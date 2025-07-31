@@ -2,12 +2,19 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  webpack: (config) => {
+  experimental: {
+    // Các tính năng thử nghiệm hợp lệ
+    optimizePackageImports: ['lucide-react'],
+  },
+  webpack: (config, { isServer, dev }) => {
     // Cấu hình webpack để hỗ trợ Fast Refresh tốt hơn
-    config.experiments = {
-      ...config.experiments,
-      topLevelAwait: true,
-    };
+    if (dev && !isServer) {
+      // Chỉ áp dụng cho môi trường phát triển ở phía client
+      config.experiments = {
+        ...config.experiments,
+        topLevelAwait: true,
+      };
+    }
     return config;
   },
 }

@@ -17,6 +17,8 @@ interface SessionResult {
   error: any;
 }
 
+// Thêm key để hỗ trợ Fast Refresh
+// @refresh reset
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<'welcome' | 'login' | 'register' | 'main'>('welcome');
   const [user, setUser] = useState<any>(null);
