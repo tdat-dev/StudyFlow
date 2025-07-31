@@ -18,6 +18,7 @@ import {
   getDocs 
 } from "firebase/firestore";
 import { auth, db } from "./config";
+import { FirebaseUser, Session, UserProfile } from "@/types";
 
 // Auth functions
 export const firebaseAuth = {
@@ -28,7 +29,7 @@ export const firebaseAuth = {
       return { 
         data: { 
           session: {
-            user: userCredential.user,
+            user: userCredential.user as FirebaseUser,
             access_token: await userCredential.user.getIdToken()
           } 
         }, 
@@ -45,7 +46,7 @@ export const firebaseAuth = {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       return { 
         data: { 
-          user: userCredential.user,
+          user: userCredential.user as FirebaseUser,
           session: {
             access_token: await userCredential.user.getIdToken()
           }
@@ -95,14 +96,13 @@ export const firebaseAuth = {
             resolve({ 
               data: { 
                 session: {
-                  user,
+                  user: user as FirebaseUser,
                   access_token: token
                 } 
               }, 
               error: null 
             });
           } catch (error) {
-            console.error("Error getting token:", error);
             resolve({ data: { session: null }, error });
           }
         } else {
@@ -112,24 +112,15 @@ export const firebaseAuth = {
     });
   },
 
-  // Lắng nghe thay đổi trạng thái xác thực
-  onAuthStateChange: (callback: (event: string, session: any) => void) => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const token = await user.getIdToken();
-        callback('SIGNED_IN', { user, access_token: token });
-      } else {
-        callback('SIGNED_OUT', null);
-      }
-    });
-    
-    return { data: { subscription: { unsubscribe } } };
+  // Theo dõi thay đổi trạng thái xác thực
+  onAuthStateChange: (callback: (user: User | null) => void) => {
+    return onAuthStateChanged(auth, callback);
   }
 };
 
 // Firestore functions
 export const firestore = {
-  // Lấy profile người dùng
+  // Lấy thông tin profile người dùng
   getProfile: async (userId: string) => {
     try {
       const docRef = doc(db, "profiles", userId);
@@ -138,15 +129,15 @@ export const firestore = {
       if (docSnap.exists()) {
         return { profile: docSnap.data(), error: null };
       } else {
-        return { profile: null, error: "Profile not found" };
+        return { profile: null, error: null };
       }
-    } catch (error: any) {
+    } catch (error) {
       return { profile: null, error };
     }
   },
 
-  // Cập nhật profile người dùng
-  updateProfile: async (userId: string, data: any) => {
+  // Cập nhật thông tin profile người dùng
+  updateProfile: async (userId: string, data: Partial<UserProfile>) => {
     try {
       const docRef = doc(db, "profiles", userId);
       const docSnap = await getDoc(docRef);
@@ -158,78 +149,100 @@ export const firestore = {
       }
       
       return { error: null };
-    } catch (error: any) {
+    } catch (error) {
       return { error };
     }
   },
 
-  // Lấy flashcards
+  // Lấy danh sách flashcard
   getFlashcards: async (userId: string) => {
     try {
-      const q = query(collection(db, "flashcard_decks"), where("userId", "==", userId));
+      const decksRef = collection(db, "flashcard_decks");
+      const q = query(decksRef, where("userId", "==", userId));
       const querySnapshot = await getDocs(q);
       
       const decks: any[] = [];
       querySnapshot.forEach((doc) => {
-        decks.push({ id: doc.id, ...doc.data() });
+        decks.push({
+          id: doc.id,
+          ...doc.data()
+        });
       });
       
       return { decks, error: null };
-    } catch (error: any) {
+    } catch (error) {
       return { decks: [], error };
     }
   },
 
-  // Lấy habits
+  // Lấy danh sách habits
   getHabits: async (userId: string) => {
     try {
-      const q = query(collection(db, "habits"), where("userId", "==", userId));
+      const habitsRef = collection(db, "habits");
+      const q = query(habitsRef, where("userId", "==", userId));
       const querySnapshot = await getDocs(q);
       
       const habits: any[] = [];
       querySnapshot.forEach((doc) => {
-        habits.push({ id: doc.id, ...doc.data() });
+        habits.push({
+          id: doc.id,
+          ...doc.data()
+        });
       });
       
       return { habits, error: null };
-    } catch (error: any) {
+    } catch (error) {
       return { habits: [], error };
     }
   },
 
   // Cập nhật tiến độ học tập
-  updateProgress: async (userId: string, data: any) => {
+  updateProgress: async (userId: string, data: { wordsLearned?: number, studyTime?: number }) => {
     try {
-      const docRef = doc(db, "progress", userId);
-      const docSnap = await getDoc(docRef);
+      const today = new Date().toISOString().split('T')[0];
+      const progressRef = doc(db, "progress", `${userId}_${today}`);
+      const docSnap = await getDoc(progressRef);
       
       if (docSnap.exists()) {
         const currentData = docSnap.data();
-        await updateDoc(docRef, {
-          todayProgress: (currentData.todayProgress || 0) + (data.wordsLearned || 0),
-          totalWordsLearned: (currentData.totalWordsLearned || 0) + (data.wordsLearned || 0),
-          streak: currentData.streak || 0
+        await updateDoc(progressRef, {
+          wordsLearned: (currentData.wordsLearned || 0) + (data.wordsLearned || 0),
+          studyTime: (currentData.studyTime || 0) + (data.studyTime || 0),
+          lastUpdated: new Date()
         });
       } else {
-        await setDoc(docRef, {
-          todayProgress: data.wordsLearned || 0,
-          totalWordsLearned: data.wordsLearned || 0,
-          streak: 1,
-          dailyGoal: 20
+        await setDoc(progressRef, {
+          userId,
+          date: today,
+          wordsLearned: data.wordsLearned || 0,
+          studyTime: data.studyTime || 0,
+          createdAt: new Date(),
+          lastUpdated: new Date()
         });
       }
       
-      // Lấy dữ liệu đã cập nhật
-      const updatedDocSnap = await getDoc(docRef);
-      return { profile: updatedDocSnap.data(), error: null };
-    } catch (error: any) {
-      return { profile: null, error };
+      // Cập nhật profile
+      const userRef = doc(db, "profiles", userId);
+      const userSnap = await getDoc(userRef);
+      
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        await updateDoc(userRef, {
+          todayProgress: (userData.todayProgress || 0) + (data.wordsLearned || 0),
+          totalWordsLearned: (userData.totalWordsLearned || 0) + (data.wordsLearned || 0),
+          lastActive: new Date()
+        });
+      }
+      
+      return { error: null };
+    } catch (error) {
+      return { error };
     }
   }
 };
 
-// Export Firebase client
+// Export combined API
 export const firebase = {
   auth: firebaseAuth,
-  firestore
-}; 
+  firestore: firestore
+};

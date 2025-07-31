@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Button } from './ui/button';
-import { BookOpen, Zap, Loader2 } from 'lucide-react';
+import { BookOpen, Zap, Loader2, Info } from 'lucide-react';
 import { firebase } from '../utils/firebase/client';
 
 interface WelcomeScreenProps {
-  onNavigate: (screen: 'login' | 'register') => void;
+  onNavigate: (screen: 'login' | 'register' | 'onboarding') => void;
 }
 
 export function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {
@@ -91,6 +91,15 @@ export function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {
               </svg>
             )}
             Tiếp tục với Google
+          </Button>
+
+          <Button
+            variant="ghost"
+            className="w-full py-6 rounded-xl text-gray-600"
+            onClick={() => onNavigate('onboarding')}
+          >
+            <Info className="h-4 w-4 mr-2" />
+            Xem giới thiệu tính năng
           </Button>
         </div>
 

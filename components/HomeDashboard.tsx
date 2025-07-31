@@ -50,7 +50,7 @@ export function HomeDashboard({ user, onUpdateUser }: HomeDashboardProps) {
         currentUser.uid, 
         { wordsLearned, studyTime }
       );
-      
+
       if (updatedProfile) {
         setProfile(updatedProfile);
         onUpdateUser({ ...user, ...updatedProfile });

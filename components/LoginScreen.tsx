@@ -28,7 +28,7 @@ export function LoginScreen({ mode, onLogin, onBack }: LoginScreenProps) {
       if (mode === 'register') {
         // Register new user
         const { data, error: signUpError } = await firebase.auth.signUp(email, password);
-
+        
         if (signUpError) {
           throw new Error(signUpError.message || 'Đăng ký thất bại');
         }
@@ -37,7 +37,7 @@ export function LoginScreen({ mode, onLogin, onBack }: LoginScreenProps) {
           // Create user profile
           await firebase.firestore.updateProfile(data.user.uid, {
             name,
-            email,
+          email,
             streak: 0,
             todayProgress: 0,
             dailyGoal: 20,
@@ -71,7 +71,7 @@ export function LoginScreen({ mode, onLogin, onBack }: LoginScreenProps) {
           // Get user profile
           const userId = data.session.user.uid;
           const { profile, error: profileError } = await firebase.firestore.getProfile(userId);
-          
+
           if (profile) {
             onLogin({ ...profile, accessToken: data.session.access_token });
           } else {
@@ -232,18 +232,6 @@ export function LoginScreen({ mode, onLogin, onBack }: LoginScreenProps) {
               </svg>
               Tiếp tục với Google
             </Button>
-
-            <p className="text-xs text-gray-500 text-center">
-              Lưu ý: Để sử dụng Google login, vui lòng hoàn tất thiết lập tại{' '}
-              <a 
-                href="https://supabase.com/docs/guides/auth/social-login/auth-google" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
-              >
-                đây
-              </a>
-            </p>
           </CardContent>
         </Card>
       </div>

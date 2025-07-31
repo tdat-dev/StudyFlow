@@ -3,10 +3,11 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Progress } from './ui/progress';
-import { Check, Plus, Calendar, TrendingUp, Target, BookOpen, Headphones, Loader2 } from 'lucide-react';
+import { Check, Plus, Calendar, TrendingUp, Target, BookOpen, Headphones, Loader2, ArrowLeft } from 'lucide-react';
 import { firebase } from '../utils/firebase/client';
 import { auth, db } from '../utils/firebase/config';
 import { collection, query, where, getDocs, doc, updateDoc, getDoc } from 'firebase/firestore';
+import { HabitStreakChart } from './HabitStreakChart';
 
 interface HabitTrackerProps {
   user: any;
@@ -19,14 +20,18 @@ interface Habit {
   icon: any;
   color: string;
   bgColor: string;
+  textColor: string;
   currentStreak: number;
   todayCompleted: boolean;
   weeklyProgress: boolean[];
+  monthlyProgress: boolean[];
 }
 
 export function HabitTracker({ user }: HabitTrackerProps) {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(false);
+  const [currentView, setCurrentView] = useState<'list' | 'detail'>('list');
+  const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
 
   useEffect(() => {
     loadHabits();
@@ -47,16 +52,17 @@ export function HabitTracker({ user }: HabitTrackerProps) {
           ...doc.data()
         });
       });
-      
-      // Add icons and colors to habits
-      const habitsWithIcons = serverHabits.map((habit, index) => ({
-        ...habit,
-        icon: index === 0 ? BookOpen : Headphones,
-        color: index === 0 ? 'text-blue-600' : 'text-green-600',
-        bgColor: index === 0 ? 'bg-blue-100' : 'bg-green-100',
-      }));
-      
-      setHabits(habitsWithIcons);
+        
+        // Add icons and colors to habits
+        const habitsWithIcons = serverHabits.map((habit, index) => ({
+          ...habit,
+          icon: index === 0 ? BookOpen : Headphones,
+        color: index === 0 ? 'bg-blue-500' : 'bg-green-500',
+          bgColor: index === 0 ? 'bg-blue-100' : 'bg-green-100',
+        textColor: index === 0 ? 'text-blue-600' : 'text-green-600',
+        }));
+        
+        setHabits(habitsWithIcons);
     } catch (error) {
       console.error('Failed to load habits:', error);
       
@@ -69,9 +75,11 @@ export function HabitTracker({ user }: HabitTrackerProps) {
           currentStreak: 5,
           todayCompleted: true,
           weeklyProgress: [true, true, true, true, true, false, false],
+          monthlyProgress: generateMockMonthData(5),
           icon: BookOpen,
-          color: 'text-blue-600',
+          color: 'bg-blue-500',
           bgColor: 'bg-blue-100',
+          textColor: 'text-blue-600',
         },
         {
           id: "2",
@@ -80,14 +88,37 @@ export function HabitTracker({ user }: HabitTrackerProps) {
           currentStreak: 3,
           todayCompleted: false,
           weeklyProgress: [true, true, true, false, false, false, false],
+          monthlyProgress: generateMockMonthData(3),
           icon: Headphones,
-          color: 'text-green-600',
+          color: 'bg-green-500',
           bgColor: 'bg-green-100',
+          textColor: 'text-green-600',
         }
       ];
       setHabits(mockHabits);
     }
   };
+
+  // Tạo dữ liệu giả cho biểu đồ 30 ngày
+  function generateMockMonthData(currentStreak: number) {
+    const today = new Date();
+    const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+    const result = Array(daysInMonth).fill(false);
+    
+    // Đánh dấu các ngày đã hoàn thành (giả lập)
+    for (let i = 0; i < daysInMonth; i++) {
+      // Ngày hiện tại và các ngày trước đó trong streak hiện tại
+      if (i < today.getDate() && i >= today.getDate() - currentStreak) {
+        result[i] = true;
+      } 
+      // Một số ngày ngẫu nhiên trong tháng
+      else if (i < today.getDate() && Math.random() > 0.6) {
+        result[i] = true;
+      }
+    }
+    
+    return result;
+  }
 
   const toggleHabitCompletion = async (habitId: string) => {
     if (!user.accessToken || !auth.currentUser) return;
@@ -116,17 +147,35 @@ export function HabitTracker({ user }: HabitTrackerProps) {
               todayCompleted: !habit.todayCompleted,
               currentStreak: habit.todayCompleted 
                 ? Math.max(0, habit.currentStreak - 1) 
-                : habit.currentStreak + 1 
+                : habit.currentStreak + 1,
+              // Update weekly progress for today
+              weeklyProgress: habit.weeklyProgress.map((day, index) => 
+                index === habit.weeklyProgress.length - 1 ? !habit.todayCompleted : day
+              ),
+              // Update monthly progress for today
+              monthlyProgress: habit.monthlyProgress.map((day, index) => 
+                index === new Date().getDate() - 1 ? !habit.todayCompleted : day
+              )
             } 
           : habit
       );
       
       setHabits(updatedHabits);
+      
+      // Update selected habit if in detail view
+      if (selectedHabit && selectedHabit.id === habitId) {
+        setSelectedHabit(updatedHabits.find(h => h.id === habitId) || null);
+      }
     } catch (error) {
       console.error('Error toggling habit:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const viewHabitDetail = (habit: Habit) => {
+    setSelectedHabit(habit);
+    setCurrentView('detail');
   };
 
   const getDayLabel = (index: number) => {
@@ -139,6 +188,109 @@ export function HabitTracker({ user }: HabitTrackerProps) {
   const completedToday = habits.filter(h => h.todayCompleted).length;
   const totalHabits = habits.length;
   const completionRate = totalHabits > 0 ? (completedToday / totalHabits) * 100 : 0;
+
+  if (currentView === 'detail' && selectedHabit) {
+    return (
+      <div className="h-full overflow-y-auto p-6 pb-20">
+        {/* Header */}
+        <div className="mb-6">
+          <Button
+            variant="ghost"
+            onClick={() => setCurrentView('list')}
+            className="pl-0 text-blue-600 mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Quay lại
+          </Button>
+          
+          <div className="flex items-center">
+            <div className={`w-12 h-12 rounded-xl ${selectedHabit.bgColor} flex items-center justify-center mr-4`}>
+              <selectedHabit.icon className={`h-6 w-6 ${selectedHabit.textColor}`} />
+            </div>
+            <div>
+              <h1 className="text-blue-900 mb-1">{selectedHabit.title}</h1>
+              <p className="text-gray-600">{selectedHabit.description}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Streak Status */}
+        <Card className="mb-6 bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-blue-900 mb-1">Streak hiện tại</h3>
+                <p className="text-blue-700 text-sm">
+                  {selectedHabit.currentStreak} ngày liên tiếp
+                </p>
+              </div>
+              <div className={`w-16 h-16 rounded-full ${selectedHabit.color} flex items-center justify-center`}>
+                <span className="text-white text-xl font-bold">{selectedHabit.currentStreak}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 30-day Chart */}
+        <div className="mb-6">
+          <HabitStreakChart
+            habitId={selectedHabit.id}
+            title="Thống kê 30 ngày"
+            monthlyData={selectedHabit.monthlyProgress}
+            color={selectedHabit.color}
+            textColor={selectedHabit.textColor}
+          />
+        </div>
+
+        {/* 7-day Progress */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-gray-900">7 ngày qua</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex space-x-1">
+              {selectedHabit.weeklyProgress.map((completed, index) => (
+                <div key={index} className="flex-1 text-center">
+                  <div
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center mx-auto mb-1 ${
+                      completed 
+                        ? selectedHabit.color + ' text-white' 
+                        : 'bg-gray-200 text-gray-400'
+                    }`}
+                  >
+                    {completed && <Check className="h-4 w-4" />}
+                  </div>
+                  <span className="text-xs text-gray-500">{getDayLabel(index)}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Action Button */}
+        <Button
+          onClick={() => toggleHabitCompletion(selectedHabit.id)}
+          disabled={loading}
+          className={`w-full rounded-xl ${
+            selectedHabit.todayCompleted
+              ? 'bg-green-600 hover:bg-green-700 text-white'
+              : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+          }`}
+        >
+          {loading ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : selectedHabit.todayCompleted ? (
+            <>
+              <Check className="h-4 w-4 mr-2" />
+              Đã hoàn thành
+            </>
+          ) : (
+            'Đánh dấu hoàn thành'
+          )}
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full overflow-y-auto p-6 pb-20">
@@ -174,12 +326,16 @@ export function HabitTracker({ user }: HabitTrackerProps) {
           const completedDays = habit.weeklyProgress?.filter(Boolean).length || 0;
           
           return (
-            <Card key={habit.id} className="hover:shadow-lg transition-shadow">
+            <Card 
+              key={habit.id} 
+              className="hover:shadow-lg transition-shadow cursor-pointer"
+              onClick={() => viewHabitDetail(habit)}
+            >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center">
                     <div className={`w-12 h-12 rounded-xl ${habit.bgColor} flex items-center justify-center mr-4`}>
-                      <Icon className={`h-6 w-6 ${habit.color}`} />
+                      <Icon className={`h-6 w-6 ${habit.textColor}`} />
                     </div>
                     <div>
                       <CardTitle className="text-gray-900">{habit.title}</CardTitle>
@@ -205,7 +361,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                         <div
                           className={`w-8 h-8 rounded-lg flex items-center justify-center mx-auto mb-1 ${
                             completed 
-                              ? 'bg-green-500 text-white' 
+                              ? habit.color + ' text-white' 
                               : 'bg-gray-200 text-gray-400'
                           }`}
                         >
@@ -219,7 +375,10 @@ export function HabitTracker({ user }: HabitTrackerProps) {
 
                 {/* Action Button */}
                 <Button
-                  onClick={() => toggleHabitCompletion(habit.id)}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent card click event
+                    toggleHabitCompletion(habit.id);
+                  }}
                   disabled={loading}
                   className={`w-full rounded-xl ${
                     habit.todayCompleted

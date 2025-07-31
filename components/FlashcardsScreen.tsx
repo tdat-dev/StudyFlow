@@ -5,7 +5,8 @@ import { Badge } from './ui/badge';
 import { ArrowLeft, RotateCcw, ChevronLeft, ChevronRight, Sparkles, Loader2 } from 'lucide-react';
 import { firebase } from '../utils/firebase/client';
 import { auth, db } from '../utils/firebase/config';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { SwipeableFlashcard } from './SwipeableFlashcard';
 
 interface FlashcardsScreenProps {
   user: any;
@@ -28,6 +29,7 @@ export function FlashcardsScreen({ user }: FlashcardsScreenProps) {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [generatingExample, setGeneratingExample] = useState(false);
 
   useEffect(() => {
     loadFlashcards();
@@ -70,9 +72,11 @@ export function FlashcardsScreen({ user }: FlashcardsScreenProps) {
           learned: 5,
           color: "bg-blue-500",
           cards: [
-            { front: "Hello", back: "Xin chào", example: "Hello, how are you?" },
-            { front: "Goodbye", back: "Tạm biệt", example: "Goodbye, see you tomorrow." },
-            { front: "Thank you", back: "Cảm ơn", example: "Thank you for your help." }
+            { id: "1", front: "Hello", back: "Xin chào", example: "Hello, how are you?", learned: false },
+            { id: "2", front: "Goodbye", back: "Tạm biệt", example: "Goodbye, see you tomorrow.", learned: false },
+            { id: "3", front: "Thank you", back: "Cảm ơn", example: "Thank you for your help.", learned: false },
+            { id: "4", front: "Please", back: "Làm ơn", example: "Please help me with this.", learned: false },
+            { id: "5", front: "Sorry", back: "Xin lỗi", example: "I'm sorry for being late.", learned: false }
           ]
         },
         {
@@ -83,8 +87,22 @@ export function FlashcardsScreen({ user }: FlashcardsScreenProps) {
           learned: 3,
           color: "bg-green-500",
           cards: [
-            { front: "Present Simple", back: "Thì hiện tại đơn", example: "I go to school every day." },
-            { front: "Past Simple", back: "Thì quá khứ đơn", example: "I went to school yesterday." }
+            { id: "1", front: "Present Simple", back: "Thì hiện tại đơn", example: "I go to school every day.", learned: false },
+            { id: "2", front: "Past Simple", back: "Thì quá khứ đơn", example: "I went to school yesterday.", learned: false },
+            { id: "3", front: "Present Continuous", back: "Thì hiện tại tiếp diễn", example: "I am studying English now.", learned: false }
+          ]
+        },
+        {
+          id: "3",
+          title: "Từ vựng du lịch",
+          description: "Từ vựng hữu ích khi đi du lịch",
+          total: 10,
+          learned: 0,
+          color: "bg-purple-500",
+          cards: [
+            { id: "1", front: "Airport", back: "Sân bay", example: "The airport is very busy today.", learned: false },
+            { id: "2", front: "Hotel", back: "Khách sạn", example: "We're staying at a nice hotel.", learned: false },
+            { id: "3", front: "Passport", back: "Hộ chiếu", example: "Don't forget your passport.", learned: false }
           ]
         }
       ];
@@ -115,6 +133,110 @@ export function FlashcardsScreen({ user }: FlashcardsScreenProps) {
     }
   };
 
+  const markCardAsLearned = async (learned: boolean) => {
+    if (!selectedDeck || !selectedDeck.cards || !auth.currentUser) return;
+    
+    const card = selectedDeck.cards[currentCardIndex];
+    if (!card) return;
+    
+    // Update card in state
+    const updatedDecks = decks.map(deck => {
+      if (deck.id === selectedDeck.id) {
+        const updatedCards = deck.cards.map((c, idx) => {
+          if (idx === currentCardIndex) {
+            return { ...c, learned };
+          }
+          return c;
+        });
+        
+        return {
+          ...deck,
+          cards: updatedCards,
+          learned: learned 
+            ? deck.learned + (card.learned ? 0 : 1) 
+            : deck.learned - (card.learned ? 1 : 0)
+        };
+      }
+      return deck;
+    });
+    
+    setDecks(updatedDecks);
+    
+    // Update selected deck
+    const updatedDeck = updatedDecks.find(d => d.id === selectedDeck.id);
+    if (updatedDeck) {
+      setSelectedDeck(updatedDeck);
+    }
+    
+    // Move to next card
+    nextCard();
+    
+    // Update in Firestore (if not using mock data)
+    try {
+      const deckRef = doc(db, "flashcard_decks", selectedDeck.id);
+      await updateDoc(deckRef, {
+        [`cards.${currentCardIndex}.learned`]: learned,
+        learned: learned 
+          ? selectedDeck.learned + (card.learned ? 0 : 1) 
+          : selectedDeck.learned - (card.learned ? 1 : 0)
+      });
+    } catch (error) {
+      console.error('Failed to update card status:', error);
+    }
+  };
+
+  const generateNewExample = async () => {
+    if (!selectedDeck || !selectedDeck.cards) return;
+    
+    const card = selectedDeck.cards[currentCardIndex];
+    if (!card) return;
+    
+    setGeneratingExample(true);
+    
+    try {
+      // In a real app, this would call an AI API to generate a new example
+      // For now, we'll just simulate it with a timeout
+      setTimeout(() => {
+        const newExamples = [
+          `I use the word "${card.front}" in my daily conversation.`,
+          `Let me give you an example with "${card.front}" in context.`,
+          `"${card.front}" is commonly used when talking about this topic.`
+        ];
+        
+        // Update the card with a new example
+        const updatedDecks = decks.map(deck => {
+          if (deck.id === selectedDeck.id) {
+            const updatedCards = deck.cards.map((c, idx) => {
+              if (idx === currentCardIndex) {
+                return { 
+                  ...c, 
+                  example: newExamples[Math.floor(Math.random() * newExamples.length)]
+                };
+              }
+              return c;
+            });
+            
+            return { ...deck, cards: updatedCards };
+          }
+          return deck;
+        });
+        
+        setDecks(updatedDecks);
+        
+        // Update selected deck
+        const updatedDeck = updatedDecks.find(d => d.id === selectedDeck.id);
+        if (updatedDeck) {
+          setSelectedDeck(updatedDeck);
+        }
+        
+        setGeneratingExample(false);
+      }, 1500);
+    } catch (error) {
+      console.error('Failed to generate new example:', error);
+      setGeneratingExample(false);
+    }
+  };
+
   const currentCard = selectedDeck?.cards?.[currentCardIndex];
 
   if (currentView === 'player' && selectedDeck) {
@@ -141,32 +263,13 @@ export function FlashcardsScreen({ user }: FlashcardsScreenProps) {
         {/* Flashcard */}
         <div className="flex-1 flex items-center justify-center p-6">
           {currentCard ? (
-            <div 
-              className="w-full max-w-sm aspect-[4/3] perspective-1000"
-              onClick={() => setIsFlipped(!isFlipped)}
-            >
-              <div className={`relative w-full h-full transition-transform duration-600 transform-style-preserve-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
-                {/* Front */}
-                <Card className="absolute inset-0 backface-hidden cursor-pointer hover:shadow-lg transition-shadow">
-                  <CardContent className="flex flex-col items-center justify-center h-full text-center p-8">
-                    <h3 className="text-blue-900 mb-4">{currentCard.front}</h3>
-                    <p className="text-gray-500 text-sm">Nhấn để xem nghĩa</p>
-                  </CardContent>
-                </Card>
-
-                {/* Back */}
-                <Card className="absolute inset-0 backface-hidden rotate-y-180 cursor-pointer hover:shadow-lg transition-shadow">
-                  <CardContent className="flex flex-col items-center justify-center h-full text-center p-8">
-                    <h3 className="text-green-900 mb-2">{currentCard.back}</h3>
-                    {currentCard.example && (
-                      <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                        <p className="text-sm text-gray-700">{currentCard.example}</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
+            <SwipeableFlashcard
+              front={currentCard.front}
+              back={currentCard.back}
+              example={currentCard.example}
+              onSwipeLeft={() => markCardAsLearned(false)}
+              onSwipeRight={() => markCardAsLearned(true)}
+            />
           ) : (
             <div className="text-center text-gray-500">
               <p>Không có thẻ nào trong bộ này</p>
@@ -206,21 +309,36 @@ export function FlashcardsScreen({ user }: FlashcardsScreenProps) {
               </Button>
             </div>
 
-            <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl">
-              <Sparkles className="h-4 w-4 mr-2" />
-              Tạo câu ví dụ khác với AI
+            <Button 
+              className="w-full bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl"
+              onClick={generateNewExample}
+              disabled={generatingExample}
+            >
+              {generatingExample ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Đang tạo...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Tạo câu ví dụ khác với AI
+                </>
+              )}
             </Button>
 
             <div className="flex space-x-3">
               <Button 
                 variant="outline" 
                 className="flex-1 border-red-200 text-red-600 hover:bg-red-50 rounded-xl"
+                onClick={() => markCardAsLearned(false)}
               >
                 Chưa nhớ
               </Button>
               <Button 
                 variant="outline" 
                 className="flex-1 border-green-200 text-green-600 hover:bg-green-50 rounded-xl"
+                onClick={() => markCardAsLearned(true)}
               >
                 Đã nhớ
               </Button>
