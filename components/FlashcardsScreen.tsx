@@ -3,16 +3,28 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { ArrowLeft, RotateCcw, ChevronLeft, ChevronRight, Sparkles, Loader2 } from 'lucide-react';
-import { projectId } from '../utils/supabase/info';
+import { firebase } from '../utils/firebase/client';
+import { auth, db } from '../utils/firebase/config';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 
 interface FlashcardsScreenProps {
   user: any;
 }
 
+interface Deck {
+  id: string;
+  title: string;
+  description: string;
+  color: string;
+  cards: any[];
+  total: number;
+  learned: number;
+}
+
 export function FlashcardsScreen({ user }: FlashcardsScreenProps) {
   const [currentView, setCurrentView] = useState<'list' | 'player'>('list');
-  const [decks, setDecks] = useState([]);
-  const [selectedDeck, setSelectedDeck] = useState<any>(null);
+  const [decks, setDecks] = useState<Deck[]>([]);
+  const [selectedDeck, setSelectedDeck] = useState<Deck | null>(null);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -22,35 +34,67 @@ export function FlashcardsScreen({ user }: FlashcardsScreenProps) {
   }, []);
 
   const loadFlashcards = async () => {
-    if (!user.accessToken) return;
+    if (!user.accessToken || !auth.currentUser) return;
 
     setLoading(true);
     try {
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-1d3b8ecf/flashcards`, {
-        headers: {
-          'Authorization': `Bearer ${user.accessToken}`,
-        },
+      const flashcardsRef = collection(db, "flashcard_decks");
+      const q = query(flashcardsRef, where("userId", "==", auth.currentUser.uid));
+      const querySnapshot = await getDocs(q);
+      
+      const serverDecks: any[] = [];
+      querySnapshot.forEach((doc) => {
+        serverDecks.push({ 
+          id: doc.id,
+          ...doc.data()
+        });
       });
-
-      if (response.ok) {
-        const { decks: serverDecks } = await response.json();
-        
-        // Add colors to decks
-        const decksWithColors = serverDecks.map((deck, index) => ({
-          ...deck,
-          color: index === 0 ? 'bg-blue-500' : index === 1 ? 'bg-green-500' : 'bg-purple-500'
-        }));
-        
-        setDecks(decksWithColors);
-      }
+      
+      // Add colors to decks
+      const decksWithColors = serverDecks.map((deck, index) => ({
+        ...deck,
+        color: index === 0 ? 'bg-blue-500' : index === 1 ? 'bg-green-500' : 'bg-purple-500'
+      }));
+      
+      setDecks(decksWithColors);
     } catch (error) {
       console.error('Failed to load flashcards:', error);
+      
+      // Mock data for demo
+      const mockDecks = [
+        {
+          id: "1",
+          title: "Từ vựng cơ bản",
+          description: "Các từ vựng thông dụng hàng ngày",
+          total: 20,
+          learned: 5,
+          color: "bg-blue-500",
+          cards: [
+            { front: "Hello", back: "Xin chào", example: "Hello, how are you?" },
+            { front: "Goodbye", back: "Tạm biệt", example: "Goodbye, see you tomorrow." },
+            { front: "Thank you", back: "Cảm ơn", example: "Thank you for your help." }
+          ]
+        },
+        {
+          id: "2",
+          title: "Ngữ pháp cơ bản",
+          description: "Các cấu trúc ngữ pháp cơ bản",
+          total: 15,
+          learned: 3,
+          color: "bg-green-500",
+          cards: [
+            { front: "Present Simple", back: "Thì hiện tại đơn", example: "I go to school every day." },
+            { front: "Past Simple", back: "Thì quá khứ đơn", example: "I went to school yesterday." }
+          ]
+        }
+      ];
+      setDecks(mockDecks);
     } finally {
       setLoading(false);
     }
   };
 
-  const startDeck = (deck: any) => {
+  const startDeck = (deck: Deck) => {
     setSelectedDeck(deck);
     setCurrentView('player');
     setCurrentCardIndex(0);

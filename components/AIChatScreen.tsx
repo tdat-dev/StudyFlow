@@ -3,7 +3,9 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { Send, Bot, User, BookOpen, FileQuestion, Headphones, Loader2 } from 'lucide-react';
-import { projectId } from '../utils/supabase/info';
+import { firebase } from '../utils/firebase/client';
+import { auth, db } from '../utils/firebase/config';
+import { collection, addDoc, query, where, orderBy, getDocs, Timestamp } from 'firebase/firestore';
 
 interface Message {
   id: number;
@@ -54,35 +56,42 @@ export function AIChatScreen({ user }: AIChatScreenProps) {
   }, []);
 
   const loadChatHistory = async () => {
-    if (!user.accessToken) return;
+    if (!user.accessToken || !auth.currentUser) return;
 
     try {
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-1d3b8ecf/chat`, {
-        headers: {
-          'Authorization': `Bearer ${user.accessToken}`,
-        },
+      const messagesRef = collection(db, "chats", auth.currentUser.uid, "messages");
+      const q = query(messagesRef, orderBy("timestamp", "asc"));
+      const querySnapshot = await getDocs(q);
+      
+      const chatHistory: Message[] = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        chatHistory.push({
+          id: doc.id as unknown as number,
+          content: data.content,
+          sender: data.sender,
+          timestamp: data.timestamp.toDate().toISOString()
+        });
       });
 
-      if (response.ok) {
-        const { messages: chatHistory } = await response.json();
-        if (chatHistory.length === 0) {
-          // Add welcome message if no history
-          const welcomeMessage: Message = {
-            id: 1,
-            content: 'Xin chào! Tôi là AI Coach của bạn. Tôi có thể giúp bạn học tiếng Anh hiệu quả hơn. Bạn muốn hỏi gì?',
-            sender: 'ai',
-            timestamp: new Date().toISOString(),
-          };
-          setMessages([welcomeMessage]);
-        } else {
-          setMessages(chatHistory);
-        }
+      if (chatHistory.length === 0) {
+        // Add welcome message if no history
+        const welcomeMessage: Message = {
+          id: Date.now(),
+          content: 'Xin chào! Tôi là AI Coach của bạn. Tôi có thể giúp bạn học tiếng Anh hiệu quả hơn. Bạn muốn hỏi gì?',
+          sender: 'ai',
+          timestamp: new Date().toISOString(),
+        };
+        setMessages([welcomeMessage]);
+        await saveMessage(welcomeMessage.content, 'ai');
+      } else {
+        setMessages(chatHistory);
       }
     } catch (error) {
       console.error('Failed to load chat history:', error);
       // Add welcome message as fallback
       const welcomeMessage: Message = {
-        id: 1,
+        id: Date.now(),
         content: 'Xin chào! Tôi là AI Coach của bạn. Tôi có thể giúp bạn học tiếng Anh hiệu quả hơn. Bạn muốn hỏi gì?',
         sender: 'ai',
         timestamp: new Date().toISOString(),
@@ -91,17 +100,15 @@ export function AIChatScreen({ user }: AIChatScreenProps) {
     }
   };
 
-  const saveMessage = async (message: string, sender: 'user' | 'ai') => {
-    if (!user.accessToken) return;
+  const saveMessage = async (content: string, sender: 'user' | 'ai') => {
+    if (!user.accessToken || !auth.currentUser) return;
 
     try {
-      await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-1d3b8ecf/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.accessToken}`,
-        },
-        body: JSON.stringify({ message, sender }),
+      const messagesRef = collection(db, "chats", auth.currentUser.uid, "messages");
+      await addDoc(messagesRef, {
+        content,
+        sender,
+        timestamp: Timestamp.now()
       });
     } catch (error) {
       console.error('Failed to save message:', error);

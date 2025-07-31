@@ -4,14 +4,28 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Badge } from './ui/badge';
 import { Progress } from './ui/progress';
 import { Check, Plus, Calendar, TrendingUp, Target, BookOpen, Headphones, Loader2 } from 'lucide-react';
-import { projectId } from '../utils/supabase/info';
+import { firebase } from '../utils/firebase/client';
+import { auth, db } from '../utils/firebase/config';
+import { collection, query, where, getDocs, doc, updateDoc, getDoc } from 'firebase/firestore';
 
 interface HabitTrackerProps {
   user: any;
 }
 
+interface Habit {
+  id: string;
+  title: string;
+  description: string;
+  icon: any;
+  color: string;
+  bgColor: string;
+  currentStreak: number;
+  todayCompleted: boolean;
+  weeklyProgress: boolean[];
+}
+
 export function HabitTracker({ user }: HabitTrackerProps) {
-  const [habits, setHabits] = useState([]);
+  const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -19,60 +33,95 @@ export function HabitTracker({ user }: HabitTrackerProps) {
   }, []);
 
   const loadHabits = async () => {
-    if (!user.accessToken) return;
+    if (!user.accessToken || !auth.currentUser) return;
 
     try {
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-1d3b8ecf/habits`, {
-        headers: {
-          'Authorization': `Bearer ${user.accessToken}`,
-        },
+      const habitsRef = collection(db, "habits");
+      const q = query(habitsRef, where("userId", "==", auth.currentUser.uid));
+      const querySnapshot = await getDocs(q);
+      
+      const serverHabits: any[] = [];
+      querySnapshot.forEach((doc) => {
+        serverHabits.push({ 
+          id: doc.id,
+          ...doc.data()
+        });
       });
-
-      if (response.ok) {
-        const { habits: serverHabits } = await response.json();
-        
-        // Add icons and colors to habits
-        const habitsWithIcons = serverHabits.map((habit, index) => ({
-          ...habit,
-          icon: index === 0 ? BookOpen : Headphones,
-          color: index === 0 ? 'text-blue-600' : 'text-green-600',
-          bgColor: index === 0 ? 'bg-blue-100' : 'bg-green-100',
-        }));
-        
-        setHabits(habitsWithIcons);
-      }
+      
+      // Add icons and colors to habits
+      const habitsWithIcons = serverHabits.map((habit, index) => ({
+        ...habit,
+        icon: index === 0 ? BookOpen : Headphones,
+        color: index === 0 ? 'text-blue-600' : 'text-green-600',
+        bgColor: index === 0 ? 'bg-blue-100' : 'bg-green-100',
+      }));
+      
+      setHabits(habitsWithIcons);
     } catch (error) {
       console.error('Failed to load habits:', error);
+      
+      // Mock data for demo
+      const mockHabits = [
+        {
+          id: "1",
+          title: "Học từ vựng mỗi ngày",
+          description: "Học ít nhất 10 từ mới mỗi ngày",
+          currentStreak: 5,
+          todayCompleted: true,
+          weeklyProgress: [true, true, true, true, true, false, false],
+          icon: BookOpen,
+          color: 'text-blue-600',
+          bgColor: 'bg-blue-100',
+        },
+        {
+          id: "2",
+          title: "Luyện nghe mỗi ngày",
+          description: "Nghe ít nhất 10 phút tiếng Anh mỗi ngày",
+          currentStreak: 3,
+          todayCompleted: false,
+          weeklyProgress: [true, true, true, false, false, false, false],
+          icon: Headphones,
+          color: 'text-green-600',
+          bgColor: 'bg-green-100',
+        }
+      ];
+      setHabits(mockHabits);
     }
   };
 
-  const toggleHabitCompletion = async (habitId: number) => {
-    if (!user.accessToken) return;
+  const toggleHabitCompletion = async (habitId: string) => {
+    if (!user.accessToken || !auth.currentUser) return;
 
     setLoading(true);
     try {
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-1d3b8ecf/habits/${habitId}/toggle`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${user.accessToken}`,
-        },
+      // Find the habit to toggle
+      const habitToToggle = habits.find(h => h.id === habitId);
+      if (!habitToToggle) return;
+      
+      // Update in Firestore
+      const habitRef = doc(db, "habits", habitId);
+      await updateDoc(habitRef, {
+        todayCompleted: !habitToToggle.todayCompleted,
+        // Update streak and weekly progress as needed
+        currentStreak: habitToToggle.todayCompleted 
+          ? Math.max(0, habitToToggle.currentStreak - 1) 
+          : habitToToggle.currentStreak + 1
       });
-
-      if (response.ok) {
-        const { habits: updatedHabits } = await response.json();
-        
-        // Add icons and colors to updated habits
-        const habitsWithIcons = updatedHabits.map((habit, index) => ({
-          ...habit,
-          icon: index === 0 ? BookOpen : Headphones,
-          color: index === 0 ? 'text-blue-600' : 'text-green-600',
-          bgColor: index === 0 ? 'bg-blue-100' : 'bg-green-100',
-        }));
-        
-        setHabits(habitsWithIcons);
-      } else {
-        console.error('Failed to toggle habit');
-      }
+      
+      // Update local state
+      const updatedHabits = habits.map(habit => 
+        habit.id === habitId 
+          ? { 
+              ...habit, 
+              todayCompleted: !habit.todayCompleted,
+              currentStreak: habit.todayCompleted 
+                ? Math.max(0, habit.currentStreak - 1) 
+                : habit.currentStreak + 1 
+            } 
+          : habit
+      );
+      
+      setHabits(updatedHabits);
     } catch (error) {
       console.error('Error toggling habit:', error);
     } finally {
