@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Deck, Habit } from '@/types';
+import { Deck, Habit } from '../types';
 
 type Screen = 'welcome' | 'onboarding' | 'login' | 'register' | 'main';
 type Tab = 'home' | 'flashcards' | 'habits' | 'chat' | 'profile';

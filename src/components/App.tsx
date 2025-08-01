@@ -1,16 +1,16 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { firebase } from '@/services/firebase/client';
+import React, { useState, useEffect } from 'react';
+import { firebase } from '../services/firebase/client';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/services/firebase/config';
-import { FirebaseUser, Session, UserProfile } from '@/types';
-import { useErrorHandler } from '@/hooks/useErrorHandler';
+import { auth } from '../services/firebase/config';
+import { FirebaseUser, Session, UserProfile } from '../types';
+import { useErrorHandler } from '../hooks/useErrorHandler';
 import { Loader2 } from 'lucide-react';
 
 // Lazy load components
-const WelcomeScreen = lazy(() => import('@/components/screens/WelcomeScreen'));
-const LoginScreen = lazy(() => import('@/components/screens/LoginScreen'));
-const MainApp = lazy(() => import('@/components/screens/MainApp'));
-const OnboardingScreen = lazy(() => import('@/components/screens/OnboardingScreen'));
+import { WelcomeScreen } from '../../components/WelcomeScreen';
+import { LoginScreen } from '../../components/LoginScreen';
+import { MainApp } from '../../components/MainApp';
+import { OnboardingScreen } from '../../components/OnboardingScreen';
 
 // Loading component
 const LoadingScreen = () => (
@@ -45,14 +45,14 @@ export default function App() {
     checkSession();
 
     // Check for OAuth redirects
-    const handleOAuthRedirect = withErrorHandling(async () => {
-      const result = await firebase.auth.getSession();
-      
-      if (result?.data?.session && window.location.hash.includes('access_token')) {
-        // User has been redirected from OAuth provider
-        await handleAuthSession(result.data.session);
-      }
-    });
+      const handleOAuthRedirect = withErrorHandling(async () => {
+    const result = await firebase.auth.getSession() as any;
+    
+    if (result?.data?.session && window.location.hash.includes('access_token')) {
+      // User has been redirected from OAuth provider
+      await handleAuthSession(result.data.session);
+    }
+  });
     
     handleOAuthRedirect();
 
@@ -79,7 +79,7 @@ export default function App() {
   }, []);
 
   const checkSession = withErrorHandling(async () => {
-    const result = await firebase.auth.getSession();
+    const result = await firebase.auth.getSession() as any;
     const session = result?.data?.session;
     const error = result?.error;
     
@@ -114,7 +114,7 @@ export default function App() {
         todayProgress: profile.todayProgress || 0,
         dailyGoal: profile.dailyGoal || 20,
         totalWordsLearned: profile.totalWordsLearned || 0,
-        photoURL: profile.photoURL || session.user.photoURL
+        photoURL: profile.photoURL || session.user.photoURL || undefined
       };
       setUser(userProfile);
       setCurrentScreen('main');
@@ -128,7 +128,7 @@ export default function App() {
         todayProgress: 0,
         dailyGoal: 20,
         totalWordsLearned: 0,
-        photoURL: session.user?.photoURL
+        photoURL: session.user?.photoURL || undefined
       };
       
       // Create profile if it doesn't exist
@@ -174,7 +174,7 @@ export default function App() {
 
   // Render appropriate screen based on current state
   return (
-    <Suspense fallback={<LoadingScreen />}>
+    <>
       {currentScreen === 'onboarding' && (
         <OnboardingScreen onComplete={handleCompleteOnboarding} />
       )}
@@ -194,6 +194,6 @@ export default function App() {
       {currentScreen === 'main' && user && (
         <MainApp user={user} onLogout={handleLogout} />
       )}
-    </Suspense>
+    </>
   );
 }

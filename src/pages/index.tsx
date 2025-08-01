@@ -3,7 +3,7 @@ import { Suspense } from 'react'
 import Head from 'next/head'
 
 // Sử dụng dynamic import để tránh lỗi SSR
-const App = dynamic(() => import('@/components/App'), {
+const App = dynamic(() => import('../components/App'), {
   ssr: false,
   loading: () => null
 })

@@ -2,7 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
-import { env } from "@/config/env";
+import { env } from "../../config/env";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {

@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent } from './ui/card';
 import { Check, X } from 'lucide-react';
+import { cn } from './ui/utils';
 
 interface SwipeableFlashcardProps {
   front: string;
   back: string;
   example?: string;
+  exampleTranslation?: string;
   onSwipeLeft: () => void;
   onSwipeRight: () => void;
 }
@@ -14,6 +16,7 @@ export function SwipeableFlashcard({
   front,
   back,
   example,
+  exampleTranslation,
   onSwipeLeft,
   onSwipeRight
 }: SwipeableFlashcardProps) {
@@ -29,6 +32,25 @@ export function SwipeableFlashcard({
     setDragOffset(0);
     setSwipeIndicator(null);
   }, [front, back]);
+  
+  // Ensure only one side is visible at a time
+  useEffect(() => {
+    const flipContainer = cardRef.current?.querySelector('.transform-style-preserve-3d');
+    if (flipContainer) {
+      const frontCard = flipContainer.querySelector('.backface-hidden:not(.rotate-y-180)');
+      const backCard = flipContainer.querySelector('.backface-hidden.rotate-y-180');
+      
+      if (frontCard && backCard) {
+        if (isFlipped) {
+          (frontCard as HTMLElement).style.visibility = 'hidden';
+          (backCard as HTMLElement).style.visibility = 'visible';
+        } else {
+          (frontCard as HTMLElement).style.visibility = 'visible';
+          (backCard as HTMLElement).style.visibility = 'hidden';
+        }
+      }
+    }
+  }, [isFlipped]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     setDragStartX(e.touches[0].clientX);
@@ -115,38 +137,69 @@ export function SwipeableFlashcard({
       {/* Card */}
       <div
         ref={cardRef}
-        className="relative w-full h-full transition-all duration-300 transform-style-preserve-3d"
+        className="relative w-full h-full transition-all duration-500"
         style={{
-          transform: `translateX(${dragOffset}px) rotateY(${isFlipped ? '180deg' : '0deg'})`,
+          transform: `translateX(${dragOffset}px)`,
         }}
-        onClick={handleClick}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleDragEnd}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleDragEnd}
-        onMouseLeave={handleDragEnd}
       >
-        {/* Front */}
-        <Card className="absolute inset-0 backface-hidden cursor-pointer hover:shadow-lg transition-shadow">
-          <CardContent className="flex flex-col items-center justify-center h-full text-center p-8">
-            <h3 className="text-blue-900 mb-4 text-xl">{front}</h3>
-            <p className="text-gray-500 text-sm">Nhấn để xem nghĩa</p>
+        <div 
+          className="relative w-full h-full transform-style-preserve-3d transition-transform duration-500"
+          style={{
+            transform: `rotateY(${isFlipped ? '180deg' : '0deg'})`,
+          }}
+          onClick={handleClick}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleDragEnd}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleDragEnd}
+          onMouseLeave={handleDragEnd}
+        >
+        {/* Front - English only */}
+        <Card className="absolute inset-0 backface-hidden cursor-pointer hover:shadow-lg transition-shadow overflow-hidden">
+          <CardContent className="flex flex-col h-full p-6">
+            <div className="w-full h-full flex flex-col">
+              <div className="mb-4 px-3 py-1 bg-blue-100 text-blue-800 rounded-md inline-block text-sm font-medium">English</div>
+              <div className="flex-grow flex items-center justify-center">
+                <h2 className="text-blue-900 text-2xl font-bold text-center leading-relaxed">{front}</h2>
+              </div>
+              
+              {example && (
+                <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-100 w-full">
+                  <p className="text-gray-700 text-sm italic">"{example}"</p>
+                </div>
+              )}
+              
+              <div className="mt-auto pt-4 text-center">
+                <p className="text-gray-500 text-sm opacity-80">Tap to see Vietnamese meaning</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        {/* Back */}
-        <Card className="absolute inset-0 backface-hidden rotate-y-180 cursor-pointer hover:shadow-lg transition-shadow">
-          <CardContent className="flex flex-col items-center justify-center h-full text-center p-8">
-            <h3 className="text-green-900 mb-2 text-xl">{back}</h3>
-            {example && (
-              <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-700">{example}</p>
+        {/* Back - Vietnamese only */}
+        <Card className="absolute inset-0 backface-hidden rotate-y-180 cursor-pointer hover:shadow-lg transition-shadow overflow-hidden">
+          <CardContent className="flex flex-col h-full p-6" style={{ transform: 'rotateY(180deg)' }}>
+            <div className="w-full h-full flex flex-col">
+              <div className="mb-4 px-3 py-1 bg-green-100 text-green-800 rounded-md inline-block text-sm font-medium">Vietnamese</div>
+              <div className="flex-grow flex items-center justify-center">
+                <h2 className="text-green-900 text-2xl font-bold text-center leading-relaxed">{back}</h2>
               </div>
-            )}
+              
+              {exampleTranslation && (
+                <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-100 w-full">
+                  <p className="text-gray-700 text-sm italic">"{exampleTranslation}"</p>
+                </div>
+              )}
+              
+              <div className="mt-auto pt-4 text-center">
+                <p className="text-gray-500 text-sm opacity-80">Tap to see English word</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
+        </div>
       </div>
       
       <style jsx>{`
@@ -158,6 +211,7 @@ export function SwipeableFlashcard({
         }
         .backface-hidden {
           backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
         }
         .rotate-y-180 {
           transform: rotateY(180deg);

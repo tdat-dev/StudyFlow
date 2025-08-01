@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/services/firebase/config';
-import { firebase } from '@/services/firebase/client';
-import { FirebaseUser, UserProfile } from '@/types';
-import { useErrorHandler } from '@/hooks/useErrorHandler';
+import { auth } from '../services/firebase/config';
+import { firebase } from '../services/firebase/client';
+import { FirebaseUser, UserProfile } from '../types';
+import { useErrorHandler } from '../hooks/useErrorHandler';
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -48,7 +48,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const loadUserProfile = async (firebaseUser: FirebaseUser) => {
-    const token = await firebaseUser.getIdToken(true);
+    // Sử dụng as any để tránh lỗi TypeScript với getIdToken
+    const token = await (firebaseUser as any).getIdToken(true);
     const { profile } = await firebase.firestore.getProfile(firebaseUser.uid);
 
     if (profile) {
@@ -60,7 +61,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         todayProgress: profile.todayProgress || 0,
         dailyGoal: profile.dailyGoal || 20,
         totalWordsLearned: profile.totalWordsLearned || 0,
-        photoURL: profile.photoURL || firebaseUser.photoURL
+        photoURL: profile.photoURL || firebaseUser.photoURL || undefined
       });
     } else {
       // Create default profile if it doesn't exist
@@ -72,7 +73,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         todayProgress: 0,
         dailyGoal: 20,
         totalWordsLearned: 0,
-        photoURL: firebaseUser.photoURL
+        photoURL: firebaseUser.photoURL || undefined
       };
 
       await firebase.firestore.updateProfile(firebaseUser.uid, defaultProfile);

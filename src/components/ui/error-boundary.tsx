@@ -1,6 +1,29 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { Button } from '@/components/ui/button';
-import { AppError } from '@/lib/error';
+
+// Định nghĩa AppError trực tiếp trong file này để tránh lỗi import
+class AppError extends Error {
+  public readonly statusCode: number;
+  public readonly isOperational: boolean;
+  public readonly context?: Record<string, any>;
+
+  constructor(
+    message: string,
+    statusCode = 500,
+    isOperational = true,
+    context?: Record<string, any>
+  ) {
+    super(message);
+    this.statusCode = statusCode;
+    this.isOperational = isOperational;
+    this.context = context;
+    
+    // Đặt prototype đúng cho việc kiểm tra instanceof
+    Object.setPrototypeOf(this, AppError.prototype);
+    
+    // Capture stack trace
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -53,10 +76,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       }
 
       // Render UI mặc định khi có lỗi
-      const isAppError = this.state.error instanceof AppError;
-      const errorMessage = isAppError 
-        ? this.state.error.message 
-        : 'Đã xảy ra lỗi không mong muốn.';
+      const errorMessage = this.state.error ? this.state.error.message : 'Đã xảy ra lỗi không mong muốn.';
       
       return (
         <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-50">
@@ -69,15 +89,18 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             <h2 className="mb-2 text-xl font-semibold text-center text-gray-800">Đã xảy ra lỗi</h2>
             <p className="mb-4 text-center text-gray-600">{errorMessage}</p>
             <div className="flex justify-center space-x-3">
-              <Button 
-                variant="outline"
+              <button 
+                className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
                 onClick={() => window.location.href = '/'}
               >
                 Về trang chủ
-              </Button>
-              <Button onClick={this.handleReset}>
+              </button>
+              <button 
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                onClick={this.handleReset}
+              >
                 Thử lại
-              </Button>
+              </button>
             </div>
           </div>
         </div>

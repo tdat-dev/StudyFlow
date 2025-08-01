@@ -13,6 +13,7 @@ const requiredEnvVars = [
 for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
     if (typeof window === 'undefined') {
+      // Chỉ log tên biến môi trường bị thiếu, không log giá trị
       console.error(`Missing required environment variable: ${envVar}`);
     }
   }

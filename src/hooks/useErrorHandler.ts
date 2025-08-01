@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
-import { handleError, AppError } from '@/lib/error';
+import { handleError, AppError } from '../lib/error';
 
 /**
  * Custom hook để xử lý lỗi trong các component React

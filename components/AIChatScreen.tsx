@@ -1,15 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
-import { Send, Bot, User, BookOpen, FileQuestion, Headphones, Loader2 } from 'lucide-react';
-import { firebase } from '../utils/firebase/client';
+import { Send, Bot, User, BookOpen, FileQuestion, Headphones, Loader2, Plus, MessageSquare, MoreVertical, Trash2, Edit } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
+import { generateGeminiResponse, generateLocalAIResponse } from '../src/services/gemini/config';
 import { auth, db } from '../utils/firebase/config';
-import { collection, addDoc, query, where, orderBy, getDocs, Timestamp } from 'firebase/firestore';
-import { generateGeminiResponse } from '../utils/gemini/config';
+import { collection, addDoc, query, orderBy, getDocs, Timestamp, where, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 interface Message {
-  id: number;
+  id: string;
   content: string;
   sender: 'user' | 'ai';
   timestamp: string;
@@ -35,30 +41,54 @@ interface QuickAction {
   bgColor: string;
 }
 
+interface ChatSession {
+  id: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  messageCount: number;
+}
+
+// Tin nhắn chào mừng mặc định
+const welcomeMessage: Message = {
+  id: 'welcome-message',
+  content: 'Xin chào! Tôi là AI Tutor Agent, người bạn đồng hành của bạn. Tôi có thể giúp bạn:\n\n1. Tạo flashcards cho mọi môn học\n2. Giải thích các khái niệm học tập\n3. Đặt câu hỏi ôn tập kiến thức\n4. Gợi ý phương pháp học hiệu quả\n5. Trò chuyện và lắng nghe bạn về mọi chủ đề\n6. Hỗ trợ bạn bằng nhiều ngôn ngữ khác nhau\n\nBạn muốn trò chuyện về điều gì hôm nay?',
+  sender: 'ai',
+  timestamp: new Date().toISOString(),
+};
+
 const quickActions: QuickAction[] = [
   {
     id: 1,
-    label: 'Ôn tập từ hôm nay',
+    label: 'Tạo flashcards',
     icon: BookOpen,
-    prompt: 'Giúp tôi ôn tập lại những từ vựng đã học hôm nay',
+    prompt: 'Tạo flashcards tiếng Anh cho tôi với 5 từ vựng học thuật',
     color: 'text-blue-600',
     bgColor: 'bg-blue-100',
   },
   {
     id: 2,
-    label: 'Sinh quiz nhanh',
+    label: 'Ôn tập kiến thức',
     icon: FileQuestion,
-    prompt: 'Tạo cho tôi một bài quiz nhanh về từ vựng đã học',
+    prompt: 'Đặt câu hỏi để ôn tập kiến thức',
     color: 'text-green-600',
     bgColor: 'bg-green-100',
   },
   {
     id: 3,
-    label: 'Gợi ý nghe audio',
+    label: 'Phương pháp học',
     icon: Headphones,
-    prompt: 'Gợi ý cho tôi một số audio ngắn để luyện nghe',
+    prompt: 'Giải thích cho tôi về các phương pháp học hiệu quả như Spaced Repetition, Active Recall, Pomodoro, Feynman Technique và Mind Mapping',
     color: 'text-purple-600',
     bgColor: 'bg-purple-100',
+  },
+  {
+    id: 4,
+    label: 'Trò chuyện tiếng Anh',
+    icon: MessageSquare,
+    prompt: 'Let\'s chat in English. How are you feeling today?',
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-100',
   },
 ];
 
@@ -66,98 +96,314 @@ export function AIChatScreen({ user }: AIChatScreenProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [chatHistory, setChatHistory] = useState<Array<{ role: 'user' | 'model', content: string }>>([]);
   const [loading, setLoading] = useState(false);
-  const [chatHistory, setChatHistory] = useState<Array<{role: 'user' | 'model', content: string}>>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // State cho quản lý chat sessions
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
+  const [currentChatId, setCurrentChatId] = useState<string | null>(null);
+  const [showSidebar, setShowSidebar] = useState(true);
+  const [loadingSessions, setLoadingSessions] = useState(false);
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+  const [chatToRename, setChatToRename] = useState<string | null>(null);
+  const [newChatTitle, setNewChatTitle] = useState('');
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
+  const [activeSession, setActiveSession] = useState<string | null>(null);
+
+  // Auto-scroll đến tin nhắn mới nhất
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Scroll khi messages thay đổi
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+  
+  // Đóng menu tùy chọn khi click ra ngoài
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setShowOptionsMenu(false);
+    };
+    
+    document.addEventListener('click', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     if (user) {
-      loadChatHistory();
+      loadChatSessions();
     }
   }, [user]);
+  
+  useEffect(() => {
+    if (currentChatId) {
+      loadChatHistory(currentChatId);
+    }
+  }, [currentChatId]);
 
-  const loadChatHistory = async () => {
-    // Luôn hiển thị tin nhắn chào mừng trước
-    const welcomeMessage: Message = {
-      id: Date.now(),
-      content: 'Xin chào! Tôi là AI Coach của bạn. Tôi có thể giúp bạn học tiếng Anh hiệu quả hơn. Bạn muốn hỏi gì?',
-      sender: 'ai',
-      timestamp: new Date().toISOString(),
-    };
-    setMessages([welcomeMessage]);
+  const generateUniqueId = (prefix: string = 'msg') => {
+    return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${Math.random().toString(36).substr(2, 5)}`;
+  };
+
+  const loadChatSessions = async () => {
+    setLoadingSessions(true);
     
-    // Thêm tin nhắn chào mừng vào lịch sử chat cho Gemini API
-    setChatHistory([{ role: 'model' as const, content: welcomeMessage.content }]);
-    
-    if (!auth.currentUser) return;
+    try {
+      // Kiểm tra nếu người dùng đã đăng nhập
+      if (!auth.currentUser) {
+        console.error('User not logged in');
+        setLoadingSessions(false);
+        return;
+      }
+      
+      // Lấy danh sách các chat sessions từ Firestore
+      // Sử dụng hai truy vấn riêng biệt thay vì composite index
+      const sessionsRef = collection(db, "chat_sessions");
+      const q = query(
+        sessionsRef, 
+        where("userId", "==", auth.currentUser.uid)
+      );
+      
+      const querySnapshot = await getDocs(q);
+      const sessions: ChatSession[] = [];
+      
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        sessions.push({
+          id: doc.id,
+          title: data.title || 'Cuộc trò chuyện mới',
+          createdAt: data.createdAt?.toDate().toISOString() || new Date().toISOString(),
+          updatedAt: data.updatedAt?.toDate().toISOString() || new Date().toISOString(),
+          messageCount: data.messageCount || 0
+        });
+      });
+      
+      // Sắp xếp theo thời gian cập nhật mới nhất
+      sessions.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+      
+      setChatSessions(sessions);
+      
+      // Nếu có sessions, chọn session đầu tiên
+      if (sessions.length > 0) {
+        setCurrentChatId(sessions[0].id);
+      } else {
+        // Nếu không có sessions, tạo mới
+        createNewChat();
+      }
+    } catch (error) {
+      console.error('Failed to load chat sessions:', error);
+    } finally {
+      setLoadingSessions(false);
+    }
+  };
+  
+  const loadChatHistory = async (chatId: string) => {
+    setLoading(true);
+    setMessages([]);
 
     try {
-      // Tạo reference đến collection messages của user
-      const messagesRef = collection(db, "chats", auth.currentUser.uid, "messages");
+      // Kiểm tra nếu người dùng đã đăng nhập
+      if (!auth.currentUser) {
+        console.error('User not logged in');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Lấy tin nhắn từ Firestore
+        const messagesRef = collection(db, "chat_sessions", chatId, "messages");
       const q = query(messagesRef, orderBy("timestamp", "asc"));
       const querySnapshot = await getDocs(q);
       
       const loadedMessages: Message[] = [];
-      const loadedChatHistory: Array<{role: 'user' | 'model', content: string}> = [];
       
       querySnapshot.forEach((doc) => {
-        try {
           const data = doc.data();
-          // Chỉ thêm tin nhắn hợp lệ
-          if (data.content && data.sender && data.timestamp) {
-            const message: Message = {
-              id: parseInt(doc.id) || Date.now() + Math.random(),
+          loadedMessages.push({
+            id: doc.id,
               content: data.content,
               sender: data.sender,
-              timestamp: data.timestamp.toDate ? data.timestamp.toDate().toISOString() : new Date().toISOString()
-            };
-            
-            loadedMessages.push(message);
-            
-            // Thêm vào lịch sử chat cho Gemini API
-            loadedChatHistory.push({
-              role: data.sender === 'user' ? 'user' as const : 'model' as const,
-              content: data.content
-            });
-          }
-        } catch (err) {
-          console.error("Error parsing message:", err);
-        }
+            timestamp: data.timestamp.toDate().toISOString()
+          });
       });
 
       if (loadedMessages.length === 0) {
-        // Nếu không có lịch sử, lưu tin nhắn chào mừng
+          // Nếu không có tin nhắn, hiển thị tin nhắn chào mừng
+          setMessages([welcomeMessage]);
+          
+          // Lưu tin nhắn chào mừng vào Firestore
         await saveMessage(welcomeMessage.content, 'ai');
       } else {
-        // Nếu có lịch sử, hiển thị lịch sử và tin nhắn chào mừng
-        setMessages([...loadedMessages, welcomeMessage]);
-        
-        // Cập nhật lịch sử chat cho Gemini API, thêm tin nhắn chào mừng mới nhất
-        setChatHistory([...loadedChatHistory, { role: 'model' as const, content: welcomeMessage.content }]);
+          setMessages(loadedMessages);
+        }
+      } catch (err) {
+        console.error("Error loading chat history:", err);
       }
     } catch (error) {
       console.error('Failed to load chat history:', error);
-      // Tin nhắn chào mừng đã được hiển thị ở trên
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createNewChat = async () => {
+    if (!auth.currentUser) return;
+
+    try {
+      // Tạo chat session mới
+      const newSessionRef = await addDoc(collection(db, "chat_sessions"), {
+        userId: auth.currentUser.uid,
+        title: 'Cuộc trò chuyện mới',
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+        messageCount: 0
+      });
+      
+      // Cập nhật danh sách sessions
+      const newSession: ChatSession = {
+        id: newSessionRef.id,
+        title: 'Cuộc trò chuyện mới',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        messageCount: 0
+      };
+      
+      setChatSessions([newSession, ...chatSessions]);
+      setCurrentChatId(newSessionRef.id);
+    } catch (error) {
+      console.error('Failed to create new chat:', error);
+    }
+  };
+  
+  const deleteChat = async (chatId: string) => {
+    if (!auth.currentUser) return;
+
+    try {
+      // Xóa chat session từ Firestore
+      await deleteDoc(doc(db, "chat_sessions", chatId));
+      
+      // Cập nhật danh sách sessions
+      const updatedSessions = chatSessions.filter(session => session.id !== chatId);
+      setChatSessions(updatedSessions);
+      
+      // Nếu xóa session hiện tại, chọn session khác hoặc tạo mới
+      if (chatId === currentChatId) {
+        if (updatedSessions.length > 0) {
+          setCurrentChatId(updatedSessions[0].id);
+        } else {
+          createNewChat();
+        }
+      }
+    } catch (error) {
+      console.error('Failed to delete chat:', error);
+    }
+  };
+  
+  const renameChat = (chatId: string) => {
+    // Tìm tiêu đề hiện tại của chat
+    const chat = chatSessions.find(session => session.id === chatId);
+    if (chat) {
+      setNewChatTitle(chat.title);
+      setChatToRename(chatId);
+      setRenameDialogOpen(true);
+    }
+  };
+  
+  const handleRenameChat = async () => {
+    if (!auth.currentUser || !chatToRename || !newChatTitle.trim()) return;
+    
+    try {
+      // Cập nhật tiêu đề chat trong Firestore
+      const chatRef = doc(db, "chat_sessions", chatToRename);
+      await updateDoc(chatRef, {
+        title: newChatTitle.trim(),
+        updatedAt: Timestamp.now()
+      });
+      
+      // Cập nhật danh sách sessions
+      const updatedSessions = chatSessions.map(session => {
+        if (session.id === chatToRename) {
+          return {
+            ...session,
+            title: newChatTitle.trim(),
+            updatedAt: new Date().toISOString()
+          };
+        }
+        return session;
+      });
+      
+      setChatSessions(updatedSessions);
+      setRenameDialogOpen(false);
+      setChatToRename(null);
+      setNewChatTitle('');
+    } catch (error) {
+      console.error('Failed to rename chat:', error);
     }
   };
 
   const saveMessage = async (content: string, sender: 'user' | 'ai') => {
-    if (!auth.currentUser) return;
+    if (!auth.currentUser || !currentChatId) {
+      // Không log thông tin chi tiết, chỉ log trạng thái
+      console.log('Cannot save message: Authentication required');
+      return null;
+    }
 
     try {
-      // Đảm bảo collection chats/uid/messages tồn tại
-      const userChatRef = collection(db, "chats", auth.currentUser.uid, "messages");
+      // Đảm bảo collection chat_sessions/chatId/messages tồn tại
+      const chatMessagesRef = collection(db, "chat_sessions", currentChatId, "messages");
       
       // Thêm tin nhắn mới
-      const docRef = await addDoc(userChatRef, {
+      const docRef = await addDoc(chatMessagesRef, {
         content,
         sender,
         timestamp: Timestamp.now()
       });
       
-      console.log('Message saved with ID:', docRef.id);
+      try {
+        // Cập nhật thông tin session
+        const sessionRef = doc(db, "chat_sessions", currentChatId);
+        await updateDoc(sessionRef, {
+          updatedAt: Timestamp.now(),
+          messageCount: messages.length + 1,
+          // Cập nhật tiêu đề nếu là tin nhắn đầu tiên của người dùng
+          ...(sender === 'user' && messages.length <= 1 ? { 
+            title: content.length > 30 ? content.substring(0, 30) + '...' : content 
+          } : {})
+        });
+        
+        // Cập nhật danh sách sessions
+        setChatSessions(prev => {
+          return prev.map(session => {
+            if (session.id === currentChatId) {
+              return {
+                ...session,
+                updatedAt: new Date().toISOString(),
+                messageCount: messages.length + 1,
+                ...(sender === 'user' && messages.length <= 1 ? { 
+                  title: content.length > 30 ? content.substring(0, 30) + '...' : content 
+                } : {})
+              };
+            }
+            return session;
+          });
+        });
+      } catch (updateError) {
+        // Không log chi tiết lỗi vì có thể chứa thông tin nhạy cảm
+        console.error('Failed to update session metadata');
+        // Tin nhắn vẫn được lưu, chỉ có metadata bị lỗi
+      }
+      
+      // Không log ID của tin nhắn, chỉ log trạng thái
+      console.log('Message saved successfully');
       return docRef.id;
     } catch (error) {
-      console.error('Failed to save message:', error);
+      // Không log chi tiết lỗi vì có thể chứa thông tin nhạy cảm
+      console.error('Failed to save message');
       return null;
     }
   };
@@ -170,7 +416,7 @@ export function AIChatScreen({ user }: AIChatScreenProps) {
     try {
       // Thêm tin nhắn người dùng vào UI
       const userMessage: Message = {
-        id: Date.now(),
+        id: generateUniqueId('user'),
         content,
         sender: 'user',
         timestamp: new Date().toISOString(),
@@ -182,13 +428,6 @@ export function AIChatScreen({ user }: AIChatScreenProps) {
 
       // Lưu tin nhắn người dùng vào Firestore
       await saveMessage(content, 'user');
-      
-      // Cập nhật lịch sử chat cho Gemini API
-      const updatedChatHistory = [
-        ...chatHistory,
-        { role: 'user' as const, content }
-      ];
-      setChatHistory(updatedChatHistory);
 
       try {
         // Tạo prompt cho Gemini API
@@ -196,24 +435,19 @@ export function AIChatScreen({ user }: AIChatScreenProps) {
         
         let aiResponse = '';
         
-        // Kiểm tra xem có API key Gemini hợp lệ không
-        if (process.env.NEXT_PUBLIC_GEMINI_API_KEY && process.env.NEXT_PUBLIC_GEMINI_API_KEY.length > 10) {
           try {
-            // Gọi Gemini API với lịch sử chat để duy trì ngữ cảnh
-            aiResponse = await generateGeminiResponse(prompt, updatedChatHistory);
+          // Gọi Gemini API
+            aiResponse = await generateGeminiResponse(prompt);
           } catch (apiError) {
-            console.error('Error calling Gemini API:', apiError);
-            // Fallback to local response if API call fails
-            aiResponse = generateLocalAIResponse(content);
-          }
-        } else {
-          console.log('No valid Gemini API key found, using local responses');
+          // Không log chi tiết lỗi API vì có thể chứa thông tin nhạy cảm
+          console.error('Gemini API error occurred');
+          // Fallback khi API lỗi
           aiResponse = generateLocalAIResponse(content);
         }
         
         // Tạo tin nhắn AI
         const aiMessage: Message = {
-          id: Date.now() + 1,
+          id: generateUniqueId('ai'),
           content: aiResponse,
           sender: 'ai',
           timestamp: new Date().toISOString(),
@@ -225,15 +459,12 @@ export function AIChatScreen({ user }: AIChatScreenProps) {
         // Lưu tin nhắn AI vào Firestore
         await saveMessage(aiResponse, 'ai');
         
-        // Cập nhật lịch sử chat với phản hồi của AI
-        setChatHistory(prev => [...prev, { role: 'model' as const, content: aiResponse }]);
-        
       } catch (error) {
         console.error('Error generating AI response:', error);
         
         // Hiển thị thông báo lỗi cho người dùng
         const errorMessage: Message = {
-          id: Date.now() + 1,
+          id: generateUniqueId('error'),
           content: 'Xin lỗi, tôi đang gặp sự cố kỹ thuật. Vui lòng thử lại sau.',
           sender: 'ai',
           timestamp: new Date().toISOString(),
@@ -241,9 +472,6 @@ export function AIChatScreen({ user }: AIChatScreenProps) {
         
         setMessages(prev => [...prev, errorMessage]);
         await saveMessage(errorMessage.content, 'ai');
-        
-        // Cập nhật lịch sử chat với thông báo lỗi
-        setChatHistory(prev => [...prev, { role: 'model' as const, content: errorMessage.content }]);
       } finally {
         setIsTyping(false);
         setLoading(false);
@@ -257,77 +485,44 @@ export function AIChatScreen({ user }: AIChatScreenProps) {
 
   // Tạo prompt cho Gemini AI với hướng dẫn rõ ràng
   const createGeminiPrompt = (userMessage: string, user: User): string => {
-    return `Bạn là một AI Coach tiếng Anh, giúp người dùng học tiếng Anh hiệu quả.
+    return `Bạn là một AI Giáo viên Ảo (AI Tutor Agent) thông minh với khả năng tư duy linh hoạt.
 Tên người dùng: ${user?.name || 'Học viên'}
 Câu hỏi/yêu cầu hiện tại của người dùng: ${userMessage}
 
-Hướng dẫn trả lời:
-1. Trả lời bằng tiếng Việt một cách ngắn gọn, dễ hiểu và thân thiện.
-2. Nếu câu hỏi liên quan đến tiếng Anh, hãy giải thích rõ ràng và đưa ra ví dụ cụ thể.
-3. Luôn duy trì ngữ cảnh của cuộc hội thoại, tham chiếu đến các tin nhắn trước đó khi cần thiết.
-4. Nếu người dùng hỏi về nội dung đã đề cập trước đó, hãy nhớ và trả lời dựa trên thông tin đã chia sẻ.
-5. Sử dụng emoji phù hợp để làm cho câu trả lời sinh động hơn.
+Nhiệm vụ của bạn:
+Hãy suy nghĩ linh hoạt và sáng tạo như ChatGPT, không bị giới hạn bởi kịch bản cứng nhắc. Tư duy độc lập và đưa ra các giải pháp phù hợp với từng tình huống cụ thể. Tạo ra các lộ trình học tập cá nhân hóa dựa trên nhu cầu của người dùng.
 
-Các chủ đề bạn có thể giúp:
-- Ngữ pháp tiếng Anh
-- Từ vựng và cách sử dụng
-- Phát âm và ngữ điệu
-- Cách học tiếng Anh hiệu quả
-- Luyện tập và kiểm tra kiến thức`;
-  };
+Khả năng đặc biệt:
+1. Trò chuyện tự nhiên: Nếu người dùng tâm sự, chia sẻ cảm xúc hoặc trò chuyện về đời sống cá nhân, hãy đáp lại một cách đồng cảm, thấu hiểu và tự nhiên như một người bạn thân thiết, không chỉ giới hạn trong vai trò giáo viên.
 
-  // Phản hồi cục bộ khi không có kết nối API
-  const generateLocalAIResponse = (userMessage: string): string => {
-    // Simple mock responses based on keywords
-    const lowerMessage = userMessage.toLowerCase();
-    
-    // Giới từ
-    if (lowerMessage.includes('on monday') || lowerMessage.includes('in monday')) {
-      return 'Câu hỏi hay! Chúng ta dùng "on Monday" thay vì "in Monday" vì:\n\n📅 Với các ngày trong tuần, chúng ta luôn dùng giới từ "ON"\n- On Monday (vào thứ Hai)\n- On Friday (vào thứ Sáu)\n\n🗓️ "IN" được dùng với:\n- Tháng: in January\n- Năm: in 2024\n- Thời gian dài: in the morning\n\nVí dụ:\n✅ I have a meeting on Monday\n❌ I have a meeting in Monday';
-    }
-    
-    // Ôn tập
-    if (lowerMessage.includes('ôn tập') || lowerMessage.includes('review')) {
-      return '📚 Tuyệt! Hãy cùng ôn tập những từ quan trọng:\n\n🔸 Beautiful - đẹp\n🔸 Interesting - thú vị\n🔸 Difficult - khó\n🔸 Airport - sân bay\n🔸 Meeting - cuộc họp\n\nBạn muốn tôi tạo câu ví dụ cho từ nào?';
-    }
-    
-    // Quiz
-    if (lowerMessage.includes('quiz')) {
-      return '🎯 Quiz nhanh cho bạn!\n\n❓ Từ nào có nghĩa là "thú vị"?\nA) Beautiful\nB) Interesting\nC) Difficult\nD) Important\n\nHãy trả lời và tôi sẽ giải thích!';
-    }
-    
-    // Audio
-    if (lowerMessage.includes('audio') || lowerMessage.includes('nghe')) {
-      return '🎧 Gợi ý audio cho bạn:\n\n📻 BBC Learning English (5-10 phút)\n🎙️ English Pod (Beginner level)\n📱 Duolingo Podcast (Interesting stories)\n🎬 TED-Ed videos (Short & engaging)\n\nBắt đầu với 10 phút mỗi ngày nhé!';
-    }
+2. Thích ứng ngôn ngữ: Nếu người dùng yêu cầu trò chuyện bằng ngôn ngữ cụ thể (ví dụ: tiếng Anh, tiếng Pháp, tiếng Nhật...), hãy chuyển sang ngôn ngữ đó và duy trì cuộc trò chuyện bằng ngôn ngữ người dùng yêu cầu.
 
-    // Trả lời quiz
-    if (lowerMessage.includes('b') && (lowerMessage.includes('quiz') || lowerMessage.includes('interesting'))) {
-      return '🎉 Chính xác! "Interesting" có nghĩa là "thú vị, hấp dẫn".\n\n✨ Cách sử dụng:\n- This movie is interesting (Bộ phim này thú vị)\n- An interesting story (Một câu chuyện thú vị)\n\n📖 Từ đồng nghĩa: fascinating, engaging, captivating\n\nBạn có muốn thử câu hỏi khác không?';
-    }
-    
-    // Thì hiện tại đơn
-    if (lowerMessage.includes('present simple') || lowerMessage.includes('hiện tại đơn')) {
-      return '📝 Thì hiện tại đơn (Present Simple)\n\n🔹 Công thức: S + V(s/es) + O\n\n🔹 Cách dùng:\n- Diễn tả thói quen, sự thật hiển nhiên\n- Lịch trình, thời gian biểu\n\n🔹 Dấu hiệu nhận biết:\n- Always, usually, often, sometimes, rarely, never\n- Every day/week/month/year\n\n🔹 Ví dụ:\n- I go to school every day\n- She works in a bank\n- The sun rises in the east';
-    }
-    
-    // Từ vựng du lịch
-    if (lowerMessage.includes('du lịch') || lowerMessage.includes('travel')) {
-      return '✈️ Từ vựng du lịch cơ bản:\n\n🔸 Airport - Sân bay\n🔸 Passport - Hộ chiếu\n🔸 Luggage/Baggage - Hành lý\n🔸 Check-in - Làm thủ tục\n🔸 Flight - Chuyến bay\n🔸 Departure - Khởi hành\n🔸 Arrival - Đến nơi\n🔸 Hotel - Khách sạn\n🔸 Reservation - Đặt chỗ\n🔸 Sightseeing - Tham quan\n\nBạn muốn học thêm từ vựng nào?';
-    }
-    
-    // Cách học từ vựng
-    if (lowerMessage.includes('cách học') || lowerMessage.includes('how to learn')) {
-      return '📚 5 cách học từ vựng hiệu quả:\n\n1️⃣ Học từ trong ngữ cảnh (câu, đoạn văn)\n2️⃣ Sử dụng flashcards và ứng dụng học từ vựng\n3️⃣ Tạo liên kết hình ảnh với từ mới\n4️⃣ Thực hành sử dụng từ mới trong câu\n5️⃣ Ôn tập theo lịch trình (spaced repetition)\n\nHãy thử áp dụng phương pháp nào phù hợp với bạn nhé!';
-    }
-    
-    // Chào hỏi
-    if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('chào')) {
-      return 'Xin chào! Rất vui được gặp bạn. Tôi là AI Coach tiếng Anh của bạn. Hôm nay bạn muốn học gì? 😊\n\n- Từ vựng mới?\n- Ngữ pháp?\n- Luyện tập hội thoại?\n- Kiểm tra kiến thức?';
-    }
-    
-    // Mặc định
-    return 'Tôi hiểu! Đây là một câu hỏi thú vị về tiếng Anh. Bạn có thể chia sẻ thêm chi tiết để tôi giúp bạn tốt hơn không? 😊\n\nTôi có thể giúp bạn:\n📚 Giải thích ngữ pháp\n📖 Học từ vựng mới\n🎯 Tạo quiz luyện tập\n🎧 Gợi ý tài liệu nghe';
+3. Hỗ trợ đa lĩnh vực: Không chỉ giới hạn ở việc học tập, hãy sẵn sàng tư vấn, hỗ trợ về các vấn đề khác như phát triển cá nhân, sức khỏe tinh thần, kỹ năng sống, v.v.
+
+Khi được yêu cầu:
+- Tạo flashcards: Thiết kế các thẻ học phù hợp với chủ đề và cấp độ.
+- Giải thích khái niệm: Cung cấp giải thích rõ ràng, dễ hiểu với ví dụ thực tế.
+- Tạo bài tập: Đưa ra các bài tập phù hợp với trình độ người học.
+- Đề xuất lộ trình: Thiết kế lộ trình học tập cá nhân hóa.
+- Trò chuyện cá nhân: Đáp lại một cách tự nhiên, đồng cảm và thấu hiểu.
+- Thay đổi ngôn ngữ: Chuyển sang ngôn ngữ mà người dùng yêu cầu.
+
+QUAN TRỌNG - Quy tắc định dạng PHẢI tuân thủ:
+- TUYỆT ĐỐI KHÔNG ĐƯỢC sử dụng dấu * hoặc ** trong bất kỳ trường hợp nào, ngay cả khi liệt kê danh sách.
+- KHÔNG ĐƯỢC sử dụng bất kỳ định dạng markdown nào trong nội dung.
+- Thay vì dùng dấu * để liệt kê, hãy dùng dấu gạch ngang (-) hoặc số (1., 2.) 
+- KHÔNG sử dụng emoji số (1️⃣, 2️⃣, 3️⃣) mà chỉ dùng số thường (1, 2, 3).
+- Sử dụng xuống dòng và khoảng cách để format text hợp lý.
+- KHÔNG sử dụng các dấu gạch ngang liên tục như "---------------" trong bảng hoặc nội dung.
+- Khi tạo flashcards, sử dụng định dạng đơn giản và dễ đọc:
+
+Front: [nội dung]
+Back: [nội dung]
+
+Front: [nội dung]
+Back: [nội dung]
+
+Hãy trả lời với tư duy linh hoạt, sáng tạo và cá nhân hóa như ChatGPT, không theo kịch bản cứng nhắc.`;
   };
 
   const handleQuickAction = (action: QuickAction) => {
@@ -342,18 +537,192 @@ Các chủ đề bạn có thể giúp:
     });
   };
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
   return (
-    <div className="h-full flex flex-col bg-gray-50">
+    <div className="h-full flex bg-gray-50">
+      {/* Dialog đổi tên chat */}
+      <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Đổi tên cuộc trò chuyện</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Input
+              value={newChatTitle}
+              onChange={(e) => setNewChatTitle(e.target.value)}
+              placeholder="Nhập tên mới cho cuộc trò chuyện"
+              className="w-full"
+              autoFocus
+            />
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setRenameDialogOpen(false);
+                setChatToRename(null);
+                setNewChatTitle('');
+              }}
+            >
+              Hủy
+            </Button>
+            <Button onClick={handleRenameChat}>Lưu</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Sidebar */}
+      {showSidebar && (
+        <div className="w-64 bg-white border-r flex flex-col h-full">
+          <div className="p-4 border-b flex items-center justify-between">
+            <h2 className="font-medium">Cuộc trò chuyện</h2>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8 rounded-full"
+              onClick={createNewChat}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto">
+            {loadingSessions ? (
+              <div className="flex justify-center items-center h-20">
+                <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+              </div>
+            ) : chatSessions.length === 0 ? (
+              <div className="text-center p-4 text-gray-500">
+                <p>Chưa có cuộc trò chuyện nào</p>
+              </div>
+            ) : (
+              <div className="space-y-1 p-2">
+                {chatSessions.map((session) => (
+                  <div 
+                    key={session.id}
+                    className={`flex items-center justify-between p-2 rounded-lg cursor-pointer hover:bg-gray-100 ${
+                      currentChatId === session.id ? 'bg-blue-50 text-blue-700' : ''
+                    }`}
+                    onClick={() => setCurrentChatId(session.id)}
+                  >
+                    <div className="flex items-center space-x-2 overflow-hidden">
+                      <MessageSquare className="h-4 w-4 flex-shrink-0" />
+                      <div className="truncate">
+                        <p className="truncate font-medium">{session.title}</p>
+                        <p className="text-xs text-gray-500">{formatDate(session.updatedAt)}</p>
+                      </div>
+                    </div>
+                    
+                    <div 
+                      onClick={(e) => e.stopPropagation()}
+                      className="z-50 relative"
+                    >
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 rounded-full"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const menuOptions = [
+                            {
+                              label: "Đổi tên",
+                              icon: <Edit className="h-4 w-4 mr-2" />,
+                              action: () => renameChat(session.id)
+                            },
+                            {
+                              label: "Xóa cuộc trò chuyện",
+                              icon: <Trash2 className="h-4 w-4 mr-2" />,
+                              action: () => deleteChat(session.id),
+                              className: "text-red-600"
+                            }
+                          ];
+                          
+                          // Hiển thị menu tùy chọn
+                          setActiveSession(session.id);
+                          setShowOptionsMenu(true);
+                        }}
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                      
+                      {showOptionsMenu && activeSession === session.id && (
+                        <div className="absolute right-2 top-8 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
+                          <div className="py-1" role="menu" aria-orientation="vertical">
+                            <button
+                              className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              role="menuitem"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                renameChat(session.id);
+                                setShowOptionsMenu(false);
+                              }}
+                            >
+                              <Edit className="h-4 w-4 mr-2" />
+                              Đổi tên
+                            </button>
+                            <button
+                              className="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                              role="menuitem"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteChat(session.id);
+                                setShowOptionsMenu(false);
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Xóa cuộc trò chuyện
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      
+      {/* Main content */}
+      <div className="flex-1 flex flex-col h-full">
       {/* Header */}
       <div className="bg-white border-b p-4">
+          <div className="flex items-center justify-between">
         <div className="flex items-center">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 mr-2 md:hidden"
+                onClick={() => setShowSidebar(!showSidebar)}
+              >
+                <MessageSquare className="h-4 w-4" />
+              </Button>
           <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
             <Bot className="h-6 w-6 text-blue-600" />
           </div>
           <div>
-            <h2 className="text-gray-900">AI Coach</h2>
-            <p className="text-sm text-gray-500">Luôn sẵn sàng giúp bạn học tập</p>
+                <h2 className="text-gray-900">AI Tutor Agent</h2>
+                <p className="text-sm text-gray-500">Giáo viên ảo hỗ trợ học tập mọi môn học</p>
+              </div>
           </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={createNewChat}
+              className="hidden md:flex items-center"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Chat mới
+            </Button>
         </div>
       </div>
 
@@ -388,11 +757,9 @@ Các chủ đề bạn có thể giúp:
             key={message.id}
             className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
           >
-            <div className={`flex items-start space-x-2 max-w-xs lg:max-w-md ${
-              message.sender === 'user' ? 'flex-row-reverse space-x-reverse' : ''
+              <div className={`flex items-start space-x-2 max-w-xs lg:max-w-md ${message.sender === 'user' ? 'flex-row-reverse space-x-reverse' : ''
             }`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                message.sender === 'user' 
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${message.sender === 'user'
                   ? 'bg-blue-600' 
                   : 'bg-gray-200'
               }`}>
@@ -403,14 +770,12 @@ Các chủ đề bạn có thể giúp:
                 )}
               </div>
               
-              <div className={`rounded-2xl px-4 py-2 ${
-                message.sender === 'user'
+                <div className={`rounded-2xl px-4 py-2 ${message.sender === 'user'
                   ? 'bg-blue-600 text-white'
                   : 'bg-white border shadow-sm'
               }`}>
                 <p className="whitespace-pre-line">{message.content}</p>
-                <p className={`text-xs mt-1 ${
-                  message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
+                  <p className={`text-xs mt-1 ${message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
                 }`}>
                   {formatTime(message.timestamp)}
                 </p>
@@ -418,6 +783,7 @@ Các chủ đề bạn có thể giúp:
             </div>
           </div>
         ))}
+        <div ref={messagesEndRef} />
 
         {/* Typing Indicator */}
         {isTyping && (
@@ -444,9 +810,9 @@ Các chủ đề bạn có thể giúp:
           <Input
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
-            placeholder="Hỏi AI Coach..."
+              placeholder="Hỏi AI Tutor Agent..."
             className="flex-1 rounded-xl"
-            disabled={loading}
+              disabled={loading || !currentChatId}
             onKeyPress={(e) => {
               if (e.key === 'Enter') {
                 sendMessage(inputMessage);
@@ -455,7 +821,7 @@ Các chủ đề bạn có thể giúp:
           />
           <Button
             onClick={() => sendMessage(inputMessage)}
-            disabled={!inputMessage.trim() || loading}
+              disabled={!inputMessage.trim() || loading || !currentChatId}
             className="bg-blue-600 hover:bg-blue-700 rounded-xl"
           >
             {loading ? (
@@ -464,6 +830,7 @@ Các chủ đề bạn có thể giúp:
               <Send className="h-4 w-4" />
             )}
           </Button>
+          </div>
         </div>
       </div>
     </div>

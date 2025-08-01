@@ -18,7 +18,7 @@ import {
   getDocs 
 } from "firebase/firestore";
 import { auth, db } from "./config";
-import { FirebaseUser, Session, UserProfile } from "@/types";
+import { FirebaseUser, Session, UserProfile } from "../../types";
 
 // Auth functions
 export const firebaseAuth = {

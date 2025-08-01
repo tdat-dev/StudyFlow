@@ -1,7 +1,7 @@
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
-import { useAppState } from '@/contexts/AppStateContext';
+import { Button } from '../../../components/ui/button';
+import { useAuth } from '../../contexts/AuthContext';
+import { useAppState } from '../../contexts/AppStateContext';
 
 interface WelcomeScreenProps {
   onNavigate: (screen: 'login' | 'register' | 'onboarding') => void;
