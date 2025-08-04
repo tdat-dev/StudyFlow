@@ -217,29 +217,42 @@ export function AIChatScreen({ user }: AIChatScreenProps) {
       try {
         // Lấy tin nhắn từ Firestore
         const messagesRef = collection(db, "chat_sessions", chatId, "messages");
-      const q = query(messagesRef, orderBy("timestamp", "asc"));
-      const querySnapshot = await getDocs(q);
-      
-      const loadedMessages: Message[] = [];
-      
-      querySnapshot.forEach((doc) => {
+        const q = query(messagesRef, orderBy("timestamp", "asc"));
+        const querySnapshot = await getDocs(q);
+        
+        const loadedMessages: Message[] = [];
+        const newChatHistory: Array<{ role: 'user' | 'model', content: string }> = [];
+        
+        querySnapshot.forEach((doc) => {
           const data = doc.data();
-          loadedMessages.push({
+          const message = {
             id: doc.id,
-              content: data.content,
-              sender: data.sender,
+            content: data.content,
+            sender: data.sender,
             timestamp: data.timestamp.toDate().toISOString()
+          };
+          
+          loadedMessages.push(message);
+          
+          // Cập nhật lịch sử trò chuyện cho Gemini API
+          newChatHistory.push({
+            role: data.sender === 'user' ? 'user' : 'model',
+            content: data.content
           });
-      });
+        });
 
-      if (loadedMessages.length === 0) {
+        if (loadedMessages.length === 0) {
           // Nếu không có tin nhắn, hiển thị tin nhắn chào mừng
           setMessages([welcomeMessage]);
           
           // Lưu tin nhắn chào mừng vào Firestore
-        await saveMessage(welcomeMessage.content, 'ai');
-      } else {
+          await saveMessage(welcomeMessage.content, 'ai');
+        } else {
           setMessages(loadedMessages);
+          
+          // Giới hạn lịch sử trò chuyện để tránh vượt quá token limit
+          setChatHistory(newChatHistory.slice(-20)); // Giữ 20 tin nhắn gần nhất để có ngữ cảnh đầy đủ hơn
+          console.log(`Chat history updated with ${newChatHistory.length} items`);
         }
       } catch (err) {
         console.error("Error loading chat history:", err);
@@ -430,20 +443,39 @@ export function AIChatScreen({ user }: AIChatScreenProps) {
       await saveMessage(content, 'user');
 
       try {
+        // Cập nhật lịch sử trò chuyện
+        const updatedChatHistory = [...chatHistory];
+        
+        // Thêm tin nhắn người dùng vào lịch sử
+        updatedChatHistory.push({
+          role: 'user',
+          content: content
+        });
+        
+        // Giới hạn lịch sử trò chuyện để tránh vượt quá token limit
+        const limitedChatHistory = updatedChatHistory.slice(-20); // Giữ 20 tin nhắn gần nhất để có ngữ cảnh đầy đủ hơn
+        setChatHistory(limitedChatHistory);
+        
         // Tạo prompt cho Gemini API
         const prompt = createGeminiPrompt(content, user);
         
         let aiResponse = '';
         
-          try {
-          // Gọi Gemini API
-            aiResponse = await generateGeminiResponse(prompt);
-          } catch (apiError) {
-          // Không log chi tiết lỗi API vì có thể chứa thông tin nhạy cảm
+        try {
+          // Gọi Gemini API với lịch sử trò chuyện
+          console.log('Sending message with chat history length:', limitedChatHistory.length);
+          aiResponse = await generateGeminiResponse(prompt, limitedChatHistory);
+        } catch (apiError) {
           console.error('Gemini API error occurred');
           // Fallback khi API lỗi
           aiResponse = generateLocalAIResponse(content);
         }
+        
+        // Cập nhật lịch sử với phản hồi của AI
+        setChatHistory([...limitedChatHistory, {
+          role: 'model',
+          content: aiResponse
+        }]);
         
         // Tạo tin nhắn AI
         const aiMessage: Message = {
@@ -499,6 +531,10 @@ Khả năng đặc biệt:
 
 3. Hỗ trợ đa lĩnh vực: Không chỉ giới hạn ở việc học tập, hãy sẵn sàng tư vấn, hỗ trợ về các vấn đề khác như phát triển cá nhân, sức khỏe tinh thần, kỹ năng sống, v.v.
 
+4. Trả lời chi tiết: Luôn cung cấp câu trả lời đầy đủ, chi tiết và hữu ích. Nếu người dùng hỏi về một chủ đề phức tạp, hãy cung cấp câu trả lời toàn diện với nhiều thông tin và ví dụ. Đừng trả lời quá ngắn gọn.
+
+5. Duy trì ngữ cảnh: Luôn nhớ và tham khảo các cuộc trò chuyện trước đó để đảm bảo tính nhất quán và liên tục trong cuộc hội thoại.
+
 Khi được yêu cầu:
 - Tạo flashcards: Thiết kế các thẻ học phù hợp với chủ đề và cấp độ.
 - Giải thích khái niệm: Cung cấp giải thích rõ ràng, dễ hiểu với ví dụ thực tế.
@@ -522,7 +558,7 @@ Back: [nội dung]
 Front: [nội dung]
 Back: [nội dung]
 
-Hãy trả lời với tư duy linh hoạt, sáng tạo và cá nhân hóa như ChatGPT, không theo kịch bản cứng nhắc.`;
+Hãy trả lời với tư duy linh hoạt, sáng tạo và cá nhân hóa như ChatGPT, không theo kịch bản cứng nhắc. Đảm bảo câu trả lời của bạn đầy đủ, chi tiết và hữu ích.`;
   };
 
   const handleQuickAction = (action: QuickAction) => {

@@ -77,9 +77,16 @@ export function PomodoroScreen({ user, habitId }: PomodoroScreenProps) {
     
     initializeData();
     
-    // Create audio element - sử dụng đường dẫn tương đối
+    // Create audio element - sử dụng đường dẫn tuyệt đối
     try {
-      audioRef.current = new Audio('./sounds/bell.mp3');
+      audioRef.current = new Audio('/sounds/bell.mp3');
+      // Preload audio để đảm bảo sẵn sàng khi cần
+      if (audioRef.current) {
+        audioRef.current.preload = 'auto';
+        // Test load audio
+        audioRef.current.load();
+        console.log('Audio loaded successfully');
+      }
     } catch (error) {
       console.error('Error loading audio:', error);
     }
@@ -92,6 +99,13 @@ export function PomodoroScreen({ user, habitId }: PomodoroScreenProps) {
   }, [user?.uid, habitId]);
   
   // Timer effect
+  // Khởi tạo giá trị timeLeft khi chuyển mode
+  useEffect(() => {
+    // Đặt thời gian ban đầu dựa trên mode hiện tại
+    setTimeLeft(settings[mode] * 60);
+  }, [mode, settings]);
+  
+  // Timer effect - chạy khi isRunning thay đổi
   useEffect(() => {
     // Đảm bảo xóa timer cũ trước khi tạo timer mới
     if (timerRef.current) {
@@ -119,7 +133,7 @@ export function PomodoroScreen({ user, habitId }: PomodoroScreenProps) {
         } else {
           setTimeLeft(remaining);
         }
-      }, 500); // Cập nhật mỗi 500ms để đảm bảo độ chính xác
+      }, 200); // Cập nhật mỗi 200ms để đảm bảo độ chính xác cao hơn
     }
     
     return () => {
@@ -128,7 +142,7 @@ export function PomodoroScreen({ user, habitId }: PomodoroScreenProps) {
         timerRef.current = null;
       }
     };
-  }, [isRunning, mode]);
+  }, [isRunning, timeLeft]);
   
   const loadSettings = async () => {
     try {
@@ -224,9 +238,29 @@ export function PomodoroScreen({ user, habitId }: PomodoroScreenProps) {
     // Phát âm thanh khi hoàn thành
     if (settings.soundEnabled && audioRef.current) {
       try {
-        audioRef.current.play().catch(error => {
-          console.error('Error playing sound:', error);
-        });
+        // Đảm bảo âm thanh được tải lại từ đầu
+        audioRef.current.currentTime = 0;
+        
+        // Phát âm thanh và xử lý lỗi
+        const playPromise = audioRef.current.play();
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log('Audio played successfully');
+            })
+            .catch(error => {
+              console.error('Error playing sound:', error);
+              // Thử lại với phương pháp khác nếu cần
+              try {
+                // Tạo một audio element mới và phát
+                const newAudio = new Audio('/sounds/bell.mp3');
+                newAudio.play();
+              } catch (fallbackError) {
+                console.error('Fallback audio also failed:', fallbackError);
+              }
+            });
+        }
       } catch (error) {
         console.error('Error playing sound:', error);
       }
