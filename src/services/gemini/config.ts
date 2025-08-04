@@ -8,7 +8,7 @@ export const genAI = new GoogleGenerativeAI(apiKey);
 
 // Cấu hình model Gemini
 export const geminiConfig = {
-  model: process.env.NEXT_PUBLIC_GEMINI_MODEL || "gemini-1.5-flash",
+  model: process.env.NEXT_PUBLIC_GEMINI_MODEL || "gemini-2.5-pro",
   maxOutputTokens: 1000,
   temperature: 0.9,  // Tăng temperature để AI sáng tạo hơn
   topP: 0.95,

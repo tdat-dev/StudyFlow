@@ -3,11 +3,13 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Progress } from './ui/progress';
-import { Check, Plus, Calendar, TrendingUp, Target, BookOpen, Headphones, Loader2, ArrowLeft } from 'lucide-react';
+import { Check, Plus, Calendar, TrendingUp, Target, BookOpen, BookMarked, Pencil, Headphones, Loader2, ArrowLeft, Timer } from 'lucide-react';
 import { firebase } from '../utils/firebase/client';
 import { auth, db } from '../utils/firebase/config';
 import { collection, query, where, getDocs, doc, updateDoc, getDoc } from 'firebase/firestore';
 import { HabitStreakChart } from './HabitStreakChart';
+import { AddHabitForm } from './AddHabitForm';
+import { PomodoroTimer } from './PomodoroTimer';
 
 interface HabitTrackerProps {
   user: any;
@@ -25,13 +27,16 @@ interface Habit {
   todayCompleted: boolean;
   weeklyProgress: boolean[];
   monthlyProgress: boolean[];
+  studyMinutes?: number;
+  iconName?: string;
 }
 
 export function HabitTracker({ user }: HabitTrackerProps) {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(false);
-  const [currentView, setCurrentView] = useState<'list' | 'detail'>('list');
+  const [currentView, setCurrentView] = useState<'list' | 'detail' | 'pomodoro'>('list');
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
+  const [isAddHabitOpen, setIsAddHabitOpen] = useState(false);
 
   useEffect(() => {
     loadHabits();
@@ -39,7 +44,8 @@ export function HabitTracker({ user }: HabitTrackerProps) {
 
   const loadHabits = async () => {
     if (!user.accessToken || !auth.currentUser) return;
-
+    
+    setLoading(true);
     try {
       const habitsRef = collection(db, "habits");
       const q = query(habitsRef, where("userId", "==", auth.currentUser.uid));
@@ -52,50 +58,41 @@ export function HabitTracker({ user }: HabitTrackerProps) {
           ...doc.data()
         });
       });
-        
-        // Add icons and colors to habits
-        const habitsWithIcons = serverHabits.map((habit, index) => ({
+      
+      // Định nghĩa các icon có thể sử dụng
+      const iconMap: Record<string, any> = {
+        'BookOpen': BookOpen,
+        'Headphones': Headphones,
+        'Target': Target,
+        'Calendar': Calendar,
+        'TrendingUp': TrendingUp,
+        'BookMarked': BookMarked,
+        'Pencil': Pencil
+      };
+      
+      // Add icons to habits based on iconName or default
+      const habitsWithIcons = serverHabits.map((habit) => {
+        const icon = habit.iconName && iconMap[habit.iconName] 
+          ? iconMap[habit.iconName] 
+          : BookOpen;
+          
+        return {
           ...habit,
-          icon: index === 0 ? BookOpen : Headphones,
-        color: index === 0 ? 'bg-blue-500' : 'bg-green-500',
-          bgColor: index === 0 ? 'bg-blue-100' : 'bg-green-100',
-        textColor: index === 0 ? 'text-blue-600' : 'text-green-600',
-        }));
-        
-        setHabits(habitsWithIcons);
+          icon: icon,
+          // Sử dụng color từ database hoặc mặc định
+          color: habit.color || 'bg-blue-500',
+          bgColor: habit.bgColor || 'bg-blue-100',
+          textColor: habit.textColor || 'text-blue-600',
+        };
+      });
+      
+      setHabits(habitsWithIcons);
     } catch (error) {
       console.error('Failed to load habits:', error);
-      
-      // Mock data for demo
-      const mockHabits = [
-        {
-          id: "1",
-          title: "Học từ vựng mỗi ngày",
-          description: "Học ít nhất 10 từ mới mỗi ngày",
-          currentStreak: 5,
-          todayCompleted: true,
-          weeklyProgress: [true, true, true, true, true, false, false],
-          monthlyProgress: generateMockMonthData(5),
-          icon: BookOpen,
-          color: 'bg-blue-500',
-          bgColor: 'bg-blue-100',
-          textColor: 'text-blue-600',
-        },
-        {
-          id: "2",
-          title: "Luyện nghe mỗi ngày",
-          description: "Nghe ít nhất 10 phút tiếng Anh mỗi ngày",
-          currentStreak: 3,
-          todayCompleted: false,
-          weeklyProgress: [true, true, true, false, false, false, false],
-          monthlyProgress: generateMockMonthData(3),
-          icon: Headphones,
-          color: 'bg-green-500',
-          bgColor: 'bg-green-100',
-          textColor: 'text-green-600',
-        }
-      ];
-      setHabits(mockHabits);
+      // Không sử dụng dữ liệu mẫu nữa, chỉ hiển thị mảng rỗng
+      setHabits([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -189,6 +186,44 @@ export function HabitTracker({ user }: HabitTrackerProps) {
   const totalHabits = habits.length;
   const completionRate = totalHabits > 0 ? (completedToday / totalHabits) * 100 : 0;
 
+  if (currentView === 'pomodoro' && selectedHabit) {
+    return (
+      <div className="h-full overflow-y-auto p-6 pb-20">
+        {/* Header */}
+        <div className="mb-6">
+          <Button
+            variant="ghost"
+            onClick={() => setCurrentView('detail')}
+            className="pl-0 text-blue-600 mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Quay lại
+          </Button>
+          
+          <div className="flex items-center">
+            <div className={`w-12 h-12 rounded-xl ${selectedHabit.bgColor} flex items-center justify-center mr-4`}>
+              <selectedHabit.icon className={`h-6 w-6 ${selectedHabit.textColor}`} />
+            </div>
+            <div>
+              <h1 className="text-blue-900 mb-1">{selectedHabit.title}</h1>
+              <p className="text-gray-600">{selectedHabit.description}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Pomodoro Timer */}
+        <PomodoroTimer 
+          habitId={selectedHabit.id}
+          habitTitle={selectedHabit.title}
+          onComplete={(duration) => {
+            // Reload habits after completing a pomodoro session
+            loadHabits();
+          }}
+        />
+      </div>
+    );
+  }
+  
   if (currentView === 'detail' && selectedHabit) {
     return (
       <div className="h-full overflow-y-auto p-6 pb-20">
@@ -215,21 +250,39 @@ export function HabitTracker({ user }: HabitTrackerProps) {
         </div>
 
         {/* Streak Status */}
-        <Card className="mb-6 bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-blue-900 mb-1">Streak hiện tại</h3>
-                <p className="text-blue-700 text-sm">
-                  {selectedHabit.currentStreak} ngày liên tiếp
-                </p>
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <Card className="bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-blue-900 mb-1">Streak hiện tại</h3>
+                  <p className="text-blue-700 text-sm">
+                    {selectedHabit.currentStreak} ngày liên tiếp
+                  </p>
+                </div>
+                <div className={`w-16 h-16 rounded-full ${selectedHabit.color} flex items-center justify-center`}>
+                  <span className="text-white text-xl font-bold">{selectedHabit.currentStreak}</span>
+                </div>
               </div>
-              <div className={`w-16 h-16 rounded-full ${selectedHabit.color} flex items-center justify-center`}>
-                <span className="text-white text-xl font-bold">{selectedHabit.currentStreak}</span>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-indigo-900 mb-1">Thời gian học</h3>
+                  <p className="text-indigo-700 text-sm">
+                    {selectedHabit.studyMinutes || 0} phút
+                  </p>
+                </div>
+                <div className="w-16 h-16 rounded-full bg-indigo-500 flex items-center justify-center">
+                  <Timer className="h-6 w-6 text-white" />
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* 30-day Chart */}
         <div className="mb-6">
@@ -267,27 +320,46 @@ export function HabitTracker({ user }: HabitTrackerProps) {
           </CardContent>
         </Card>
 
-        {/* Action Button */}
-        <Button
-          onClick={() => toggleHabitCompletion(selectedHabit.id)}
-          disabled={loading}
-          className={`w-full rounded-xl ${
-            selectedHabit.todayCompleted
-              ? 'bg-green-600 hover:bg-green-700 text-white'
-              : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-          }`}
-        >
-          {loading ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          ) : selectedHabit.todayCompleted ? (
-            <>
-              <Check className="h-4 w-4 mr-2" />
-              Đã hoàn thành
-            </>
-          ) : (
-            'Đánh dấu hoàn thành'
-          )}
-        </Button>
+                  {/* Action Buttons */}
+          <div className="flex gap-2">
+            <Button
+              onClick={() => toggleHabitCompletion(selectedHabit.id)}
+              disabled={loading}
+              className={`flex-1 rounded-xl ${
+                selectedHabit.todayCompleted
+                  ? 'bg-green-600 hover:bg-green-700 text-white'
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+              }`}
+            >
+              {loading ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : selectedHabit.todayCompleted ? (
+                <>
+                  <Check className="h-4 w-4 mr-2" />
+                  Đã hoàn thành
+                </>
+              ) : (
+                'Đánh dấu hoàn thành'
+              )}
+            </Button>
+            
+            <Button
+              onClick={() => {
+                // Chuyển đến tab pomodoro với thông tin habit được chọn
+                const event = new CustomEvent('navigate-tab', { 
+                  detail: { 
+                    tab: 'pomodoro', 
+                    habitId: selectedHabit.id 
+                  } 
+                });
+                window.dispatchEvent(event);
+              }}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl"
+            >
+              <Timer className="h-4 w-4 mr-2" />
+              Pomodoro
+            </Button>
+          </div>
       </div>
     );
   }
@@ -320,8 +392,20 @@ export function HabitTracker({ user }: HabitTrackerProps) {
       </Card>
 
       {/* Habit List */}
-      <div className="space-y-4 mb-6">
-        {habits.map((habit) => {
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 text-blue-600 animate-spin mb-4" />
+          <p className="text-blue-600">Đang tải thói quen...</p>
+        </div>
+      ) : habits.length === 0 ? (
+        <div className="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300 mb-6">
+          <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-gray-700 text-lg font-medium mb-2">Chưa có thói quen nào</h3>
+          <p className="text-gray-500 mb-6">Bắt đầu thêm thói quen học tập của bạn</p>
+        </div>
+      ) : (
+        <div className="space-y-4 mb-6">
+          {habits.map((habit) => {
           const Icon = habit.icon;
           const completedDays = habit.weeklyProgress?.filter(Boolean).length || 0;
           
@@ -401,13 +485,24 @@ export function HabitTracker({ user }: HabitTrackerProps) {
             </Card>
           );
         })}
-      </div>
+        </div>
+      )}
 
       {/* Add New Habit Button */}
-      <Button className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl">
+      <Button 
+        className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl"
+        onClick={() => setIsAddHabitOpen(true)}
+      >
         <Plus className="h-4 w-4 mr-2" />
         Thêm thói quen mới
       </Button>
+      
+      {/* Add Habit Form Dialog */}
+      <AddHabitForm 
+        isOpen={isAddHabitOpen} 
+        onClose={() => setIsAddHabitOpen(false)}
+        onHabitAdded={loadHabits}
+      />
     </div>
   );
 }

@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { Home, BookOpen, Target, MessageCircle, User } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Home, BookOpen, Target, MessageCircle, User, Clock } from 'lucide-react';
 import { HomeDashboard } from './HomeDashboard';
 import { FlashcardsScreen } from './FlashcardsScreen';
 import { HabitTracker } from './HabitTracker';
 import { AIChatScreen } from './AIChatScreen';
 import { ProfileScreen } from './ProfileScreen';
+import { PomodoroScreen } from './PomodoroScreen';
 import { firebase } from '../utils/firebase/client';
 
 interface MainAppProps {
@@ -12,11 +13,44 @@ interface MainAppProps {
   onLogout: () => void;
 }
 
-type TabType = 'home' | 'flashcards' | 'habits' | 'chat' | 'profile';
+type TabType = 'home' | 'flashcards' | 'habits' | 'pomodoro' | 'chat' | 'profile';
 
 export function MainApp({ user, onLogout }: MainAppProps) {
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [currentUser, setCurrentUser] = useState(user);
+  
+  const tabs = [
+    { id: 'home', label: 'Home', icon: Home },
+    { id: 'flashcards', label: 'Flashcards', icon: BookOpen },
+    { id: 'habits', label: 'Habits', icon: Target },
+    { id: 'pomodoro', label: 'Pomodoro', icon: Clock },
+    { id: 'chat', label: 'AI Chat', icon: MessageCircle },
+    { id: 'profile', label: 'Profile', icon: User },
+  ];
+  
+  // State để lưu trữ thông tin bổ sung khi chuyển tab
+  const [tabParams, setTabParams] = useState<Record<string, any>>({});
+  
+  // Lắng nghe sự kiện chuyển tab từ các component con
+  useEffect(() => {
+    const handleNavigateTab = (event: CustomEvent) => {
+      const { tab, ...params } = event.detail;
+      if (tab && tabs.some(t => t.id === tab)) {
+        setActiveTab(tab as TabType);
+        
+        // Lưu các thông số bổ sung (như habitId)
+        if (Object.keys(params).length > 0) {
+          setTabParams(params);
+        }
+      }
+    };
+    
+    window.addEventListener('navigate-tab', handleNavigateTab as EventListener);
+    
+    return () => {
+      window.removeEventListener('navigate-tab', handleNavigateTab as EventListener);
+    };
+  }, [tabs]);
 
   const handleLogout = async () => {
     try {
@@ -32,14 +66,6 @@ export function MainApp({ user, onLogout }: MainAppProps) {
     setCurrentUser(updatedUser);
   };
 
-  const tabs = [
-    { id: 'home', label: 'Home', icon: Home },
-    { id: 'flashcards', label: 'Flashcards', icon: BookOpen },
-    { id: 'habits', label: 'Habits', icon: Target },
-    { id: 'chat', label: 'AI Chat', icon: MessageCircle },
-    { id: 'profile', label: 'Profile', icon: User },
-  ];
-
   const renderScreen = () => {
     switch (activeTab) {
       case 'home':
@@ -48,6 +74,8 @@ export function MainApp({ user, onLogout }: MainAppProps) {
         return <FlashcardsScreen user={currentUser} />;
       case 'habits':
         return <HabitTracker user={currentUser} />;
+      case 'pomodoro':
+        return <PomodoroScreen user={currentUser} habitId={tabParams.habitId} />;
       case 'chat':
         return <AIChatScreen user={currentUser} />;
       case 'profile':

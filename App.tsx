@@ -114,17 +114,32 @@ export default function App() {
       // Get user profile from Firestore
       const userId = session.user.uid;
       const { profile, error: profileError } = await firebase.firestore.getProfile(userId);
+      
+      // Define profile type to fix TypeScript errors
+      interface ProfileData {
+        name?: string;
+        email?: string;
+        streak?: number;
+        todayProgress?: number;
+        dailyGoal?: number;
+        totalWordsLearned?: number;
+        photoURL?: string;
+        [key: string]: any;
+      }
 
+      // Cast profile to ProfileData type
+      const profileData = profile as ProfileData;
+      
       if (profile) {
         const userProfile: UserProfile = {
-          name: profile.name || session.user.displayName || 'User',
-          email: profile.email || session.user.email || '',
+          name: profileData.name || session.user.displayName || 'User',
+          email: profileData.email || session.user.email || '',
           accessToken: session.access_token,
-          streak: profile.streak || 0,
-          todayProgress: profile.todayProgress || 0,
-          dailyGoal: profile.dailyGoal || 20,
-          totalWordsLearned: profile.totalWordsLearned || 0,
-          photoURL: profile.photoURL || session.user.photoURL
+          streak: profileData.streak || 0,
+          todayProgress: profileData.todayProgress || 0,
+          dailyGoal: profileData.dailyGoal || 20,
+          totalWordsLearned: profileData.totalWordsLearned || 0,
+          photoURL: profileData.photoURL || session.user.photoURL
         };
         setUser(userProfile);
         setCurrentScreen('main');
