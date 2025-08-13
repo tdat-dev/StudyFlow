@@ -39,8 +39,10 @@ export const generateGeminiResponse = async (
       throw new Error("Missing API key");
     }
 
-    // Không log prompt người dùng vì có thể chứa thông tin nhạy cảm
-    console.log("Calling Gemini API...");
+    // Chỉ log trong môi trường development
+    if (process.env.NODE_ENV === 'development') {
+      console.log("Calling Gemini API with prompt:", prompt.substring(0, 100) + "...");
+    }
     
     const model = getGeminiModel();
     
@@ -51,8 +53,10 @@ export const generateGeminiResponse = async (
       // Sử dụng generateContent thay vì chat history để tránh lỗi
       result = await model.generateContent(prompt);
     } catch (error) {
-      // Không log chi tiết lỗi API vì có thể chứa thông tin nhạy cảm
-      console.error("Error generating content from AI");
+      // Chỉ log trong môi trường development
+      if (process.env.NODE_ENV === 'development') {
+        console.error("Error generating content from AI:", error);
+      }
       // Không truyền lỗi gốc vì có thể chứa thông tin nhạy cảm
       throw new Error("Failed to generate AI response");
     }
@@ -62,8 +66,10 @@ export const generateGeminiResponse = async (
     
     return text;
   } catch (error) {
-    // Không log chi tiết lỗi API vì có thể chứa thông tin nhạy cảm
-    console.error("Error generating Gemini response");
+    // Chỉ log trong môi trường development
+    if (process.env.NODE_ENV === 'development') {
+      console.error("Error generating Gemini response:", error);
+    }
     // Không truyền lỗi gốc vì có thể chứa thông tin nhạy cảm
     throw new Error("Failed to generate AI response");
   }

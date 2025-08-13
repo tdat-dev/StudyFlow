@@ -51,7 +51,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     // Ghi log lỗi
-    console.error('Error caught by ErrorBoundary:', error, errorInfo);
+    // Chỉ log trong môi trường development
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error caught by ErrorBoundary:', error, errorInfo);
+    }
     
     // Gọi callback onError nếu được cung cấp
     if (this.props.onError) {

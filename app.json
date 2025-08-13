@@ -1,14 +1,41 @@
 {
   "expo": {
-    "extra": {
-      "eas": {
-        "projectId": "268dfce3-ab52-43dd-af9c-f03b10901d94"
-      }
+    "name": "Ứng dụng Học Tiếng Anh",
+    "slug": "ung-dung-hoc-tieng-anh",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#4F46E5"
     },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
+      "supportsTablet": true,
       "bundleIdentifier": "com.tdat.ungdunghoctienganh",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.tdat.ungdunghoctienganh",
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "f14401f5-260e-4e86-9826-63e2c1aaa039"
       }
     }
   }

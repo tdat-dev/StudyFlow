@@ -2,11 +2,15 @@
   "name": "ung-dung-hoc-tieng-anh",
   "version": "0.1.0",
   "private": true,
+  "main": "index.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "export": "next build",
+    "deploy": "npm run export && firebase deploy --only hosting",
+    "deploy:complete": "npm run export && firebase deploy"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

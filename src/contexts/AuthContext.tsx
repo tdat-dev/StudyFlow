@@ -45,7 +45,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [handleError]);
 
   const loadUserProfile = async (firebaseUser: FirebaseUser) => {
     // Sử dụng as any để tránh lỗi TypeScript với getIdToken

@@ -30,7 +30,10 @@ export function useErrorHandler(options?: {
     setError(appError);
 
     if (logToConsole) {
-      console.error('Application error:', appError);
+      // Chỉ log trong môi trường development
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Application error:', appError);
+      }
     }
 
     if (showToast) {

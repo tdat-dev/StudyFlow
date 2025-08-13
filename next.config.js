@@ -1,22 +1,41 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false, // Tắt Strict Mode để tránh double rendering
   swcMinify: true,
-  experimental: {
-    // Các tính năng thử nghiệm hợp lệ
-    optimizePackageImports: ['lucide-react'],
+  output: 'export', // Enable static HTML export
+  trailingSlash: true, // Add trailing slash for better compatibility
+  images: {
+    unoptimized: true // Disable image optimization for static export
   },
+
+  // Cải thiện Fast Refresh
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
+  },
+
+  experimental: {
+    optimizePackageImports: ["lucide-react"],
+    esmExternals: "loose",
+  },
+
   webpack: (config, { isServer, dev }) => {
-    // Cấu hình webpack để hỗ trợ Fast Refresh tốt hơn
     if (dev && !isServer) {
-      // Chỉ áp dụng cho môi trường phát triển ở phía client
-      config.experiments = {
-        ...config.experiments,
-        topLevelAwait: true,
+      // Cải thiện Fast Refresh performance
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+      };
+
+      // Giảm kích thước bundle để Fast Refresh nhanh hơn
+      config.optimization = {
+        ...config.optimization,
+        moduleIds: "named",
+        chunkIds: "named",
       };
     }
     return config;
   },
-}
+};
 
-module.exports = nextConfig 
+module.exports = nextConfig;

@@ -1,72 +1,88 @@
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 /**
- * Kết hợp các class name từ clsx và tailwind-merge
- * @param inputs Danh sách các class name
- * @returns Class name đã được xử lý
+ * Combines class names using clsx and tailwind-merge
  */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 /**
- * Format thời gian từ chuỗi ISO
- * @param dateString Chuỗi thời gian dạng ISO
- * @returns Chuỗi thời gian đã được format
+ * Formats a date string to a human-readable format
  */
-export function formatTime(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleTimeString('vi-VN', { 
-    hour: '2-digit', 
-    minute: '2-digit' 
+export function formatDate(date: string | Date): string {
+  if (!date) return '';
+  
+  const d = typeof date === 'string' ? new Date(date) : date;
+  
+  return d.toLocaleDateString('vi-VN', {
+    day: 'numeric',
+    month: 'numeric',
+    year: 'numeric'
   });
 }
 
 /**
- * Tạo ID duy nhất
- * @returns Chuỗi ID duy nhất
+ * Formats a date string to a time format
  */
-export function generateUniqueId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).substring(2);
+export function formatTime(date: string | Date): string {
+  if (!date) return '';
+  
+  const d = typeof date === 'string' ? new Date(date) : date;
+  
+  return d.toLocaleTimeString('vi-VN', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 }
 
 /**
- * Trì hoãn thực thi
- * @param ms Thời gian trì hoãn (milliseconds)
- * @returns Promise
+ * Truncates a string to a specified length
  */
-export function delay(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+export function truncateString(str: string, maxLength: number): string {
+  if (!str || str.length <= maxLength) return str;
+  return str.substring(0, maxLength) + '...';
 }
 
 /**
- * Tạo mảng từ khoảng số
- * @param start Số bắt đầu
- * @param end Số kết thúc
- * @returns Mảng các số từ start đến end
+ * Generates a unique ID
  */
-export function range(start: number, end: number): number[] {
-  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+export function generateId(prefix: string = 'id'): string {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 }
 
 /**
- * Lấy ngày trong tuần
- * @param index Chỉ số ngày (0-6)
- * @returns Tên ngày
+ * Debounces a function
  */
-export function getDayLabel(index: number): string {
-  const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-  return days[index % 7];
+export function debounce<T extends (...args: any[]) => any>(
+  fn: T,
+  delay: number
+): (...args: Parameters<T>) => void {
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
+  
+  return function(...args: Parameters<T>) {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+    
+    timeoutId = setTimeout(() => {
+      fn(...args);
+      timeoutId = null;
+    }, delay);
+  };
 }
 
 /**
- * Cắt ngắn chuỗi
- * @param text Chuỗi cần cắt
- * @param maxLength Độ dài tối đa
- * @returns Chuỗi đã cắt
+ * Safely parses JSON with error handling
  */
-export function truncateText(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text;
-  return text.substring(0, maxLength) + '...';
+export function safeJsonParse<T>(json: string, fallback: T): T {
+  try {
+    return JSON.parse(json) as T;
+  } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error parsing JSON:', error);
+    }
+    return fallback;
+  }
 }
