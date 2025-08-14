@@ -1,16 +1,23 @@
-import React, { useState } from 'react';
-import Button from '../../../components/ui/button';
-import { Edit, Loader2, MessageSquare, MoreVertical, Plus, Trash2 } from 'lucide-react';
-import { ChatSession } from '../../../types/chat';
+import React, { useState } from "react";
+import Button from "../../../components/ui/button";
+import {
+  Edit,
+  Loader2,
+  MessageSquare,
+  MoreVertical,
+  Plus,
+  Trash2,
+} from "lucide-react";
+import { ChatSession } from "../../../types/chat";
 // Định nghĩa hàm formatDate trong component
 function formatDate(dateString: string): string {
-  if (!dateString) return '';
-  
+  if (!dateString) return "";
+
   const date = new Date(dateString);
-  return date.toLocaleDateString('vi-VN', {
-    day: 'numeric',
-    month: 'numeric',
-    year: 'numeric'
+  return date.toLocaleDateString("vi-VN", {
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
   });
 }
 
@@ -31,25 +38,25 @@ export function ChatList({
   onNewChat,
   onRenameChat,
   onDeleteChat,
-  loading = false
+  loading = false,
 }: ChatListProps) {
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
   const [activeSession, setActiveSession] = useState<string | null>(null);
 
   return (
-    <div className="w-64 bg-white border-r flex flex-col h-full">
+    <div className="w-64 bg-white dark:bg-gray-800 border-r flex flex-col h-full">
       <div className="p-2 sm:p-4 border-b flex items-center justify-between">
         <h2 className="font-medium text-sm sm:text-base">Cuộc trò chuyện</h2>
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
           className="h-7 w-7 sm:h-8 sm:w-8 rounded-full"
           onClick={onNewChat}
         >
           <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
         </Button>
       </div>
-      
+
       <div className="flex-1 overflow-y-auto">
         {loading ? (
           <div className="flex justify-center items-center h-20">
@@ -62,10 +69,10 @@ export function ChatList({
         ) : (
           <div className="space-y-1 p-2">
             {sessions.map((session) => (
-              <div 
+              <div
                 key={session.id}
-                className={`flex items-center justify-between p-2 rounded-lg cursor-pointer hover:bg-gray-100 ${
-                  currentChatId === session.id ? 'bg-blue-50 text-blue-700' : ''
+                className={`flex items-center justify-between p-2 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                  currentChatId === session.id ? "bg-blue-50 text-blue-700" : ""
                 }`}
                 onClick={() => onSelectChat(session.id)}
               >
@@ -73,17 +80,19 @@ export function ChatList({
                   <MessageSquare className="h-4 w-4 flex-shrink-0" />
                   <div className="truncate">
                     <p className="truncate font-medium">{session.title}</p>
-                    <p className="text-xs text-gray-500">{formatDate(session.updatedAt)}</p>
+                    <p className="text-xs text-gray-500">
+                      {formatDate(session.updatedAt)}
+                    </p>
                   </div>
                 </div>
-                
-                <div 
+
+                <div
                   onClick={(e) => e.stopPropagation()}
                   className="z-50 relative"
                 >
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     className="h-7 w-7 sm:h-8 sm:w-8 rounded-full"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -93,12 +102,16 @@ export function ChatList({
                   >
                     <MoreVertical className="h-3 w-3 sm:h-4 sm:w-4" />
                   </Button>
-                  
+
                   {showOptionsMenu && activeSession === session.id && (
-                    <div className="absolute right-0 top-8 w-48 sm:w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
-                      <div className="py-1" role="menu" aria-orientation="vertical">
+                    <div className="absolute right-0 top-8 w-48 sm:w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black dark:ring-gray-700 ring-opacity-5 focus:outline-none z-50">
+                      <div
+                        className="py-1"
+                        role="menu"
+                        aria-orientation="vertical"
+                      >
                         <button
-                          className="flex w-full items-center px-3 py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-100"
+                          className="flex w-full items-center px-3 py-2 text-xs sm:text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                           role="menuitem"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -110,7 +123,7 @@ export function ChatList({
                           Đổi tên
                         </button>
                         <button
-                          className="flex w-full items-center px-3 py-2 text-xs sm:text-sm text-red-600 hover:bg-gray-100"
+                          className="flex w-full items-center px-3 py-2 text-xs sm:text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                           role="menuitem"
                           onClick={(e) => {
                             e.stopPropagation();

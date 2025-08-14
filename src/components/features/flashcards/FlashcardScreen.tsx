@@ -57,6 +57,7 @@ import {
 } from "../../../components/ui/alert-dialog";
 import { auth, db } from "../../../services/firebase/config";
 import { generateGeminiResponse } from "../../../services/gemini/config";
+import { useLevel } from "../../../contexts/LevelContext";
 
 interface FlashcardsScreenProps {
   user: any;
@@ -80,6 +81,7 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [loading, setLoading] = useState(false);
   const [generatingExample, setGeneratingExample] = useState(false);
+  const { addUserXP, updateStats, userStats } = useLevel();
 
   // State cho AI Flashcard Creator
   const [aiDialogOpen, setAiDialogOpen] = useState(false);
@@ -378,6 +380,12 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
     const updatedDeck = updatedDecks.find((d) => d.id === selectedDeck.id);
     if (updatedDeck) {
       setSelectedDeck(updatedDeck);
+    }
+
+    // Award XP for studying flashcard
+    if (learned && !card.learned) {
+      await addUserXP("COMPLETE_FLASHCARD");
+      await updateStats({ flashcardsStudied: userStats.flashcardsStudied + 1 });
     }
 
     // Move to next card
@@ -966,12 +974,14 @@ Lưu ý quan trọng:
                 <CardContent>
                   <div className="mb-3">
                     <div className="flex justify-between text-sm mb-1">
-                      <span className="text-gray-600">Tiến trình</span>
-                      <span className="text-gray-600">
+                      <span className="text-gray-600 dark:text-gray-400">
+                        Tiến trình
+                      </span>
+                      <span className="text-gray-600 dark:text-gray-400">
                         {Math.round(progress)}%
                       </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                       <div
                         className={`h-2 rounded-full ${deck.color}`}
                         style={{ width: `${progress}%` }}

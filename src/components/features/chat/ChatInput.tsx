@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import Button from '../../../components/ui/button';
-import { Input } from '../../../components/ui/input';
-import { Loader2, Send } from 'lucide-react';
+import React, { useState } from "react";
+import Button from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
+import { Loader2, Send } from "lucide-react";
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -9,18 +9,22 @@ interface ChatInputProps {
   disabled?: boolean;
 }
 
-export function ChatInput({ onSendMessage, loading, disabled = false }: ChatInputProps) {
-  const [inputMessage, setInputMessage] = useState('');
+export function ChatInput({
+  onSendMessage,
+  loading,
+  disabled = false,
+}: ChatInputProps) {
+  const [inputMessage, setInputMessage] = useState("");
 
   const handleSend = () => {
     if (inputMessage.trim() && !loading) {
       onSendMessage(inputMessage);
-      setInputMessage('');
+      setInputMessage("");
     }
   };
 
   return (
-    <div className="p-2 sm:p-4 bg-white border-t">
+    <div className="p-2 sm:p-4 bg-white dark:bg-gray-800 border-t">
       <div className="flex space-x-2">
         <Input
           value={inputMessage}
@@ -29,7 +33,7 @@ export function ChatInput({ onSendMessage, loading, disabled = false }: ChatInpu
           className="flex-1 rounded-xl text-sm"
           disabled={loading || disabled}
           onKeyPress={(e) => {
-            if (e.key === 'Enter') {
+            if (e.key === "Enter") {
               handleSend();
             }
           }}

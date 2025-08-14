@@ -800,8 +800,8 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
             disabled={isActive}
             className={`rounded-md ${
               timerMode === "pomodoro"
-                ? "bg-white text-purple-600 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
+                ? "bg-white dark:bg-gray-700 text-purple-600 dark:text-purple-400 shadow-sm"
+                : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
             }`}
           >
             Pomodoro
@@ -813,8 +813,8 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
             disabled={isActive}
             className={`rounded-md ${
               timerMode === "shortBreak"
-                ? "bg-white text-green-600 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
+                ? "bg-white dark:bg-gray-700 text-green-600 dark:text-green-400 shadow-sm"
+                : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
             }`}
           >
             Nghỉ Ngắn
@@ -826,8 +826,8 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
             disabled={isActive}
             className={`rounded-md ${
               timerMode === "longBreak"
-                ? "bg-white text-blue-600 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
+                ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm"
+                : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
             }`}
           >
             Nghỉ Dài
@@ -844,7 +844,7 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
           {isActive ? (
             <Button
               size="lg"
-              className="bg-white text-gray-900 hover:bg-gray-100 px-8 py-3 text-lg font-medium rounded-md shadow-sm"
+              className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 px-8 py-3 text-lg font-medium rounded-md shadow-sm"
               onClick={pauseSession}
             >
               <Pause className="h-5 w-5 mr-2" />
@@ -853,7 +853,7 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
           ) : (
             <Button
               size="lg"
-              className="bg-white text-gray-900 hover:bg-gray-100 px-8 py-3 text-lg font-medium rounded-md shadow-sm"
+              className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 px-8 py-3 text-lg font-medium rounded-md shadow-sm"
               onClick={currentSession ? resumeSession : startSession}
             >
               <Play className="h-5 w-5 mr-2" />
@@ -903,7 +903,7 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
 
       {/* Tasks Section */}
       {showTasks && (
-        <div className="bg-white rounded-t-3xl p-6 pb-20">
+        <div className="bg-white dark:bg-gray-800 rounded-t-3xl p-6 pb-20">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-900">Tasks</h2>
             <Button
@@ -938,7 +938,7 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
                 className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${
                   currentTaskId === task.id
                     ? `${colors.bgLight} ${colors.border} border-2`
-                    : "bg-gray-50 border-gray-200 hover:bg-gray-100"
+                    : "bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600"
                 }`}
                 onClick={() => selectTask(task.id)}
               >
@@ -953,8 +953,8 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
                   <span
                     className={
                       task.completed
-                        ? "text-gray-500 line-through"
-                        : "text-gray-900"
+                        ? "text-gray-500 dark:text-gray-400 line-through"
+                        : "text-gray-900 dark:text-gray-100"
                     }
                   >
                     {task.text}
@@ -1042,7 +1042,7 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
         <div className="fixed bottom-6 right-6 z-10">
           <Button
             onClick={() => setShowTasks(true)}
-            className="bg-white text-gray-900 hover:bg-gray-100 rounded-full w-12 h-12 shadow-lg"
+            className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600 rounded-full w-12 h-12 shadow-lg"
           >
             <List className="h-5 w-5" />
           </Button>

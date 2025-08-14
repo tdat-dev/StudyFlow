@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
-import { useAuth, useErrorHandler } from '../hooks';
-import { MainApp } from './MainApp';
-import { LoginForm, RegisterForm } from './features/auth';
+import React, { useState, useEffect } from "react";
+import { Loader2 } from "lucide-react";
+import { useAuth, useErrorHandler } from "../hooks";
+import { MainApp } from "./MainApp";
+import { LoginForm, RegisterForm } from "./features/auth";
 
 // Loading component
 const LoadingScreen = () => (
@@ -33,7 +33,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       {user ? (
         <MainApp user={user} onLogout={() => {}} />
       ) : (

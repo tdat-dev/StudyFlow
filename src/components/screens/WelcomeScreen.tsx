@@ -41,7 +41,7 @@ export default function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {
           </Button>
 
           <Button
-            className="w-full bg-white hover:bg-gray-100 text-gray-800 border border-gray-300 py-6 text-lg"
+            className="w-full bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 py-6 text-lg"
             variant="outline"
             onClick={() => onNavigate("register")}
           >
@@ -50,7 +50,7 @@ export default function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {
 
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
+              <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
             </div>
             <div className="relative flex justify-center">
               <span className="bg-gradient-to-br from-blue-50 to-yellow-50 px-4 text-sm text-gray-500">
@@ -60,7 +60,7 @@ export default function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {
           </div>
 
           <Button
-            className="w-full bg-white hover:bg-gray-100 text-gray-800 border border-gray-300 py-6 text-lg flex items-center justify-center gap-2"
+            className="w-full bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 py-6 text-lg flex items-center justify-center gap-2"
             variant="outline"
             onClick={handleGoogleLogin}
           >

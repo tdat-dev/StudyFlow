@@ -4,10 +4,10 @@ import { FlashcardScreen } from "./features/flashcards/FlashcardScreen";
 import { HabitTracker } from "./features/habits/HabitTracker";
 import { HomeDashboard } from "./features/home/HomeDashboard";
 import { PomodoroTimer } from "./features/pomodoro/PomodoroTimer";
-import { ProfileScreen } from "./features/profile/ProfileScreen";
+import ProfileScreen from "./features/profile/ProfileScreen";
 import { User } from "../types/chat";
 import { Header } from "./common/layout/Header";
-import { BottomNav } from "./common/layout/BottomNav";
+import BottomNav from "./common/layout/BottomNav";
 
 type TabType =
   | "home"
@@ -30,11 +30,19 @@ export function MainApp({ user, onLogout }: MainAppProps) {
     setCurrentUser(updatedUser);
   };
 
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab as TabType);
+  };
+
   const renderScreen = () => {
     switch (activeTab) {
       case "home":
         return (
-          <HomeDashboard user={currentUser} onUpdateUser={handleUpdateUser} />
+          <HomeDashboard
+            user={currentUser}
+            onUpdateUser={handleUpdateUser}
+            onTabChange={handleTabChange}
+          />
         );
       case "chat":
         return <ChatScreen user={currentUser} />;
@@ -48,21 +56,39 @@ export function MainApp({ user, onLogout }: MainAppProps) {
         return <ProfileScreen user={currentUser} onLogout={onLogout} />;
       default:
         return (
-          <HomeDashboard user={currentUser} onUpdateUser={handleUpdateUser} />
+          <HomeDashboard
+            user={currentUser}
+            onUpdateUser={handleUpdateUser}
+            onTabChange={handleTabChange}
+          />
         );
     }
   };
 
+  const handleNavigateToProfile = () => {
+    setActiveTab("profile");
+  };
+
   return (
-    <div className="flex flex-col h-screen bg-gray-100">
-      <Header user={currentUser} onLogout={onLogout} />
-      {/* Content area với padding bottom để không bị che bởi bottom nav */}
-      <div className="flex-1 overflow-hidden pb-16">{renderScreen()}</div>
-      {/* Bottom nav luôn hiển thị ở dưới cho cả desktop và mobile */}
-      <BottomNav
-        activeTab={activeTab as any}
-        onTabChange={(t) => setActiveTab(t as TabType)}
+    <div className="flex flex-col h-screen bg-white dark:bg-[#0d1117]">
+      <Header
+        user={currentUser}
+        onLogout={onLogout}
+        onNavigateToProfile={handleNavigateToProfile}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
       />
+      {/* Content area với full width */}
+      <div className="flex-1 overflow-auto bg-white dark:bg-[#0d1117] pb-16 md:pb-0">
+        <div className="w-full">{renderScreen()}</div>
+      </div>
+      {/* Bottom nav hiển thị trên mobile, ẩn trên desktop */}
+      <div className="md:hidden">
+        <BottomNav
+          activeTab={activeTab as any}
+          onTabChange={(t) => setActiveTab(t as TabType)}
+        />
+      </div>
     </div>
   );
 }

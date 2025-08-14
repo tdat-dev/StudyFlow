@@ -223,11 +223,11 @@ export function HomeDashboard({
         </div>
       </div>
 
-      {/* Main Content - Single Column Layout */}
-      <div className="flex-1 overflow-y-auto">
-        {/* Main Content */}
-        <div className="space-y-3 xl:space-y-4">
-          {/* Progress Today - Full width */}
+      {/* Main Content - Fill Remaining Space */}
+      <div className="flex-1 block xl:grid xl:grid-cols-[1fr_320px] xl:gap-3 min-h-0">
+        {/* Main Content Column */}
+        <div className="space-y-3 xl:space-y-4 xl:overflow-y-auto xl:h-full xl:pr-2">
+          {/* Progress Today - Compact */}
           <Card className="bg-white dark:bg-[#161b22] border border-gray-200 dark:border-gray-700">
             <CardHeader className="pb-2 p-4">
               <CardTitle className="text-base xl:text-lg text-gray-900 dark:text-[#f0f6fc] flex items-center">
@@ -259,83 +259,6 @@ export function HomeDashboard({
               </div>
             </CardContent>
           </Card>
-
-          {/* Stats Cards - CSS Grid responsive: 1 col <480px, 2 cols <768px, 4 cols >=768px */}
-          <div className="w-full grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-3 xl:gap-4">
-            {/* Row 1: Ngày liên tiếp + Từ đã học */}
-            {/* Card 1: Ngày liên tiếp */}
-            <Card className="bg-white dark:bg-[#161b22] border border-gray-200 dark:border-gray-700 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-              <CardContent className="p-3 xl:p-4 text-center flex flex-col items-center justify-center h-full">
-                <div className="w-10 h-10 xl:w-12 xl:h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center mb-2">
-                  <Calendar
-                    className="text-blue-600 dark:text-blue-400"
-                    size={18}
-                  />
-                </div>
-                <p className="text-xl xl:text-2xl font-bold text-gray-900 dark:text-[#f0f6fc] mb-1">
-                  {profile.streak || 0}
-                </p>
-                <p className="text-xs xl:text-sm text-gray-600 dark:text-[#f0f6fc] leading-tight font-medium">
-                  Ngày liên tiếp
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Card 2: Từ đã học */}
-            <Card className="bg-white dark:bg-[#161b22] border border-gray-200 dark:border-gray-700 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-              <CardContent className="p-3 xl:p-4 text-center flex flex-col items-center justify-center h-full">
-                <div className="w-10 h-10 xl:w-12 xl:h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center mb-2">
-                  <Trophy
-                    className="text-green-600 dark:text-green-400"
-                    size={18}
-                  />
-                </div>
-                <p className="text-xl xl:text-2xl font-bold text-gray-900 dark:text-[#f0f6fc] mb-1">
-                  {profile.totalWordsLearned || 0}
-                </p>
-                <p className="text-xs xl:text-sm text-gray-600 dark:text-[#f0f6fc] leading-tight font-medium">
-                  Từ đã học
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Row 2: Level + Giờ học tập */}
-            {/* Card 3: Level */}
-            <Card className="bg-white dark:bg-[#161b22] border border-gray-200 dark:border-gray-700 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-              <CardContent className="p-3 xl:p-4 text-center flex flex-col items-center justify-center h-full">
-                <div className="w-10 h-10 xl:w-12 xl:h-12 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center mb-2">
-                  <BookOpen
-                    className="text-purple-600 dark:text-purple-400"
-                    size={18}
-                  />
-                </div>
-                <p className="text-xl xl:text-2xl font-bold text-gray-900 dark:text-[#f0f6fc] mb-1">
-                  Level {profile.level || 1}
-                </p>
-                <p className="text-xs xl:text-sm text-gray-600 dark:text-[#f0f6fc] leading-tight font-medium">
-                  Cấp độ
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Card 4: Giờ học tập */}
-            <Card className="bg-white dark:bg-[#161b22] border border-gray-200 dark:border-gray-700 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-              <CardContent className="p-3 xl:p-4 text-center flex flex-col items-center justify-center h-full">
-                <div className="w-10 h-10 xl:w-12 xl:h-12 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg flex items-center justify-center mb-2">
-                  <Clock
-                    className="text-yellow-600 dark:text-yellow-400"
-                    size={18}
-                  />
-                </div>
-                <p className="text-xl xl:text-2xl font-bold text-gray-900 dark:text-[#f0f6fc] mb-1">
-                  {profile.totalStudyTime || 0}
-                </p>
-                <p className="text-xs xl:text-sm text-gray-600 dark:text-[#f0f6fc] leading-tight font-medium">
-                  Giờ học tập
-                </p>
-              </CardContent>
-            </Card>
-          </div>
 
           {/* Continue Learning CTA - Compact */}
           <Card className="bg-white dark:bg-[#161b22] border border-gray-200 dark:border-gray-700">
@@ -422,6 +345,88 @@ export function HomeDashboard({
               </Button>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Sidebar - Fill Height */}
+        <div className="mt-4 xl:mt-0 xl:h-full">
+          {/* Stats Grid - Compact 2x2 với chiều cao cố định */}
+          <div className="grid grid-cols-2 gap-2 xl:gap-3 h-full auto-rows-fr">
+            <Card className="bg-white dark:bg-[#161b22] border border-gray-200 dark:border-gray-700 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+              <CardContent className="p-4 text-center h-full flex flex-col items-center justify-center space-y-2">
+                <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
+                  <Calendar
+                    className="text-blue-600 dark:text-blue-400"
+                    size={18}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xl font-bold text-gray-900 dark:text-[#f0f6fc]">
+                    {profile.streak || 0}
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-[#f0f6fc] leading-tight">
+                    Ngày liên tiếp
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white dark:bg-[#161b22] border border-gray-200 dark:border-gray-700 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+              <CardContent className="p-4 text-center h-full flex flex-col items-center justify-center space-y-2">
+                <div className="w-10 h-10 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
+                  <Trophy
+                    className="text-green-600 dark:text-green-400"
+                    size={18}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xl font-bold text-gray-900 dark:text-[#f0f6fc]">
+                    {profile.totalWordsLearned || 0}
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-[#f0f6fc] leading-tight">
+                    Từ đã học
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white dark:bg-[#161b22] border border-gray-200 dark:border-gray-700 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+              <CardContent className="p-4 text-center h-full flex flex-col items-center justify-center space-y-2">
+                <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center">
+                  <BookOpen
+                    className="text-purple-600 dark:text-purple-400"
+                    size={18}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xl font-bold text-gray-900 dark:text-[#f0f6fc]">
+                    Level {profile.level || 1}
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-[#f0f6fc] leading-tight">
+                    Cấp độ
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white dark:bg-[#161b22] border border-gray-200 dark:border-gray-700 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+              <CardContent className="p-4 text-center h-full flex flex-col items-center justify-center space-y-2">
+                <div className="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg flex items-center justify-center">
+                  <Clock
+                    className="text-yellow-600 dark:text-yellow-400"
+                    size={18}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xl font-bold text-gray-900 dark:text-[#f0f6fc]">
+                    {profile.totalStudyTime || 0}
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-[#f0f6fc] leading-tight">
+                    Giờ học tập
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>

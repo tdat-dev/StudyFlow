@@ -2,10 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import component styles */
+@import "./components.css";
+
 /* Ensure styles are properly loaded */
 @layer base {
   html {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, sans-serif;
   }
 }
 
@@ -14,9 +18,9 @@
 :root {
   --font-size: 14px;
   --background: #ffffff;
-  --foreground: oklch(0.145 0 0);
+  --foreground: #000000;
   --card: #ffffff;
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: #000000;
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
   --primary: #030213;
@@ -53,40 +57,40 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
+  --background: #0d1117;
+  --foreground: #f0f6fc;
+  --card: #161b22;
+  --card-foreground: #f0f6fc;
+  --popover: #161b22;
+  --popover-foreground: #f0f6fc;
+  --primary: #f0f6fc;
+  --primary-foreground: #0d1117;
+  --secondary: #21262d;
+  --secondary-foreground: #f0f6fc;
+  --muted: #30363d;
+  --muted-foreground: #f0f6fc;
+  --accent: #21262d;
+  --accent-foreground: #f0f6fc;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: transparent;
+  --ring: #3b82f6;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: #030213;
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
 }
 
 @theme inline {
@@ -197,4 +201,298 @@
 
 html {
   font-size: var(--font-size);
+}
+
+/* CSS Utility Classes for Components */
+@layer components {
+  .page-container {
+    @apply max-w-4xl mx-auto p-4 pb-16 md:pb-0;
+  }
+
+  /* Text Colors */
+  .dark-text-primary {
+    @apply text-gray-900 dark:text-[#f0f6fc];
+  }
+
+  .dark-text-secondary {
+    @apply text-gray-600 dark:text-[#f0f6fc];
+  }
+
+  /* Cards */
+  .stats-card {
+    @apply bg-white dark:bg-[#161b22] border-gray-200 dark:border-gray-700;
+  }
+
+  .progress-card {
+    @apply mb-6 bg-white dark:bg-[#161b22] border-gray-200 dark:border-gray-700;
+  }
+
+  .cta-card {
+    @apply mb-6 bg-yellow-50 dark:bg-[#161b22] border-yellow-200 dark:border-gray-700;
+  }
+
+  /* Buttons */
+  .action-button {
+    @apply bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl;
+  }
+
+  .action-button-outline {
+    @apply bg-white dark:bg-[#0d1117] text-gray-900 dark:text-[#f0f6fc] border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-[#21262d] rounded-xl;
+  }
+
+  /* Icons */
+  .icon-blue {
+    @apply text-blue-600 dark:text-blue-400;
+  }
+
+  .icon-green {
+    @apply text-green-600 dark:text-green-400;
+  }
+
+  .icon-purple {
+    @apply text-purple-600 dark:text-purple-400;
+  }
+
+  .icon-yellow {
+    @apply text-yellow-600 dark:text-yellow-400;
+  }
+
+  /* Stats Icon Containers */
+  .stats-icon-blue {
+    @apply bg-blue-100 dark:bg-blue-900 w-12 h-12 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400;
+  }
+
+  .stats-icon-green {
+    @apply bg-green-100 dark:bg-green-900 w-12 h-12 rounded-xl flex items-center justify-center text-green-600 dark:text-green-400;
+  }
+
+  .stats-icon-purple {
+    @apply bg-purple-100 dark:bg-purple-900 w-12 h-12 rounded-xl flex items-center justify-center text-purple-600 dark:text-purple-400;
+  }
+
+  .stats-icon-yellow {
+    @apply bg-yellow-100 dark:bg-yellow-900 w-12 h-12 rounded-xl flex items-center justify-center text-yellow-600 dark:text-yellow-400;
+  }
+
+  /* Badges */
+  .streak-badge {
+    @apply bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-[#f0f6fc] border-yellow-200 dark:border-yellow-700;
+  }
+
+  /* Layout Classes */
+  .header-section {
+    @apply mb-6;
+  }
+
+  .header-content {
+    @apply flex items-center justify-between mb-2;
+  }
+
+  .header-title {
+    @apply text-2xl font-bold;
+  }
+
+  .header-subtitle {
+    @apply text-base;
+  }
+
+  .badge-container {
+    @apply flex items-center space-x-2;
+  }
+
+  .progress-header {
+    @apply pb-3;
+  }
+
+  .progress-title {
+    @apply flex items-center;
+  }
+
+  .progress-description {
+    @apply text-sm;
+  }
+
+  .progress-content {
+    @apply mb-3;
+  }
+
+  .progress-stats {
+    @apply flex justify-between text-sm;
+  }
+
+  .cta-content {
+    @apply p-6;
+  }
+
+  .cta-layout {
+    @apply flex items-center justify-between;
+  }
+
+  .cta-text {
+    @apply mb-1;
+  }
+
+  .cta-subtitle {
+    @apply text-sm;
+  }
+
+  .stats-grid {
+    @apply grid grid-cols-2 gap-4 mb-6;
+  }
+
+  .stats-content {
+    @apply p-4 text-center;
+  }
+
+  .stats-value {
+    @apply text-2xl mb-1;
+  }
+
+  .stats-label {
+    @apply text-sm;
+  }
+
+  .quick-actions-content {
+    @apply space-y-3;
+  }
+
+  .quick-action-item {
+    @apply w-full justify-start;
+  }
+}
+
+/* Dark Theme Utilities - CSS thuần */
+.page-container {
+  height: 100%;
+  overflow-y: auto;
+  padding: 1.5rem;
+  padding-bottom: 5rem;
+  background-color: white;
+}
+
+.dark .page-container {
+  background-color: #0d1117;
+}
+
+.stats-card {
+  padding: 1rem;
+  text-align: center;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background-color: white;
+}
+
+.dark .stats-card {
+  background-color: #161b22;
+  border-color: #30363d;
+}
+
+.stats-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.5rem;
+}
+
+.stats-icon-blue {
+  background-color: #dbeafe;
+}
+
+.dark .stats-icon-blue {
+  background-color: rgba(30, 58, 138, 0.3);
+}
+
+.stats-icon-green {
+  background-color: #dcfce7;
+}
+
+.dark .stats-icon-green {
+  background-color: rgba(20, 83, 45, 0.3);
+}
+
+.stats-icon-purple {
+  background-color: #e9d5ff;
+}
+
+.dark .stats-icon-purple {
+  background-color: rgba(88, 28, 135, 0.3);
+}
+
+.stats-icon-yellow {
+  background-color: #fef3c7;
+}
+
+.dark .stats-icon-yellow {
+  background-color: rgba(133, 77, 14, 0.3);
+}
+
+.action-button {
+  width: 100%;
+  justify-content: flex-start;
+  border-radius: 0.75rem;
+  border: 1px solid #e5e7eb;
+  background-color: white;
+  color: #111827;
+  padding: 0.75rem;
+  transition: all 0.2s;
+}
+
+.action-button:hover {
+  background-color: #f9fafb;
+}
+
+.dark .action-button {
+  background-color: #161b22;
+  border-color: #30363d;
+  color: #f0f6fc;
+}
+
+.dark .action-button:hover {
+  background-color: #21262d;
+}
+
+.progress-card {
+  margin-bottom: 1.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #bfdbfe;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background-color: #eff6ff;
+}
+
+.dark .progress-card {
+  background-color: #161b22;
+  border-color: #30363d;
+}
+
+.cta-card {
+  margin-bottom: 1.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #fed7aa;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background-color: #fefce8;
+}
+
+.dark .cta-card {
+  background-color: #161b22;
+  border-color: #30363d;
+}
+
+.dark-text-primary {
+  color: #111827;
+}
+
+.dark .dark-text-primary {
+  color: #f0f6fc;
+}
+
+.dark-text-secondary {
+  color: #6b7280;
+}
+
+.dark .dark-text-secondary {
+  color: #8b949e;
 }

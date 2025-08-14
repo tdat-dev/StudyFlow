@@ -1,33 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 // Button component
-const Button = ({ 
-  children, 
-  variant = 'default',
-  size = 'default',
-  className = '',
+const Button = ({
+  children,
+  variant = "default",
+  size = "default",
+  className = "",
   onClick,
   ...props
 }: {
   children: React.ReactNode;
-  variant?: 'default' | 'outline' | 'ghost';
-  size?: 'default' | 'sm';
+  variant?: "default" | "outline" | "ghost";
+  size?: "default" | "sm";
   className?: string;
   onClick?: () => void;
   [key: string]: any;
 }) => {
-  const baseClasses = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50';
-  
+  const baseClasses =
+    "inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50";
+
   const variantClasses = {
-    default: 'bg-blue-600 text-white hover:bg-blue-700',
-    outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
-    ghost: 'hover:bg-accent hover:text-accent-foreground'
+    default: "bg-blue-600 text-white hover:bg-blue-700",
+    outline:
+      "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+    ghost: "hover:bg-accent hover:text-accent-foreground",
   };
-  
+
   const sizeClasses = {
-    default: 'h-9 px-4 py-2',
-    sm: 'h-8 rounded-md px-3 text-xs'
+    default: "h-9 px-4 py-2",
+    sm: "h-8 rounded-md px-3 text-xs",
   };
-  
+
   return (
     <button
       className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
@@ -41,8 +43,8 @@ const Button = ({
 
 // Input component
 const Input = ({
-  className = '',
-  type = 'text',
+  className = "",
+  type = "text",
   ...props
 }: React.InputHTMLAttributes<HTMLInputElement>) => {
   return (
@@ -56,7 +58,7 @@ const Input = ({
 
 // Label component
 const Label = ({
-  className = '',
+  className = "",
   ...props
 }: React.LabelHTMLAttributes<HTMLLabelElement>) => {
   return (
@@ -66,8 +68,11 @@ const Label = ({
     />
   );
 };
-import { Mail, Lock, Loader2 } from 'lucide-react';
-import { loginWithEmail, loginWithGoogle } from '../../../services/firebase/auth';
+import { Mail, Lock, Loader2 } from "lucide-react";
+import {
+  loginWithEmail,
+  loginWithGoogle,
+} from "../../../services/firebase/auth";
 
 interface LoginFormProps {
   onSuccess: () => void;
@@ -75,15 +80,19 @@ interface LoginFormProps {
   onForgotPassword: () => void;
 }
 
-export function LoginForm({ onSuccess, onRegister, onForgotPassword }: LoginFormProps) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+export function LoginForm({
+  onSuccess,
+  onRegister,
+  onForgotPassword,
+}: LoginFormProps) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
@@ -91,9 +100,9 @@ export function LoginForm({ onSuccess, onRegister, onForgotPassword }: LoginForm
       onSuccess();
     } catch (error: any) {
       setError(
-        error.code === 'auth/invalid-credential'
-          ? 'Email hoặc mật khẩu không chính xác'
-          : 'Đã xảy ra lỗi khi đăng nhập. Vui lòng thử lại sau.'
+        error.code === "auth/invalid-credential"
+          ? "Email hoặc mật khẩu không chính xác"
+          : "Đã xảy ra lỗi khi đăng nhập. Vui lòng thử lại sau."
       );
     } finally {
       setLoading(false);
@@ -101,21 +110,21 @@ export function LoginForm({ onSuccess, onRegister, onForgotPassword }: LoginForm
   };
 
   const handleGoogleLogin = async () => {
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       await loginWithGoogle();
       onSuccess();
     } catch (error: any) {
-      setError('Đã xảy ra lỗi khi đăng nhập với Google. Vui lòng thử lại sau.');
+      setError("Đã xảy ra lỗi khi đăng nhập với Google. Vui lòng thử lại sau.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="w-full max-w-md mx-auto p-6 bg-white rounded-xl shadow-md">
+    <div className="w-full max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-xl shadow-md">
       <h2 className="text-2xl font-semibold text-blue-900 mb-6 text-center">
         Đăng nhập
       </h2>
@@ -180,10 +189,12 @@ export function LoginForm({ onSuccess, onRegister, onForgotPassword }: LoginForm
 
       <div className="mt-4 relative">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-200"></div>
+          <div className="w-full border-t border-gray-200 dark:border-gray-600"></div>
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="px-2 bg-white text-gray-500">hoặc</span>
+          <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+            hoặc
+          </span>
         </div>
       </div>
 
@@ -223,7 +234,7 @@ export function LoginForm({ onSuccess, onRegister, onForgotPassword }: LoginForm
 
       <div className="mt-6 text-center text-sm">
         <p className="text-gray-600">
-          Chưa có tài khoản?{' '}
+          Chưa có tài khoản?{" "}
           <button
             type="button"
             onClick={onRegister}

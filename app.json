@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Ứng dụng Học Tiếng Anh",
-    "slug": "ung-dung-hoc-tieng-anh",
+    "name": "FlashPomo",
+    "slug": "Flash-Pomo",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
@@ -9,9 +9,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#4F46E5"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.tdat.ungdunghoctienganh",
@@ -21,18 +19,12 @@
     },
     "android": {
       "package": "com.tdat.ungdunghoctienganh",
-      "permissions": [
-        "android.permission.RECORD_AUDIO"
-      ]
+      "permissions": ["android.permission.RECORD_AUDIO"]
     },
     "web": {
       "bundler": "metro"
     },
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
+    "platforms": ["ios", "android", "web"],
     "extra": {
       "eas": {
         "projectId": "f14401f5-260e-4e86-9826-63e2c1aaa039"

@@ -1,5 +1,7 @@
 # AI Coding Agent Instructions for Vietnamese English Learning App
 
+Luôn luôn nhắn tin tiếng việt
+
 ## Architecture Overview
 
 This is a Next.js 14 learning app with Firebase backend and Gemini AI integration. The app uses a feature-based architecture with responsive design (desktop sidebar + mobile bottom nav).

@@ -1,0 +1,93 @@
+/* Dark Theme Utilities */
+
+/* GitHub Dark Theme Colors */
+.dark-bg-primary {
+  @apply bg-white dark:bg-[#0d1117];
+}
+
+.dark-bg-card {
+  @apply bg-white dark:bg-[#161b22];
+}
+
+.dark-bg-secondary {
+  @apply bg-gray-50 dark:bg-[#21262d];
+}
+
+.dark-text-primary {
+  @apply text-gray-900 dark:text-[#f0f6fc];
+}
+
+.dark-text-secondary {
+  @apply text-gray-600 dark:text-[#8b949e];
+}
+
+.dark-border-primary {
+  @apply border-gray-200 dark:border-[#30363d];
+}
+
+.dark-border-accent {
+  @apply border-gray-300 dark:border-[#21262d];
+}
+
+/* Component-specific classes */
+.stats-card {
+  @apply dark-bg-card dark-border-primary p-4 text-center rounded-lg border shadow-sm;
+}
+
+.stats-icon-blue {
+  @apply bg-blue-100 dark:bg-blue-900/30 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2;
+}
+
+.stats-icon-green {
+  @apply bg-green-100 dark:bg-green-900/30 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2;
+}
+
+.stats-icon-purple {
+  @apply bg-purple-100 dark:bg-purple-900/30 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2;
+}
+
+.stats-icon-yellow {
+  @apply bg-yellow-100 dark:bg-yellow-900/30 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2;
+}
+
+.stats-number {
+  @apply text-2xl mb-1 dark-text-primary;
+}
+
+.stats-label {
+  @apply text-sm dark-text-secondary;
+}
+
+.action-button {
+  @apply w-full justify-start rounded-xl dark-bg-card dark-text-primary dark-border-primary hover:bg-gray-50 dark:hover:bg-[#21262d] border;
+}
+
+.progress-card {
+  @apply mb-6 dark-bg-card dark-border-primary border rounded-lg shadow-sm;
+}
+
+.cta-card {
+  @apply mb-6 dark-bg-card dark-border-primary border rounded-lg shadow-sm;
+}
+
+/* Icon colors */
+.icon-blue {
+  @apply text-blue-600 dark:text-blue-400;
+}
+
+.icon-green {
+  @apply text-green-600 dark:text-green-400;
+}
+
+.icon-purple {
+  @apply text-purple-600 dark:text-purple-400;
+}
+
+.icon-yellow {
+  @apply text-yellow-600 dark:text-yellow-400;
+}
+
+/* Badge styles */
+.streak-badge {
+  @apply bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 border-yellow-200 dark:border-yellow-700 px-3 py-1 rounded-full text-xs font-medium border;
+}

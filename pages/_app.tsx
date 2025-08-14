@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import { ErrorBoundary } from "../src/components/ui/error-boundary";
 import { AuthProvider } from "../src/contexts/AuthContext";
 import { AppStateProvider } from "../src/contexts/AppStateContext";
+import { LevelProvider } from "../src/contexts/LevelContext";
 
 export default function App({ Component, pageProps }: AppProps) {
   const handleError = (error: Error, errorInfo: React.ErrorInfo) => {
@@ -19,8 +20,10 @@ export default function App({ Component, pageProps }: AppProps) {
       <ThemeProvider attribute="class" defaultTheme="light">
         <AppStateProvider>
           <AuthProvider>
-            <Component {...pageProps} />
-            <Toaster position="top-center" />
+            <LevelProvider>
+              <Component {...pageProps} />
+              <Toaster position="top-center" />
+            </LevelProvider>
           </AuthProvider>
         </AppStateProvider>
       </ThemeProvider>

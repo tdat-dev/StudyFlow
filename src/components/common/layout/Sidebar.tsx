@@ -65,7 +65,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   ];
 
   return (
-    <div className="w-64 bg-white border-r h-full flex flex-col">
+    <div className="w-64 bg-white dark:bg-gray-800 border-r h-full flex flex-col">
       <div className="p-4 border-b" />
 
       <div className="flex-1 overflow-y-auto p-2">
@@ -81,7 +81,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
                 className={`w-full justify-start ${
                   isActive
                     ? "bg-blue-600 text-white"
-                    : "text-gray-700 hover:bg-gray-100"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                 }`}
                 onClick={() => onTabChange(tab.id)}
               >
@@ -96,7 +96,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
       <div className="p-4 border-t">
         <Button
           variant="ghost"
-          className="w-full justify-start text-gray-700"
+          className="w-full justify-start text-gray-700 dark:text-gray-300"
           onClick={() => onTabChange("settings")}
         >
           <Settings className="h-4 w-4 mr-2" />
