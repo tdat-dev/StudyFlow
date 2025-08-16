@@ -41,7 +41,7 @@ class ErrorBoundary extends Component<Props, State> {
             <h2 className="text-2xl font-bold text-red-600 mb-4">
               Oops! Something went wrong
             </h2>
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
               We encountered an unexpected error. Please try refreshing the
               page.
             </p>
@@ -53,10 +53,10 @@ class ErrorBoundary extends Component<Props, State> {
             </button>
             {process.env.NODE_ENV === 'development' && this.state.error && (
               <details className="mt-4 text-left">
-                <summary className="cursor-pointer text-sm text-gray-500">
+                <summary className="cursor-pointer text-sm text-gray-500 dark:text-gray-400">
                   Error Details (Development)
                 </summary>
-                <pre className="mt-2 p-2 bg-gray-100 rounded text-xs overflow-auto">
+                <pre className="mt-2 p-2 bg-gray-100 dark:bg-gray-800 rounded text-xs overflow-auto">
                   {this.state.error.toString()}
                 </pre>
               </details>

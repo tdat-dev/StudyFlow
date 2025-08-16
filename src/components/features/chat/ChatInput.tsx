@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import Button from "../../../components/ui/button";
-import { Input } from "../../../components/ui/input";
-import { Loader2, Send } from "lucide-react";
+import React, { useState } from 'react';
+import Button from '../../../components/ui/button';
+import { Input } from '../../../components/ui/input';
+import { Loader2, Send } from 'lucide-react';
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -14,12 +14,12 @@ export function ChatInput({
   loading,
   disabled = false,
 }: ChatInputProps) {
-  const [inputMessage, setInputMessage] = useState("");
+  const [inputMessage, setInputMessage] = useState('');
 
   const handleSend = () => {
     if (inputMessage.trim() && !loading) {
       onSendMessage(inputMessage);
-      setInputMessage("");
+      setInputMessage('');
     }
   };
 
@@ -28,12 +28,12 @@ export function ChatInput({
       <div className="flex space-x-2">
         <Input
           value={inputMessage}
-          onChange={(e) => setInputMessage(e.target.value)}
-          placeholder="Hỏi AI Tutor Agent..."
+          onChange={e => setInputMessage(e.target.value)}
+          placeholder="Hỏi Trợ lý AI Agent..."
           className="flex-1 rounded-xl text-sm"
           disabled={loading || disabled}
-          onKeyPress={(e) => {
-            if (e.key === "Enter") {
+          onKeyPress={e => {
+            if (e.key === 'Enter') {
               handleSend();
             }
           }}

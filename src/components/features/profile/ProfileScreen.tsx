@@ -218,12 +218,14 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
           </Button>
 
           <h1 className="text-blue-900 mb-2">Thông báo</h1>
-          <p className="text-gray-600">Tùy chỉnh cách bạn nhận thông báo</p>
+          <p className="text-gray-600 dark:text-gray-300">Tùy chỉnh cách bạn nhận thông báo</p>
         </div>
 
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-gray-900">Nhắc nhở học tập</CardTitle>
+            <CardTitle className="text-gray-900 dark:text-gray-100">
+              Nhắc nhở học tập
+            </CardTitle>
             <CardDescription>
               Nhận thông báo để duy trì thói quen học tập
             </CardDescription>
@@ -232,7 +234,9 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <Bell className="h-5 w-5 text-blue-600" />
-                <span className="text-gray-900">Nhắc nhở hàng ngày</span>
+                <span className="text-gray-900 dark:text-gray-100">
+                  Nhắc nhở hàng ngày
+                </span>
               </div>
               <Switch
                 checked={notifications.studyReminders}
@@ -249,7 +253,9 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
 
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-gray-900">Thành tích</CardTitle>
+            <CardTitle className="text-gray-900 dark:text-gray-100">
+              Thành tích
+            </CardTitle>
             <CardDescription>
               Nhận thông báo khi đạt được thành tích mới
             </CardDescription>
@@ -258,7 +264,9 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <Trophy className="h-5 w-5 text-yellow-600" />
-                <span className="text-gray-900">Thông báo thành tích</span>
+                <span className="text-gray-900 dark:text-gray-100">
+                  Thông báo thành tích
+                </span>
               </div>
               <Switch
                 checked={notifications.achievementAlerts}
@@ -275,7 +283,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
 
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-gray-900">Âm thanh</CardTitle>
+            <CardTitle className="text-gray-900 dark:text-gray-100">Âm thanh</CardTitle>
             <CardDescription>
               Bật/tắt hiệu ứng âm thanh trong ứng dụng
             </CardDescription>
@@ -286,9 +294,9 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
                 {notifications.soundEffects ? (
                   <Volume2 className="h-5 w-5 text-green-600" />
                 ) : (
-                  <VolumeX className="h-5 w-5 text-gray-400" />
+                  <VolumeX className="h-5 w-5 text-gray-400 dark:text-gray-300" />
                 )}
-                <span className="text-gray-900">Hiệu ứng âm thanh</span>
+                <span className="text-gray-900 dark:text-gray-100">Hiệu ứng âm thanh</span>
               </div>
               <Switch
                 checked={notifications.soundEffects}
@@ -321,7 +329,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
               Quay lại
             </Button>
             <h1 className="text-blue-900 mb-2">Giao diện</h1>
-            <p className="text-gray-600">Đang tải...</p>
+            <p className="text-gray-600 dark:text-gray-300">Đang tải...</p>
           </div>
         </div>
       );
@@ -345,12 +353,12 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
           </p>
         </div>
 
-        <Card className="mb-6 bg-white dark:bg-gray-100">
+        <Card className="mb-6 bg-white dark:bg-gray-800">
           <CardHeader>
             <CardTitle className="text-gray-900 dark:text-gray-900">
               Chế độ hiển thị
             </CardTitle>
-            <CardDescription className="dark:text-gray-600">
+            <CardDescription className="dark:text-gray-600 dark:text-gray-300">
               Chọn chế độ hiển thị phù hợp với bạn
             </CardDescription>
           </CardHeader>
@@ -363,7 +371,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
               <Sun className="h-5 w-5 mr-3 text-yellow-600" />
               <div className="text-left">
                 <p className="font-medium">Chế độ sáng</p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-300">
                   Giao diện sáng, dễ nhìn ban ngày
                 </p>
               </div>
@@ -388,7 +396,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
               className="w-full justify-start p-4 h-auto dark:bg-gray-700 dark:hover:bg-gray-600"
               onClick={() => setTheme('system')}
             >
-              <Smartphone className="h-5 w-5 mr-3 text-gray-600 dark:text-gray-400" />
+              <Smartphone className="h-5 w-5 mr-3 text-gray-600 dark:text-gray-400 dark:text-gray-300" />
               <div className="text-left">
                 <p className="font-medium dark:text-gray-100">Theo hệ thống</p>
                 <p className="text-sm text-gray-500 dark:text-gray-300">
@@ -438,7 +446,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
           </Button>
 
           <h1 className="text-blue-900 mb-2">Hướng dẫn Cấp độ</h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-300">
             Tìm hiểu cách lên cấp và kiếm kinh nghiệm
           </p>
         </div>
@@ -446,7 +454,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
         {/* Cách kiếm XP */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-gray-900">
+            <CardTitle className="text-gray-900 dark:text-gray-100">
               Cách kiếm kinh nghiệm (XP)
             </CardTitle>
             <CardDescription>
@@ -495,7 +503,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
         {/* Bảng cấp độ */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-gray-900">Bảng cấp độ</CardTitle>
+            <CardTitle className="text-gray-900 dark:text-gray-100">Bảng cấp độ</CardTitle>
             <CardDescription>
               Kinh nghiệm cần thiết cho mỗi cấp độ
             </CardDescription>
@@ -541,7 +549,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
                     <div className="text-right">
                       <span
                         className={`text-sm ${
-                          isCurrentLevel ? 'text-blue-700' : 'text-gray-600'
+                          isCurrentLevel ? 'text-blue-700' : 'text-gray-600 dark:text-gray-300'
                         }`}
                       >
                         {threshold} XP
@@ -577,13 +585,13 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
           </Button>
 
           <h1 className="text-blue-900 mb-2">Quyền riêng tư</h1>
-          <p className="text-gray-600">Cài đặt bảo mật và quyền riêng tư</p>
+          <p className="text-gray-600 dark:text-gray-300">Cài đặt bảo mật và quyền riêng tư</p>
         </div>
 
         {/* Cài đặt quyền riêng tư */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-gray-900">
+            <CardTitle className="text-gray-900 dark:text-gray-100">
               Cài đặt quyền riêng tư
             </CardTitle>
             <CardDescription>
@@ -594,7 +602,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <div className="text-sm font-medium">Chia sẻ tiến độ học</div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-300">
                   Cho phép hiển thị thành tích của bạn trong bảng xếp hạng
                 </div>
               </div>
@@ -611,7 +619,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
                 <div className="text-sm font-medium">
                   Thu thập dữ liệu phân tích
                 </div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-300">
                   Giúp cải thiện ứng dụng thông qua dữ liệu sử dụng ẩn danh
                 </div>
               </div>
@@ -628,7 +636,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <div className="text-sm font-medium">Email thông báo</div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-300">
                   Nhận email về tiến độ học tập và tính năng mới
                 </div>
               </div>
@@ -645,7 +653,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
         {/* Bảo mật tài khoản */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-gray-900">Bảo mật tài khoản</CardTitle>
+            <CardTitle className="text-gray-900 dark:text-gray-100">Bảo mật tài khoản</CardTitle>
             <CardDescription>
               Quản lý bảo mật và xác thực tài khoản
             </CardDescription>
@@ -659,7 +667,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
               <Lock className="h-5 w-5 mr-3 text-blue-600" />
               <div className="text-left">
                 <p className="font-medium">Đổi mật khẩu</p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-300">
                   Cập nhật mật khẩu tài khoản
                 </p>
               </div>
@@ -673,7 +681,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
               <Shield className="h-5 w-5 mr-3 text-green-600" />
               <div className="text-left">
                 <p className="font-medium">Xác thực hai yếu tố</p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-300">
                   Tăng cường bảo mật tài khoản
                 </p>
               </div>
@@ -684,7 +692,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
         {/* Dữ liệu và chính sách */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-gray-900">
+            <CardTitle className="text-gray-900 dark:text-gray-100">
               Dữ liệu và chính sách
             </CardTitle>
           </CardHeader>
@@ -699,7 +707,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
               <FileQuestion className="h-5 w-5 mr-3 text-blue-600" />
               <div className="text-left">
                 <p className="font-medium">Chính sách quyền riêng tư</p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-300">
                   Tìm hiểu cách chúng tôi bảo vệ dữ liệu
                 </p>
               </div>
@@ -746,17 +754,17 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
           </Button>
 
           <h1 className="text-blue-900 mb-2">Trợ giúp</h1>
-          <p className="text-gray-600">FAQ và hướng dẫn sử dụng</p>
+          <p className="text-gray-600 dark:text-gray-300">FAQ và hướng dẫn sử dụng</p>
         </div>
 
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-gray-900">Câu hỏi thường gặp</CardTitle>
+            <CardTitle className="text-gray-900 dark:text-gray-100">Câu hỏi thường gặp</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="border rounded-lg p-4">
               <p className="font-medium mb-2">Làm thế nào để tạo flashcard?</p>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
                 Vào tab Flashcards, nhấn nút &quot;Tạo bộ mới&quot; và điền
                 thông tin cần thiết. Bạn có thể tạo thủ công hoặc sử dụng AI để
                 tạo tự động.
@@ -767,7 +775,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
               <p className="font-medium mb-2">
                 Làm thế nào để sử dụng Pomodoro?
               </p>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
                 Vào tab Pomodoro, thiết lập thời gian tập trung và nghỉ ngơi,
                 sau đó nhấn nút Play để bắt đầu.
               </p>
@@ -777,7 +785,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
               <p className="font-medium mb-2">
                 Làm thế nào để nâng cấp lên Premium?
               </p>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
                 Vào trang Hồ sơ, nhấn vào nút &quot;Nâng cấp Premium&quot; và
                 làm theo hướng dẫn.
               </p>
@@ -817,7 +825,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
   return (
     <div className="h-full overflow-y-auto p-6 pb-20 bg-white dark:bg-black">
       {/* Profile Header */}
-      <Card className="mb-6 bg-white dark:bg-gray-100 border-blue-200 dark:border-gray-600">
+      <Card className="mb-6 bg-white dark:bg-gray-800 border-blue-200 dark:border-gray-600">
         <CardContent className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 rounded-lg">
           <div className="flex items-center">
             <div className="relative w-16 h-16 rounded-full mr-4 border-2 border-blue-200 dark:border-blue-600">
@@ -890,7 +898,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
       </Card>
 
       {/* Statistics */}
-      <Card className="mb-6 bg-white dark:bg-gray-100">
+      <Card className="mb-6 bg-white dark:bg-gray-800">
         <CardHeader>
           <CardTitle className="flex items-center text-gray-900 dark:text-gray-900">
             <Trophy className="h-5 w-5 mr-2 text-yellow-600 dark:text-yellow-400" />
@@ -911,7 +919,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-900">
                     {achievement.label}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-600">
+                  <p className="text-xs text-gray-500 dark:text-gray-600 dark:text-gray-300">
                     {achievement.description}
                   </p>
                 </div>
@@ -922,7 +930,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
       </Card>
 
       {/* Learning Stats */}
-      <Card className="mb-6 bg-white dark:bg-gray-100">
+      <Card className="mb-6 bg-white dark:bg-gray-800">
         <CardHeader>
           <CardTitle className="text-gray-900 dark:text-gray-900">
             Thống kê học tập
@@ -967,17 +975,17 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
           </div>
 
           <div className="flex justify-between items-center">
-            <span className="text-gray-600">Pomodoro hoàn thành</span>
+            <span className="text-gray-600 dark:text-gray-300">Pomodoro hoàn thành</span>
             <Badge variant="outline">{userStats.pomodoroSessions} phiên</Badge>
           </div>
 
           <div className="flex justify-between items-center">
-            <span className="text-gray-600">Tin nhắn AI</span>
+            <span className="text-gray-600 dark:text-gray-300">Tin nhắn AI</span>
             <Badge variant="outline">{userStats.chatMessages} tin nhắn</Badge>
           </div>
 
           <div className="flex justify-between items-center">
-            <span className="text-gray-600">Tổng XP</span>
+            <span className="text-gray-600 dark:text-gray-300">Tổng XP</span>
             <Badge variant="outline" className="bg-yellow-100 text-yellow-800">
               {userStats.totalXP} XP
             </Badge>
@@ -986,10 +994,10 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
       </Card>
 
       {/* Settings */}
-      <Card className="mb-6 bg-white dark:bg-gray-100">
+      <Card className="mb-6 bg-white dark:bg-gray-800">
         <CardHeader>
           <CardTitle className="flex items-center text-gray-900 dark:text-gray-900">
-            <Settings className="h-5 w-5 mr-2 text-gray-600 dark:text-gray-600" />
+            <Settings className="h-5 w-5 mr-2 text-gray-600 dark:text-gray-600 dark:text-gray-300" />
             Cài đặt
           </CardTitle>
         </CardHeader>
@@ -1003,12 +1011,12 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
                   className="w-full justify-start p-4 h-auto hover:bg-gray-50 dark:hover:bg-gray-700"
                   onClick={item.onClick}
                 >
-                  <Icon className="h-5 w-5 mr-3 text-gray-500 dark:text-gray-400" />
+                  <Icon className="h-5 w-5 mr-3 text-gray-500 dark:text-gray-400 dark:text-gray-300" />
                   <div className="text-left">
                     <p className="text-gray-900 dark:text-gray-100">
                       {item.label}
                     </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 dark:text-gray-300">
                       {item.description}
                     </p>
                   </div>
@@ -1023,7 +1031,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
       </Card>
 
       {/* Logout */}
-      <Card className="bg-white dark:bg-gray-100">
+      <Card className="bg-white dark:bg-gray-800">
         <CardContent className="p-4">
           <Button
             onClick={onLogout}

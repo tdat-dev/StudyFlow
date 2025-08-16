@@ -178,7 +178,7 @@ export function SwipeableFlashcard({
 
                 {example && (
                   <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-100 w-full">
-                    <p className="text-gray-700 text-sm italic">
+                    <p className="text-gray-700 dark:text-gray-300 text-sm italic">
                       &quot;{example}&quot;
                     </p>
                   </div>
@@ -211,7 +211,7 @@ export function SwipeableFlashcard({
 
                 {exampleTranslation && (
                   <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-100 w-full">
-                    <p className="text-gray-700 text-sm italic">
+                    <p className="text-gray-700 dark:text-gray-300 text-sm italic">
                       &quot;{exampleTranslation}&quot;
                     </p>
                   </div>

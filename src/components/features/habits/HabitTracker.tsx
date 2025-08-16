@@ -110,8 +110,8 @@ export function HabitTracker({ user }: HabitTrackerProps) {
         monthlyProgress: generateMockMonthData(5),
         icon: BookOpen,
         color: 'bg-blue-500',
-        bgColor: 'bg-blue-100',
-        textColor: 'text-blue-600',
+        bgColor: 'bg-blue-100 dark:bg-blue-900/50',
+        textColor: 'text-blue-600 dark:text-blue-400',
         type: 'vocabulary',
       },
       {
@@ -124,8 +124,8 @@ export function HabitTracker({ user }: HabitTrackerProps) {
         monthlyProgress: generateMockMonthData(3),
         icon: Headphones,
         color: 'bg-green-500',
-        bgColor: 'bg-green-100',
-        textColor: 'text-green-600',
+        bgColor: 'bg-green-100 dark:bg-green-900/50',
+        textColor: 'text-green-600 dark:text-green-400',
         type: 'listening',
       },
     ];
@@ -165,14 +165,14 @@ export function HabitTracker({ user }: HabitTrackerProps) {
         // Xác định icon dựa trên loại thói quen
         let icon = BookOpen;
         let color = 'bg-blue-500';
-        let bgColor = 'bg-blue-100';
-        let textColor = 'text-blue-600';
+        let bgColor = 'bg-blue-100 dark:bg-blue-900/50';
+        let textColor = 'text-blue-600 dark:text-blue-400';
 
         if (habit.type === 'listening') {
           icon = Headphones;
           color = 'bg-green-500';
-          bgColor = 'bg-green-100';
-          textColor = 'text-green-600';
+          bgColor = 'bg-green-100 dark:bg-green-900/50';
+          textColor = 'text-green-600 dark:text-green-400';
         }
 
         return {
@@ -396,13 +396,52 @@ export function HabitTracker({ user }: HabitTrackerProps) {
   const completionRate =
     totalHabits > 0 ? (completedToday / totalHabits) * 100 : 0;
 
+  // Hàm xóa thói quen
+  const handleDeleteHabit = async () => {
+    if (!habitToDelete) return;
+
+    try {
+      // Xóa khỏi state
+      setHabits(habits.filter(habit => habit.id !== habitToDelete.id));
+
+      // Xóa khỏi Firestore nếu có auth.currentUser và không phải habit local
+      if (
+        auth.currentUser &&
+        habitToDelete.id &&
+        !habitToDelete.id.startsWith('local-')
+      ) {
+        try {
+          await deleteDoc(doc(db, 'habits', habitToDelete.id));
+          // Chỉ log trong môi trường development
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`Deleted habit ${habitToDelete.id} from Firestore`);
+          }
+        } catch (error) {
+          // Chỉ log trong môi trường development
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Error deleting habit from Firestore:', error);
+          }
+        }
+      }
+
+      // Đóng dialog
+      setDeleteDialogOpen(false);
+      setHabitToDelete(null);
+    } catch (error) {
+      // Chỉ log trong môi trường development
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to delete habit:', error);
+      }
+    }
+  };
+
   if (currentView === 'detail' && selectedHabit) {
     return (
       <div className="h-full overflow-y-auto p-6 pb-24 relative bg-white dark:bg-black">
         {/* Fixed Add New Habit Button */}
         <div className="fixed bottom-6 right-6 left-6 z-10">
           <Button
-            className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl shadow-lg"
+            className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 rounded-xl shadow-lg text-white"
             onClick={() => setCurrentView('list')}
             disabled={loading}
           >
@@ -416,7 +455,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
           <Button
             variant="ghost"
             onClick={() => setCurrentView('list')}
-            className="pl-0 text-blue-600 mb-4"
+            className="pl-0 text-blue-600 dark:text-blue-400 mb-4"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Quay lại
@@ -431,19 +470,25 @@ export function HabitTracker({ user }: HabitTrackerProps) {
               />
             </div>
             <div>
-              <h1 className="text-blue-900 mb-1">{selectedHabit.title}</h1>
-              <p className="text-gray-600">{selectedHabit.description}</p>
+              <h1 className="text-blue-900 dark:text-blue-100 mb-1">
+                {selectedHabit.title}
+              </h1>
+              <p className="text-gray-600 dark:text-gray-300">
+                {selectedHabit.description}
+              </p>
             </div>
           </div>
         </div>
 
         {/* Streak Status */}
-        <Card className="mb-6 bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
+        <Card className="mb-6 bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/20 dark:to-green-900/20 border-blue-200 dark:border-blue-700">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-blue-900 mb-1">Streak hiện tại</h3>
-                <p className="text-blue-700 text-sm">
+                <h3 className="text-blue-900 dark:text-blue-100 mb-1">
+                  Streak hiện tại
+                </h3>
+                <p className="text-blue-700 dark:text-blue-300 text-sm">
                   {selectedHabit.currentStreak} ngày liên tiếp
                 </p>
               </div>
@@ -493,12 +538,12 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                     className={`w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-1 ${
                       completed
                         ? selectedHabit.color + ' text-white'
-                        : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
+                        : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-300'
                     } cursor-pointer transition-all duration-200 hover:opacity-80 active:scale-95`}
                   >
                     {completed && <Check className="h-5 w-5" />}
                   </div>
-                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                  <span className="text-xs font-medium text-gray-500 dark:text-gray-300">
                     {getDayLabel(index)}
                   </span>
                 </div>
@@ -514,7 +559,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
           className={`w-full rounded-xl transition-all duration-300 ${
             selectedHabit.todayCompleted
               ? 'bg-green-600 hover:bg-green-700 text-white scale-100'
-              : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+              : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300'
           }`}
         >
           {loading ? (
@@ -537,7 +582,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
       {/* Fixed Add New Habit Button */}
       <div className="fixed bottom-6 right-6 left-6 z-10">
         <Button
-          className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl shadow-lg"
+          className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 rounded-xl shadow-lg text-white"
           onClick={createDefaultHabits}
           disabled={loading}
         >
@@ -552,18 +597,22 @@ export function HabitTracker({ user }: HabitTrackerProps) {
 
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-blue-900 mb-2">Thói quen học tập</h1>
-        <p className="text-gray-600">Xây dựng thói quen học đều đặn mỗi ngày</p>
+        <h1 className="text-blue-900 dark:text-blue-100 mb-2">
+          Thói quen học tập
+        </h1>
+        <p className="text-gray-600 dark:text-gray-400">
+          Xây dựng thói quen học đều đặn mỗi ngày
+        </p>
       </div>
 
       {/* Today's Progress */}
-      <Card className="mb-6 bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
+      <Card className="mb-6 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border-green-200 dark:border-green-700">
         <CardHeader>
-          <CardTitle className="flex items-center text-green-900">
-            <TrendingUp className="h-5 w-5 mr-2 text-green-600" />
+          <CardTitle className="flex items-center text-green-900 dark:text-green-100">
+            <TrendingUp className="h-5 w-5 mr-2 text-green-600 dark:text-green-400" />
             Tiến trình hôm nay
           </CardTitle>
-          <CardDescription className="text-green-700">
+          <CardDescription className="text-green-700 dark:text-green-300">
             {habits.length > 0
               ? `${completedToday}/${totalHabits} thói quen đã hoàn thành`
               : 'Chưa có thói quen nào để theo dõi'}
@@ -579,7 +628,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
 
               {/* Quick Actions */}
               <div className="space-y-3">
-                <h3 className="text-sm font-medium text-gray-700">
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Đánh dấu nhanh:
                 </h3>
                 <div className="space-y-2">
@@ -608,7 +657,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                           className={`text-sm font-medium ${
                             habit.todayCompleted
                               ? 'text-green-700'
-                              : 'text-gray-700'
+                              : 'text-gray-700 dark:text-gray-300'
                           }`}
                         >
                           {habit.title}
@@ -620,7 +669,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                         className={`rounded-full w-8 h-8 p-0 ${
                           habit.todayCompleted
                             ? 'bg-green-500 text-white hover:bg-green-600'
-                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                         }`}
                         onClick={() => toggleHabitCompletion(habit.id)}
                       >
@@ -633,16 +682,16 @@ export function HabitTracker({ user }: HabitTrackerProps) {
             </>
           ) : (
             <div className="flex flex-col items-center justify-center py-4 text-center">
-              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-3">
-                <Target className="h-6 w-6 text-blue-600" />
+              <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center mb-3">
+                <Target className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
                 Thêm thói quen mới để bắt đầu theo dõi tiến trình học tập của
                 bạn
               </p>
               <Button
                 onClick={createDefaultHabits}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white"
                 size="sm"
               >
                 <Plus className="h-4 w-4 mr-2" />
@@ -660,20 +709,20 @@ export function HabitTracker({ user }: HabitTrackerProps) {
         <Card className="mb-6 border-dashed border-2 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
           <CardContent className="p-8 text-center">
             <div className="flex flex-col items-center justify-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
-                <Calendar className="h-8 w-8 text-blue-600" />
+              <div className="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
+                <Calendar className="h-8 w-8 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <h3 className="text-lg font-medium text-gray-900">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
                   Chưa có thói quen nào
                 </h3>
-                <p className="text-gray-600 mt-1 mb-4">
+                <p className="text-gray-600 dark:text-gray-300 mt-1 mb-4">
                   Thêm thói quen mới để bắt đầu theo dõi tiến trình học tập của
                   bạn
                 </p>
                 <Button
                   onClick={createDefaultHabits}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Thêm thói quen mẫu
@@ -693,10 +742,18 @@ export function HabitTracker({ user }: HabitTrackerProps) {
               <Card
                 id={`habit-card-${habit.id}`}
                 key={habit.id}
-                className="hover:shadow-lg transition-shadow cursor-pointer habit-card"
+                className="hover:shadow-lg transition-all duration-200 cursor-pointer habit-card border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus-within:ring-2 focus-within:ring-blue-500 dark:focus-within:ring-blue-400 focus-within:outline-none"
                 onClick={() => viewHabitDetail(habit)}
+                tabIndex={0}
+                role="button"
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    viewHabitDetail(habit);
+                  }
+                }}
               >
-                <CardHeader className="pb-3">
+                <CardHeader className="pb-3 bg-transparent">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center">
                       <div
@@ -705,10 +762,12 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                         <Icon className={`h-6 w-6 ${habit.textColor}`} />
                       </div>
                       <div>
-                        <CardTitle className="text-gray-900">
+                        <CardTitle className="text-gray-900 dark:text-gray-100">
                           {habit.title}
                         </CardTitle>
-                        <CardDescription>{habit.description}</CardDescription>
+                        <CardDescription className="text-gray-600 dark:text-gray-400">
+                          {habit.description}
+                        </CardDescription>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -720,7 +779,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                        className="h-8 w-8 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/50"
                         onClick={e => {
                           e.stopPropagation();
                           setHabitToDelete(habit);
@@ -733,12 +792,14 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                   </div>
                 </CardHeader>
 
-                <CardContent>
+                <CardContent className="bg-transparent">
                   {/* Weekly Progress */}
                   <div className="mb-4">
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm text-gray-600">7 ngày qua</span>
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        7 ngày qua
+                      </span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
                         {completedDays}/7 ngày
                       </span>
                     </div>
@@ -770,12 +831,12 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                             className={`w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-1 ${
                               completed
                                 ? habit.color + ' text-white'
-                                : 'bg-gray-200 text-gray-400'
+                                : 'bg-gray-200 dark:bg-gray-600 text-gray-400 dark:text-gray-300'
                             } cursor-pointer transition-all duration-200 hover:opacity-80 active:scale-95`}
                           >
                             {completed && <Check className="h-5 w-5" />}
                           </div>
-                          <span className="text-xs font-medium text-gray-500">
+                          <span className="text-xs font-medium text-gray-500 dark:text-gray-300">
                             {getDayLabel(index)}
                           </span>
                         </div>
@@ -793,7 +854,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                     className={`w-full rounded-xl transition-all duration-300 ${
                       habit.todayCompleted
                         ? 'bg-green-600 hover:bg-green-700 text-white scale-100'
-                        : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                        : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300'
                     }`}
                   >
                     {loading ? (
@@ -831,7 +892,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
           <AlertDialogFooter>
             <AlertDialogCancel>Hủy</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-red-500 hover:bg-red-600"
+              className="bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white"
               onClick={() => handleDeleteHabit()}
             >
               Xóa
@@ -841,43 +902,4 @@ export function HabitTracker({ user }: HabitTrackerProps) {
       </AlertDialog>
     </div>
   );
-
-  // Hàm xóa thói quen
-  const handleDeleteHabit = async () => {
-    if (!habitToDelete) return;
-
-    try {
-      // Xóa khỏi state
-      setHabits(habits.filter(habit => habit.id !== habitToDelete.id));
-
-      // Xóa khỏi Firestore nếu có auth.currentUser và không phải habit local
-      if (
-        auth.currentUser &&
-        habitToDelete.id &&
-        !habitToDelete.id.startsWith('local-')
-      ) {
-        try {
-          await deleteDoc(doc(db, 'habits', habitToDelete.id));
-          // Chỉ log trong môi trường development
-          if (process.env.NODE_ENV === 'development') {
-            console.log(`Deleted habit ${habitToDelete.id} from Firestore`);
-          }
-        } catch (error) {
-          // Chỉ log trong môi trường development
-          if (process.env.NODE_ENV === 'development') {
-            console.error('Error deleting habit from Firestore:', error);
-          }
-        }
-      }
-
-      // Đóng dialog
-      setDeleteDialogOpen(false);
-      setHabitToDelete(null);
-    } catch (error) {
-      // Chỉ log trong môi trường development
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to delete habit:', error);
-      }
-    }
-  };
 }

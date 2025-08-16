@@ -535,10 +535,10 @@ export function PomodoroTimer({ user: _user }: PomodoroTimerProps) {
             Quay lại
           </Button>
 
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             Cài đặt Timer
           </h1>
-          <p className="text-gray-600">Thay đổi sẽ được áp dụng ngay lập tức</p>
+          <p className="text-gray-600 dark:text-gray-300">Thay đổi sẽ được áp dụng ngay lập tức</p>
         </div>
 
         <div className="space-y-6">
@@ -560,7 +560,7 @@ export function PomodoroTimer({ user: _user }: PomodoroTimerProps) {
                 onValueChange={value => setPomodoroTime(value[0])}
                 className="mb-2"
               />
-              <div className="flex justify-between text-sm text-gray-500">
+              <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
                 <span>1 phút</span>
                 <span>60 phút</span>
               </div>
@@ -585,7 +585,7 @@ export function PomodoroTimer({ user: _user }: PomodoroTimerProps) {
                 onValueChange={value => setShortBreakTime(value[0])}
                 className="mb-2"
               />
-              <div className="flex justify-between text-sm text-gray-500">
+              <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
                 <span>1 phút</span>
                 <span>30 phút</span>
               </div>
@@ -610,7 +610,7 @@ export function PomodoroTimer({ user: _user }: PomodoroTimerProps) {
                 onValueChange={value => setLongBreakTime(value[0])}
                 className="mb-2"
               />
-              <div className="flex justify-between text-sm text-gray-500">
+              <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
                 <span>5 phút</span>
                 <span>60 phút</span>
               </div>
@@ -637,7 +637,7 @@ export function PomodoroTimer({ user: _user }: PomodoroTimerProps) {
                 onValueChange={value => setLongBreakInterval(value[0])}
                 className="mb-2"
               />
-              <div className="flex justify-between text-sm text-gray-500">
+              <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400">
                 <span>2 pomodoro</span>
                 <span>8 pomodoro</span>
               </div>
@@ -647,7 +647,7 @@ export function PomodoroTimer({ user: _user }: PomodoroTimerProps) {
           {/* Auto Start Options */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-gray-900">Tự động bắt đầu</CardTitle>
+              <CardTitle className="text-gray-900 dark:text-gray-100">Tự động bắt đầu</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center">
@@ -681,21 +681,21 @@ export function PomodoroTimer({ user: _user }: PomodoroTimerProps) {
           </Button>
 
           <h1 className="text-blue-900 mb-2">Lịch sử Pomodoro</h1>
-          <p className="text-gray-600">Các phiên làm việc đã hoàn thành</p>
+          <p className="text-gray-600 dark:text-gray-300">Các phiên làm việc đã hoàn thành</p>
         </div>
 
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-gray-900">Thống kê</CardTitle>
+            <CardTitle className="text-gray-900 dark:text-gray-100">Thống kê</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">Phiên đã hoàn thành</span>
+              <span className="text-gray-600 dark:text-gray-300">Phiên đã hoàn thành</span>
               <Badge variant="outline">{sessionsCompleted}</Badge>
             </div>
 
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">Tổng thời gian tập trung</span>
+              <span className="text-gray-600 dark:text-gray-300">Tổng thời gian tập trung</span>
               <Badge variant="outline">{formatTotalTime(totalFocusTime)}</Badge>
             </div>
           </CardContent>
@@ -722,7 +722,7 @@ export function PomodoroTimer({ user: _user }: PomodoroTimerProps) {
                       )}
                       <div>
                         <p className="font-medium">{session.title}</p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                           {session.duration} phút •{' '}
                           {session.completedAt
                             ? new Date(session.completedAt).toLocaleDateString(
@@ -764,7 +764,7 @@ export function PomodoroTimer({ user: _user }: PomodoroTimerProps) {
               </Card>
             ))
           ) : (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
               <Clock className="h-12 w-12 mx-auto mb-3 text-gray-300" />
               <p>Chưa có phiên làm việc nào</p>
             </div>
@@ -791,7 +791,7 @@ export function PomodoroTimer({ user: _user }: PomodoroTimerProps) {
             className={`rounded-md ${
               timerMode === 'pomodoro'
                 ? 'bg-white dark:bg-gray-700 text-purple-600 dark:text-purple-400 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
+                : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
             }`}
           >
             Pomodoro
@@ -804,7 +804,7 @@ export function PomodoroTimer({ user: _user }: PomodoroTimerProps) {
             className={`rounded-md ${
               timerMode === 'shortBreak'
                 ? 'bg-white dark:bg-gray-700 text-green-600 dark:text-green-400 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
+                : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
             }`}
           >
             Nghỉ Ngắn
@@ -817,7 +817,7 @@ export function PomodoroTimer({ user: _user }: PomodoroTimerProps) {
             className={`rounded-md ${
               timerMode === 'longBreak'
                 ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
+                : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
             }`}
           >
             Nghỉ Dài
@@ -895,12 +895,12 @@ export function PomodoroTimer({ user: _user }: PomodoroTimerProps) {
       {showTasks && (
         <div className="bg-white dark:bg-gray-800 rounded-t-3xl p-6 pb-20">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Tasks</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Tasks</h2>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowTasks(false)}
-              className="text-gray-500"
+              className="text-gray-500 dark:text-gray-400"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -972,7 +972,7 @@ export function PomodoroTimer({ user: _user }: PomodoroTimerProps) {
           </div>
 
           {tasks.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
               <Clock className="h-12 w-12 mx-auto mb-3 text-gray-300" />
               <p>Thêm task để bắt đầu làm việc!</p>
             </div>
@@ -989,7 +989,7 @@ export function PomodoroTimer({ user: _user }: PomodoroTimerProps) {
               <p className="text-2xl font-bold text-gray-900">
                 {sessionsCompleted}
               </p>
-              <p className="text-sm text-gray-600">Phiên hoàn thành</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">Phiên hoàn thành</p>
             </div>
 
             <div className="text-center">
@@ -1001,7 +1001,7 @@ export function PomodoroTimer({ user: _user }: PomodoroTimerProps) {
               <p className="text-2xl font-bold text-gray-900">
                 {totalFocusTime}
               </p>
-              <p className="text-sm text-gray-600">Phút tập trung</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">Phút tập trung</p>
             </div>
           </div>
 

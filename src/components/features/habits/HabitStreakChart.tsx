@@ -56,8 +56,8 @@ export function HabitStreakChart({
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="flex items-center text-gray-900">
-          <Calendar className="h-5 w-5 mr-2 text-gray-600" />
+        <CardTitle className="flex items-center text-gray-900 dark:text-gray-100">
+          <Calendar className="h-5 w-5 mr-2 text-gray-600 dark:text-gray-300" />
           {title}
         </CardTitle>
       </CardHeader>
@@ -69,19 +69,25 @@ export function HabitStreakChart({
               <p className={`text-xl font-bold ${textColor}`}>
                 {currentStreak}
               </p>
-              <p className="text-xs text-gray-500">Hiện tại</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Hiện tại
+              </p>
             </div>
             <div className="text-center">
               <p className={`text-xl font-bold ${textColor}`}>
                 {longestStreak}
               </p>
-              <p className="text-xs text-gray-500">Dài nhất</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Dài nhất
+              </p>
             </div>
             <div className="text-center">
               <p className={`text-xl font-bold ${textColor}`}>
                 {monthlyData.filter(Boolean).length}
               </p>
-              <p className="text-xs text-gray-500">Tổng ngày</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Tổng ngày
+              </p>
             </div>
           </div>
 
@@ -92,7 +98,10 @@ export function HabitStreakChart({
             </p>
             <div className="grid grid-cols-7 gap-1 text-center">
               {['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'].map((day, index) => (
-                <div key={`header-${index}`} className="text-xs text-gray-500">
+                <div
+                  key={`header-${index}`}
+                  className="text-xs text-gray-500 dark:text-gray-400"
+                >
                   {day}
                 </div>
               ))}
@@ -128,7 +137,7 @@ export function HabitStreakChart({
                           ? `${color} text-white`
                           : isPast
                             ? 'bg-gray-200 dark:bg-gray-700 dark:text-gray-400'
-                            : 'dark:text-gray-500'
+                            : 'dark:text-gray-300'
                       }
                     `}
                   >

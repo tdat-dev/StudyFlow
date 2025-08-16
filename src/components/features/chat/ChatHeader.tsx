@@ -26,7 +26,7 @@ export function ChatHeader({ onNewChat, onToggleSidebar }: ChatHeaderProps) {
           </div>
           <div className="min-w-0">
             <h2 className="text-gray-900 dark:text-white text-sm sm:text-base truncate">
-              AI Tutor Agent
+              Trợ lý AI Agent
             </h2>
             <p className="text-xs sm:text-sm text-gray-500 truncate">
               Giáo viên ảo hỗ trợ học tập mọi môn học

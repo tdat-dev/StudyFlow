@@ -21,7 +21,7 @@ async function generateAIResponse(userMessage: string): Promise<string> {
     }
 
     // Giả lập phản hồi từ AI
-    return 'Xin chào! Tôi là AI Tutor Agent, người bạn đồng hành của bạn. Tôi có thể giúp bạn học tập hiệu quả hơn.';
+    return 'Xin chào! Tôi là Trợ lý AI Agent, người bạn đồng hành của bạn. Tôi có thể giúp bạn học tập hiệu quả hơn.';
   } catch (error) {
     console.error('Error generating AI response:', error);
     throw new Error('Failed to generate AI response');
@@ -32,7 +32,7 @@ async function generateAIResponse(userMessage: string): Promise<string> {
 const welcomeMessage: Message = {
   id: 'welcome-message',
   content:
-    'Xin chào! Tôi là AI Tutor Agent, người bạn đồng hành của bạn. Tôi có thể giúp bạn:\n\n1. Tạo flashcards cho mọi môn học\n2. Giải thích các khái niệm học tập\n3. Đặt câu hỏi ôn tập kiến thức\n4. Gợi ý phương pháp học hiệu quả\n5. Trò chuyện và lắng nghe bạn về mọi chủ đề\n6. Hỗ trợ bạn bằng nhiều ngôn ngữ khác nhau\n\nBạn muốn trò chuyện về điều gì hôm nay?',
+    'Xin chào! Tôi là Trợ lý AI Agent, người bạn đồng hành của bạn. Tôi có thể giúp bạn:\n\n1. Tạo flashcards cho mọi môn học\n2. Giải thích các khái niệm học tập\n3. Đặt câu hỏi ôn tập kiến thức\n4. Gợi ý phương pháp học hiệu quả\n5. Trò chuyện và lắng nghe bạn về mọi chủ đề\n6. Hỗ trợ bạn bằng nhiều ngôn ngữ khác nhau\n\nBạn muốn trò chuyện về điều gì hôm nay?',
   sender: 'ai',
   timestamp: new Date().toISOString(),
 };

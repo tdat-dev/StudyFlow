@@ -1,19 +1,14 @@
-import React from "react";
-import {
-  MessageSquare,
-  BookOpen,
-  Calendar,
-  Clock,
-} from "lucide-react";
+import React from 'react';
+import { MessageSquare, BookOpen, Calendar, Clock } from 'lucide-react';
 
 type TabType =
-  | "home"
-  | "chat"
-  | "flashcards"
-  | "habits"
-  | "pomodoro"
-  | "profile"
-  | "settings";
+  | 'home'
+  | 'chat'
+  | 'flashcards'
+  | 'habits'
+  | 'pomodoro'
+  | 'profile'
+  | 'settings';
 
 interface BottomNavProps {
   activeTab: TabType;
@@ -26,18 +21,18 @@ const tabs: Array<{
   label: string;
   icon: React.ComponentType<{ className?: string }>;
 }> = [
-  { id: "home", label: "Trang chủ", icon: Calendar },
-  { id: "chat", label: "AI Tutor", icon: MessageSquare },
-  { id: "flashcards", label: "Flashcards", icon: BookOpen },
-  { id: "habits", label: "Thói quen", icon: Calendar },
-  { id: "pomodoro", label: "Pomodoro", icon: Clock },
+  { id: 'home', label: 'Trang chủ', icon: Calendar },
+  { id: 'chat', label: 'Trợ lý AI', icon: MessageSquare },
+  { id: 'flashcards', label: 'Flashcards', icon: BookOpen },
+  { id: 'habits', label: 'Thói quen', icon: Calendar },
+  { id: 'pomodoro', label: 'Pomodoro', icon: Clock },
 ];
 
-function BottomNav({ activeTab, onTabChange, className = "" }: BottomNavProps) {
+function BottomNav({ activeTab, onTabChange, className = '' }: BottomNavProps) {
   return (
     <nav
       className={
-        "fixed bottom-0 inset-x-0 z-40 border-t bg-white/95 dark:bg-gray-900/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:supports-[backdrop-filter]:bg-gray-900/80 shadow-lg " +
+        'fixed bottom-0 inset-x-0 z-40 border-t bg-white/95 dark:bg-gray-900/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:supports-[backdrop-filter]:bg-gray-900/80 shadow-lg ' +
         className
       }
       aria-label="Bottom navigation"
@@ -52,20 +47,20 @@ function BottomNav({ activeTab, onTabChange, className = "" }: BottomNavProps) {
                   type="button"
                   onClick={() => onTabChange(id)}
                   className={
-                    "relative w-full flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-lg text-xs font-medium transition-all duration-200 " +
+                    'relative w-full flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-lg text-xs font-medium transition-all duration-200 ' +
                     (isActive
-                      ? "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/50 scale-105"
-                      : "text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800")
+                      ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/50 scale-105'
+                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800')
                   }
-                  aria-current={isActive ? "page" : undefined}
+                  aria-current={isActive ? 'page' : undefined}
                 >
                   {/* Active indicator */}
                   <span
                     className={
-                      "absolute top-1 left-1/2 -translate-x-1/2 h-0.5 w-8 rounded-full transition-all duration-200 " +
+                      'absolute top-1 left-1/2 -translate-x-1/2 h-0.5 w-8 rounded-full transition-all duration-200 ' +
                       (isActive
-                        ? "bg-blue-600 dark:bg-blue-400 opacity-100"
-                        : "bg-transparent opacity-0")
+                        ? 'bg-blue-600 dark:bg-blue-400 opacity-100'
+                        : 'bg-transparent opacity-0')
                     }
                     aria-hidden="true"
                   />

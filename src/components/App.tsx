@@ -36,7 +36,7 @@ export default function App() {
   return (
     <>
       <Head>
-        <title>StudyFlow - Smart Learning Platform</title>
+        <title>StudyFlow</title>
         <meta
           name="description"
           content="Học tiếng Anh thông minh với AI, Flashcards, Pomodoro Timer và theo dõi thói quen"
@@ -44,7 +44,8 @@ export default function App() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 
         {/* Favicon */}
-        <link rel="icon" href="/images/favicon.ico" />
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="shortcut icon" href="/favicon.ico" />
         <link
           rel="icon"
           type="image/png"

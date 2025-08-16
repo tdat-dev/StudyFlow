@@ -7,6 +7,11 @@ import {
   UserCircle,
   ChevronDown,
   RefreshCw,
+  Home,
+  MessageSquare,
+  BookOpen,
+  Calendar,
+  Clock,
 } from 'lucide-react';
 
 // Button component
@@ -183,31 +188,43 @@ export function Header({
       <div className="px-4 md:px-8 py-3">
         <div className="flex items-center justify-between">
           {/* Logo/Brand */}
-          <Logo size="xlarge" />
+          <Logo size="large" />
 
           {/* Desktop Navigation */}
           {onTabChange && (
-            <div className="hidden md:flex items-center space-x-8">
+            <div className="hidden md:flex items-center space-x-2 bg-gray-50 dark:bg-gray-800 rounded-xl p-1">
               {[
-                { id: 'home', label: 'Trang chủ', icon: '🏠' },
-                { id: 'chat', label: 'AI Tutor', icon: '💬' },
-                { id: 'flashcards', label: 'Flashcards', icon: '🃏' },
-                { id: 'habits', label: 'Thói quen', icon: '📈' },
-                { id: 'pomodoro', label: 'Pomodoro', icon: '🍅' },
-              ].map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => onTabChange(tab.id)}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    activeTab === tab.id
-                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
-                  }`}
-                >
-                  <span>{tab.icon}</span>
-                  <span>{tab.label}</span>
-                </button>
-              ))}
+                { id: 'home', label: 'Trang chủ', icon: Home },
+                { id: 'chat', label: 'Trợ lý AI', icon: MessageSquare },
+                { id: 'flashcards', label: 'Flashcards', icon: BookOpen },
+                { id: 'habits', label: 'Thói quen', icon: Calendar },
+                { id: 'pomodoro', label: 'Pomodoro', icon: Clock },
+              ].map(tab => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => onTabChange(tab.id)}
+                    className={`relative flex items-center space-x-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      isActive
+                        ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm scale-105'
+                        : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-gray-700/50'
+                    }`}
+                  >
+                    {/* Active indicator */}
+                    <span
+                      className={`absolute top-1 left-1/2 -translate-x-1/2 h-0.5 w-6 rounded-full transition-all duration-200 ${
+                        isActive
+                          ? 'bg-blue-600 dark:bg-blue-400 opacity-100'
+                          : 'bg-transparent opacity-0'
+                      }`}
+                    />
+                    <Icon className="h-4 w-4" />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
             </div>
           )}
 
@@ -324,7 +341,7 @@ export function Header({
                         onClick={handleProfileClick}
                         className="w-full flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/50 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                       >
-                        <UserCircle className="h-4 w-4 mr-3 text-gray-400 dark:text-gray-500" />
+                        <UserCircle className="h-4 w-4 mr-3 text-gray-400 dark:text-gray-300" />
                         Xem hồ sơ
                       </button>
 
@@ -332,7 +349,7 @@ export function Header({
                         onClick={handleSettingsClick}
                         className="w-full flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                       >
-                        <Settings className="h-4 w-4 mr-3 text-gray-400 dark:text-gray-500" />
+                        <Settings className="h-4 w-4 mr-3 text-gray-400 dark:text-gray-300" />
                         Cài đặt
                       </button>
 
@@ -340,7 +357,7 @@ export function Header({
                         onClick={handleFullRefresh}
                         className="w-full flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-green-50 dark:hover:bg-green-900/50 hover:text-green-600 dark:hover:text-green-400 transition-colors"
                       >
-                        <RefreshCw className="h-4 w-4 mr-3 text-gray-400 dark:text-gray-500" />
+                        <RefreshCw className="h-4 w-4 mr-3 text-gray-400 dark:text-gray-300" />
                         Làm mới hoàn toàn
                       </button>
 
