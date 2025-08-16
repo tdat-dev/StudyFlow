@@ -2,22 +2,22 @@
 
 > **Học thông minh với AI, Flashcards & Pomodoro Timer**
 
-StudyFlow là một ứng dụng học tập toàn diện được thiết kế đặc biệt cho việc học tiếng Anh hiệu quả. Ứng dụng kết hợp AI tutoring, flashcards thông minh, Pomodoro timer và theo dõi thói quen học tập.
+StudyFlow là một ứng dụng học tập toàn diện với AI Tutor đa môn học. Ứng dụng hỗ trợ học tập từ tiểu học đến đại học với AI tutoring, flashcards thông minh, Pomodoro timer và theo dõi thói quen học tập.
 
 ## ✨ Tính Năng Chính
 
-### 🤖 AI English Tutor
+### 🤖 StudyFlow AI Tutor
 
-- Chat với AI tutor thông minh 24/7
-- Phản hồi cá nhân hóa và tương tác tự nhiên
-- Tạo flashcards tự động từ AI
-- Sửa lỗi ngữ pháp và gợi ý cải thiện
+- Chat với AI tutor thông minh 24/7 hỗ trợ TẤT CẢ các môn học
+- Phản hồi cá nhân hóa cho toán học, khoa học, tiếng Anh, lịch sử...
+- Tạo flashcards tự động từ AI cho mọi chủ đề
+- Giải bài tập từng bước chi tiết và giải thích khái niệm
 
 ### 📚 Smart Flashcards
 
-- Tạo và quản lý bộ thẻ học từ vựng
+- Tạo và quản lý bộ thẻ học cho mọi môn học
 - Hệ thống spaced repetition thông minh
-- Tích hợp AI để tạo thẻ tự động
+- Tích hợp AI để tạo thẻ tự động từ toán, khoa học, ngôn ngữ...
 - Theo dõi tiến độ học tập chi tiết
 
 ### ⏰ Pomodoro Timer

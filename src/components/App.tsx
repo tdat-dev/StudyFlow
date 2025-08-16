@@ -95,7 +95,7 @@ export default function App() {
         <meta property="og:image" content="/images/logo.png" />
         <meta property="og:type" content="website" />
       </Head>
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+      <div className="h-screen bg-gray-100 dark:bg-gray-900">
         {user ? (
           <MainApp user={user} onLogout={() => {}} />
         ) : (

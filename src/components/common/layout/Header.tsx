@@ -183,7 +183,7 @@ export function Header({
       <div className="px-4 md:px-8 py-3">
         <div className="flex items-center justify-between">
           {/* Logo/Brand */}
-          <Logo size="medium" />
+          <Logo size="xlarge" />
 
           {/* Desktop Navigation */}
           {onTabChange && (

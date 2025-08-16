@@ -2,7 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 
 interface LogoProps {
-  size?: 'small' | 'medium' | 'large';
+  size?: 'small' | 'medium' | 'large' | 'xlarge' | 'xxlarge';
   showText?: boolean;
   className?: string;
 }
@@ -16,6 +16,8 @@ const Logo: React.FC<LogoProps> = ({
     small: { width: 32, height: 32, textSize: 'text-lg' },
     medium: { width: 40, height: 40, textSize: 'text-xl' },
     large: { width: 56, height: 56, textSize: 'text-2xl' },
+    xlarge: { width: 80, height: 80, textSize: 'text-3xl' },
+    xxlarge: { width: 120, height: 120, textSize: 'text-4xl' },
   };
 
   const { width, height, textSize } = sizeMap[size];

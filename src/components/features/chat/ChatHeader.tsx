@@ -1,6 +1,6 @@
-import React from "react";
-import Button from "../../../components/ui/button";
-import { Bot, MessageSquare, Plus } from "lucide-react";
+import React from 'react';
+import Button from '../../../components/ui/button';
+import { Bot, MessageSquare, Plus } from 'lucide-react';
 
 interface ChatHeaderProps {
   onNewChat: () => void;
@@ -15,8 +15,9 @@ export function ChatHeader({ onNewChat, onToggleSidebar }: ChatHeaderProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 mr-2 md:hidden"
+            className="h-8 w-8 mr-2"
             onClick={onToggleSidebar}
+            title="Ẩn/hiện lịch sử cuộc trò chuyện"
           >
             <MessageSquare className="h-4 w-4" />
           </Button>

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import Button from "../../../components/ui/button";
+import React, { useState, useEffect, useRef } from 'react';
+import Button from '../../../components/ui/button';
 import {
   Edit,
   Loader2,
@@ -7,17 +7,17 @@ import {
   MoreVertical,
   Plus,
   Trash2,
-} from "lucide-react";
-import { ChatSession } from "../../../types/chat";
+} from 'lucide-react';
+import { ChatSession } from '../../../types/chat';
 // Định nghĩa hàm formatDate trong component
 function formatDate(dateString: string): string {
-  if (!dateString) return "";
+  if (!dateString) return '';
 
   const date = new Date(dateString);
-  return date.toLocaleDateString("vi-VN", {
-    day: "numeric",
-    month: "numeric",
-    year: "numeric",
+  return date.toLocaleDateString('vi-VN', {
+    day: 'numeric',
+    month: 'numeric',
+    year: 'numeric',
   });
 }
 
@@ -42,22 +42,43 @@ export function ChatList({
 }: ChatListProps) {
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
   const [activeSession, setActiveSession] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Handle click outside để đóng menu
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowOptionsMenu(false);
+        setActiveSession(null);
+      }
+    }
+
+    if (showOptionsMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showOptionsMenu]);
 
   return (
-    <div className="w-64 bg-white dark:bg-gray-800 border-r flex flex-col h-full">
-      <div className="p-2 sm:p-4 border-b flex items-center justify-between">
-        <h2 className="font-medium text-sm sm:text-base">Cuộc trò chuyện</h2>
+    <div className="w-full bg-white dark:bg-gray-800 border-r flex flex-col h-full min-w-0">
+      <div className="p-2 sm:p-4 border-b flex items-center justify-between flex-shrink-0">
+        <h2 className="font-medium text-sm sm:text-base truncate">
+          Cuộc trò chuyện
+        </h2>
         <Button
           variant="ghost"
           size="icon"
-          className="h-7 w-7 sm:h-8 sm:w-8 rounded-full"
+          className="h-7 w-7 sm:h-8 sm:w-8 rounded-full flex-shrink-0"
           onClick={onNewChat}
         >
           <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
         </Button>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto min-h-0">
         {loading ? (
           <div className="flex justify-center items-center h-20">
             <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
@@ -68,11 +89,11 @@ export function ChatList({
           </div>
         ) : (
           <div className="space-y-1 p-2">
-            {sessions.map((session) => (
+            {sessions.map(session => (
               <div
                 key={session.id}
                 className={`flex items-center justify-between p-2 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                  currentChatId === session.id ? "bg-blue-50 text-blue-700" : ""
+                  currentChatId === session.id ? 'bg-blue-50 text-blue-700' : ''
                 }`}
                 onClick={() => onSelectChat(session.id)}
               >
@@ -87,14 +108,14 @@ export function ChatList({
                 </div>
 
                 <div
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={e => e.stopPropagation()}
                   className="z-50 relative"
                 >
                   <Button
                     variant="ghost"
                     size="icon"
                     className="h-7 w-7 sm:h-8 sm:w-8 rounded-full"
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       setActiveSession(session.id);
                       setShowOptionsMenu(true);
@@ -104,7 +125,10 @@ export function ChatList({
                   </Button>
 
                   {showOptionsMenu && activeSession === session.id && (
-                    <div className="absolute right-0 top-8 w-48 sm:w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black dark:ring-gray-700 ring-opacity-5 focus:outline-none z-50">
+                    <div
+                      ref={menuRef}
+                      className="absolute right-0 top-8 w-48 sm:w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black dark:ring-gray-700 ring-opacity-5 focus:outline-none z-50"
+                    >
                       <div
                         className="py-1"
                         role="menu"
@@ -113,7 +137,7 @@ export function ChatList({
                         <button
                           className="flex w-full items-center px-3 py-2 text-xs sm:text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                           role="menuitem"
-                          onClick={(e) => {
+                          onClick={e => {
                             e.stopPropagation();
                             onRenameChat(session.id);
                             setShowOptionsMenu(false);
@@ -125,7 +149,7 @@ export function ChatList({
                         <button
                           className="flex w-full items-center px-3 py-2 text-xs sm:text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                           role="menuitem"
-                          onClick={(e) => {
+                          onClick={e => {
                             e.stopPropagation();
                             onDeleteChat(session.id);
                             setShowOptionsMenu(false);

@@ -9,6 +9,10 @@ import {
 import Button from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Message, ChatSession, User, QuickAction } from '../../../types/chat';
+import {
+  studyFlowWelcomeMessage,
+  studyFlowQuickActions,
+} from './welcome-config';
 // Gemini AI Tutor service
 import {
   generateTutorResponse,
@@ -21,12 +25,6 @@ import { ChatMessage } from './ChatMessage';
 import { ChatList } from './ChatList';
 import { QuickActions } from './QuickActions';
 import {
-  BookOpen,
-  FileQuestion,
-  Headphones,
-  MessageSquare,
-} from 'lucide-react';
-import {
   getChatSessions,
   getChatMessages,
   createChatSession,
@@ -38,50 +36,12 @@ import {
 // Tin nhắn chào mừng mặc định
 const welcomeMessage: Message = {
   id: 'welcome-message',
-  content:
-    '👋 Xin chào! Tôi là **English Tutor AI** - trợ lý học tiếng Anh của bạn!\n\n🎯 **Tôi có thể giúp bạn:**\n\n📚 **Tạo flashcards** từ vựng chuyên đề\n🗣️ **Luyện tập hội thoại** tiếng Anh tự nhiên\n📝 **Sửa lỗi ngữ pháp** và cải thiện writing\n💡 **Giải thích từ vựng** và cấu trúc câu\n🎵 **Dịch bài hát, phim** yêu thích của bạn\n🌟 **Tư vấn phương pháp học** hiệu quả\n\n💬 **Bạn có thể:**\n• Gửi tin nhắn tiếng Việt hoặc tiếng Anh\n• Hỏi về bất kỳ chủ đề nào\n• Yêu cầu tạo bài tập thực hành\n• Chia sẻ mục tiêu học tập của bạn\n\n🚀 **Hãy bắt đầu bằng một câu hỏi hoặc chọn gợi ý bên dưới!**',
+  content: studyFlowWelcomeMessage,
   sender: 'ai',
   timestamp: new Date().toISOString(),
 };
 
-const quickActions: QuickAction[] = [
-  {
-    id: 1,
-    label: '📚 Tạo flashcards từ vựng',
-    icon: BookOpen,
-    prompt:
-      'Tạo flashcards từ vựng tiếng Anh chủ đề "Daily Activities" với 8 từ, bao gồm cả ví dụ câu',
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-100',
-  },
-  {
-    id: 2,
-    label: '🗣️ Luyện hội thoại',
-    icon: MessageSquare,
-    prompt:
-      'Hi! I want to practice English conversation. Can we talk about hobbies and free time activities?',
-    color: 'text-green-600',
-    bgColor: 'bg-green-100',
-  },
-  {
-    id: 3,
-    label: '📝 Kiểm tra ngữ pháp',
-    icon: FileQuestion,
-    prompt:
-      'Tôi viết một đoạn văn tiếng Anh, bạn có thể kiểm tra và sửa lỗi giúp tôi được không?',
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-100',
-  },
-  {
-    id: 4,
-    label: '🎵 Dịch bài hát/phim',
-    icon: Headphones,
-    prompt:
-      'Bạn có thể giải thích ý nghĩa và dịch lời bài hát tiếng Anh này giúp tôi không?',
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-100',
-  },
-];
+const quickActions = studyFlowQuickActions;
 
 interface ChatScreenProps {
   user: User;
@@ -96,7 +56,14 @@ export function ChatScreen({ user }: ChatScreenProps) {
   // State cho quản lý chat sessions
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
-  const [showSidebar, setShowSidebar] = useState(true);
+  const [showSidebar, setShowSidebar] = useState(() => {
+    // Lấy từ localStorage, mặc định là true
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('chatSidebarVisible');
+      return saved !== null ? JSON.parse(saved) : true;
+    }
+    return true;
+  });
   const [loadingSessions, setLoadingSessions] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [chatToRename, setChatToRename] = useState<string | null>(null);
@@ -111,6 +78,13 @@ export function ChatScreen({ user }: ChatScreenProps) {
   useEffect(() => {
     scrollToBottom();
   }, [messages, scrollToBottom]);
+
+  // Lưu trạng thái sidebar vào localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('chatSidebarVisible', JSON.stringify(showSidebar));
+    }
+  }, [showSidebar]);
 
   // Định nghĩa các hàm trước khi sử dụng trong useEffect
   const loadChatSessions = useCallback(async () => {
@@ -227,6 +201,9 @@ export function ChatScreen({ user }: ChatScreenProps) {
 
       setChatSessions([newSession, ...chatSessions]);
       setCurrentChatId(newSessionId);
+
+      // Set welcome message cho chat mới
+      setMessages([welcomeMessage]);
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
         console.error('Failed to create new chat:', error);
@@ -398,7 +375,7 @@ export function ChatScreen({ user }: ChatScreenProps) {
   };
 
   return (
-    <div className="h-full flex bg-gray-50 dark:bg-gray-900">
+    <div className="h-full w-full flex bg-gray-50 dark:bg-gray-900 overflow-hidden">
       {/* Dialog đổi tên chat */}
       <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
@@ -431,35 +408,43 @@ export function ChatScreen({ user }: ChatScreenProps) {
       </Dialog>
 
       {/* Sidebar */}
-      {showSidebar && (
-        <ChatList
-          sessions={chatSessions}
-          currentChatId={currentChatId}
-          onSelectChat={setCurrentChatId}
-          onNewChat={createNewChat}
-          onRenameChat={handleRenameChat}
-          onDeleteChat={handleDeleteChat}
-          loading={loadingSessions}
-        />
-      )}
+      <div
+        className={`transition-all duration-300 ease-in-out ${showSidebar ? 'w-64' : 'w-0'} overflow-hidden`}
+      >
+        {showSidebar && (
+          <ChatList
+            sessions={chatSessions}
+            currentChatId={currentChatId}
+            onSelectChat={setCurrentChatId}
+            onNewChat={createNewChat}
+            onRenameChat={handleRenameChat}
+            onDeleteChat={handleDeleteChat}
+            loading={loadingSessions}
+          />
+        )}
+      </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col h-full">
+      <div className="flex-1 flex flex-col min-h-0 w-0">
         {/* Header */}
-        <ChatHeader
-          onNewChat={createNewChat}
-          onToggleSidebar={() => setShowSidebar(!showSidebar)}
-        />
+        <div className="flex-shrink-0">
+          <ChatHeader
+            onNewChat={createNewChat}
+            onToggleSidebar={() => setShowSidebar(!showSidebar)}
+          />
+        </div>
 
         {/* Quick Actions */}
-        <QuickActions
-          actions={quickActions}
-          onActionClick={handleQuickAction}
-          disabled={loading || !currentChatId}
-        />
+        <div className="flex-shrink-0">
+          <QuickActions
+            actions={quickActions}
+            onActionClick={handleQuickAction}
+            disabled={loading || !currentChatId}
+          />
+        </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
           {messages.map(message => (
             <ChatMessage key={message.id} message={message} />
           ))}
@@ -491,11 +476,13 @@ export function ChatScreen({ user }: ChatScreenProps) {
         </div>
 
         {/* Input */}
-        <ChatInput
-          onSendMessage={handleSendMessage}
-          loading={loading}
-          disabled={!currentChatId}
-        />
+        <div className="flex-shrink-0">
+          <ChatInput
+            onSendMessage={handleSendMessage}
+            loading={loading}
+            disabled={!currentChatId}
+          />
+        </div>
       </div>
     </div>
   );
