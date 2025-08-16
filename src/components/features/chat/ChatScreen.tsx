@@ -39,7 +39,7 @@ import {
 const welcomeMessage: Message = {
   id: 'welcome-message',
   content:
-    'Xin chào! Tôi là AI Tutor Agent, người bạn đồng hành của bạn. Tôi có thể giúp bạn:\n\n1. Tạo flashcards cho mọi môn học\n2. Giải thích các khái niệm học tập\n3. Đặt câu hỏi ôn tập kiến thức\n4. Gợi ý phương pháp học hiệu quả\n5. Trò chuyện và lắng nghe bạn về mọi chủ đề\n6. Hỗ trợ bạn bằng nhiều ngôn ngữ khác nhau\n\nBạn muốn trò chuyện về điều gì hôm nay?',
+    '👋 Xin chào! Tôi là **English Tutor AI** - trợ lý học tiếng Anh của bạn!\n\n🎯 **Tôi có thể giúp bạn:**\n\n📚 **Tạo flashcards** từ vựng chuyên đề\n🗣️ **Luyện tập hội thoại** tiếng Anh tự nhiên\n📝 **Sửa lỗi ngữ pháp** và cải thiện writing\n💡 **Giải thích từ vựng** và cấu trúc câu\n🎵 **Dịch bài hát, phim** yêu thích của bạn\n🌟 **Tư vấn phương pháp học** hiệu quả\n\n💬 **Bạn có thể:**\n• Gửi tin nhắn tiếng Việt hoặc tiếng Anh\n• Hỏi về bất kỳ chủ đề nào\n• Yêu cầu tạo bài tập thực hành\n• Chia sẻ mục tiêu học tập của bạn\n\n🚀 **Hãy bắt đầu bằng một câu hỏi hoặc chọn gợi ý bên dưới!**',
   sender: 'ai',
   timestamp: new Date().toISOString(),
 };
@@ -47,34 +47,37 @@ const welcomeMessage: Message = {
 const quickActions: QuickAction[] = [
   {
     id: 1,
-    label: 'Tạo flashcards',
+    label: '📚 Tạo flashcards từ vựng',
     icon: BookOpen,
-    prompt: 'Tạo flashcards tiếng Anh cho tôi với 5 từ vựng học thuật',
+    prompt:
+      'Tạo flashcards từ vựng tiếng Anh chủ đề "Daily Activities" với 8 từ, bao gồm cả ví dụ câu',
     color: 'text-blue-600',
     bgColor: 'bg-blue-100',
   },
   {
     id: 2,
-    label: 'Ôn tập kiến thức',
-    icon: FileQuestion,
-    prompt: 'Đặt câu hỏi để ôn tập kiến thức',
+    label: '🗣️ Luyện hội thoại',
+    icon: MessageSquare,
+    prompt:
+      'Hi! I want to practice English conversation. Can we talk about hobbies and free time activities?',
     color: 'text-green-600',
     bgColor: 'bg-green-100',
   },
   {
     id: 3,
-    label: 'Phương pháp học',
-    icon: Headphones,
+    label: '📝 Kiểm tra ngữ pháp',
+    icon: FileQuestion,
     prompt:
-      'Giải thích cho tôi về các phương pháp học hiệu quả như Spaced Repetition, Active Recall, Pomodoro, Feynman Technique và Mind Mapping',
+      'Tôi viết một đoạn văn tiếng Anh, bạn có thể kiểm tra và sửa lỗi giúp tôi được không?',
     color: 'text-purple-600',
     bgColor: 'bg-purple-100',
   },
   {
     id: 4,
-    label: 'Trò chuyện tiếng Anh',
-    icon: MessageSquare,
-    prompt: "Let's chat in English. How are you feeling today?",
+    label: '🎵 Dịch bài hát/phim',
+    icon: Headphones,
+    prompt:
+      'Bạn có thể giải thích ý nghĩa và dịch lời bài hát tiếng Anh này giúp tôi không?',
     color: 'text-orange-600',
     bgColor: 'bg-orange-100',
   },
@@ -370,7 +373,7 @@ export function ChatScreen({ user }: ChatScreenProps) {
         const errorMessage: Message = {
           id: generateUniqueId('error'),
           content:
-            'Xin lỗi, tôi đang gặp sự cố kỹ thuật. Vui lòng thử lại sau.',
+            '😅 Xin lỗi, tôi đang gặp một chút sự cố kỹ thuật!\n\n🔄 **Hãy thử:**\n• Gửi lại tin nhắn\n• Kiểm tra kết nối internet\n• Chờ vài giây rồi thử lại\n\n📚 **Trong lúc chờ bạn có thể:**\n• Tạo flashcards mới\n• Ôn tập với Pomodoro timer\n• Kiểm tra tiến độ học tập\n\n💪 Tôi sẽ sớm quay lại để tiếp tục hỗ trợ bạn!',
           sender: 'ai',
           timestamp: new Date().toISOString(),
         };

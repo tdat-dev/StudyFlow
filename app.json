@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "FlashPomo",
-    "slug": "Flash-Pomo",
+    "name": "StudyFlow",
+    "slug": "Study-Flow",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
@@ -12,13 +12,13 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.tdat.ungdunghoctienganh",
+      "bundleIdentifier": "com.tdat.studyflow",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
-      "package": "com.tdat.ungdunghoctienganh",
+      "package": "com.tdat.studyflow",
       "permissions": ["android.permission.RECORD_AUDIO"]
     },
     "web": {

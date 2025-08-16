@@ -184,7 +184,7 @@ export function Header({
           {/* Logo/Brand */}
           <div className="flex items-center">
             <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-              FlashPomo
+              StudyFlow
             </h1>
           </div>
 

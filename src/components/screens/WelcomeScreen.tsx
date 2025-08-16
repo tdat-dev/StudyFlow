@@ -24,10 +24,12 @@ export default function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {
       <div className="w-full max-w-md text-center">
         <div className="mb-8">
           <div className="w-24 h-24 bg-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-            <span className="text-3xl font-bold text-white">EA</span>
+            <span className="text-3xl font-bold text-white">SF</span>
           </div>
-          <h1 className="text-3xl font-bold text-blue-900 mb-2">Chào mừng</h1>
-          <p className="text-gray-600">Học tiếng Anh hiệu quả với AI Coach</p>
+          <h1 className="text-3xl font-bold text-blue-900 mb-2">StudyFlow</h1>
+          <p className="text-gray-600">
+            Học thông minh với AI, Flashcards & Pomodoro
+          </p>
         </div>
 
         <div className="space-y-4">

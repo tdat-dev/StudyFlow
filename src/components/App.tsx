@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { Loader2 } from "lucide-react";
-import { useAuth, useErrorHandler } from "../hooks";
-import { MainApp } from "./MainApp";
-import { LoginForm, RegisterForm } from "./features/auth";
+import React, { useState, useEffect } from 'react';
+import Head from 'next/head';
+import { Loader2 } from 'lucide-react';
+import { useAuth, useErrorHandler } from '../hooks';
+import { MainApp } from './MainApp';
+import { LoginForm, RegisterForm } from './features/auth';
 
 // Loading component
 const LoadingScreen = () => (
@@ -33,25 +34,35 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      {user ? (
-        <MainApp user={user} onLogout={() => {}} />
-      ) : (
-        <div className="min-h-screen flex items-center justify-center p-4">
-          {showRegister ? (
-            <RegisterForm
-              onSuccess={() => setShowRegister(false)}
-              onLogin={() => setShowRegister(false)}
-            />
-          ) : (
-            <LoginForm
-              onSuccess={() => {}}
-              onRegister={() => setShowRegister(true)}
-              onForgotPassword={() => {}}
-            />
-          )}
-        </div>
-      )}
-    </div>
+    <>
+      <Head>
+        <title>StudyFlow - Smart Learning Platform</title>
+        <meta
+          name="description"
+          content="Học tiếng Anh thông minh với AI, Flashcards, Pomodoro Timer và theo dõi thói quen"
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+        {user ? (
+          <MainApp user={user} onLogout={() => {}} />
+        ) : (
+          <div className="min-h-screen flex items-center justify-center p-4">
+            {showRegister ? (
+              <RegisterForm
+                onSuccess={() => setShowRegister(false)}
+                onLogin={() => setShowRegister(false)}
+              />
+            ) : (
+              <LoginForm
+                onSuccess={() => {}}
+                onRegister={() => setShowRegister(true)}
+                onForgotPassword={() => {}}
+              />
+            )}
+          </div>
+        )}
+      </div>
+    </>
   );
 }
