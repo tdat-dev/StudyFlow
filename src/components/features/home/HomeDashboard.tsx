@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from "react";
-import Button from "../../../components/ui/button";
+import React, { useState, useEffect, useCallback } from 'react';
+
+import Button from '../../ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../../../components/ui/card";
-import { Progress } from "../../../components/ui/progress";
-import { Badge } from "../../../components/ui/badge";
+} from '../../ui/card';
+import { Progress } from '../../ui/progress';
+import { Badge } from '../../ui/badge';
 import {
   Play,
   Calendar,
@@ -18,17 +19,32 @@ import {
   Target,
   Loader2,
   Clock,
-} from "lucide-react";
-import { auth } from "../../../services/firebase/config";
+} from 'lucide-react';
+import { auth } from '../../../services/firebase/config';
 import {
   getUserProfile,
   updateUserProfile,
   updateUserProgress,
-} from "../../../services/firebase/firestore";
+} from '../../../services/firebase/firestore';
+
+// Types definition
+interface User {
+  uid?: string;
+  email?: string | null;
+  displayName?: string | null;
+  accessToken?: string;
+  name?: string;
+  streak?: number;
+  level?: number;
+  totalWordsLearned?: number;
+  totalStudyTime?: number;
+  todayProgress?: number;
+  dailyGoal?: number;
+}
 
 interface HomeDashboardProps {
-  user: any;
-  onUpdateUser: (updatedUser: any) => void;
+  user: User;
+  onUpdateUser: (updatedUser: User) => void;
   onTabChange?: (tab: string) => void;
 }
 
@@ -40,11 +56,7 @@ export function HomeDashboard({
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState(user);
 
-  useEffect(() => {
-    loadProfile();
-  }, []);
-
-  const loadProfile = async () => {
+  const loadProfile = useCallback(async () => {
     if (!user.accessToken) {
       loadMockProfile();
       return;
@@ -66,12 +78,16 @@ export function HomeDashboard({
         await createDefaultProfile();
       }
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.error("Error loading profile:", error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error loading profile:', error);
       }
       loadMockProfile();
     }
-  };
+  }, [user.accessToken, onUpdateUser]);
+
+  useEffect(() => {
+    loadProfile();
+  }, [loadProfile]);
 
   const loadMockProfile = () => {
     const mockProfile = {
@@ -92,8 +108,8 @@ export function HomeDashboard({
   const createDefaultProfile = async () => {
     try {
       const defaultProfile = {
-        uid: auth.currentUser?.uid || "",
-        name: user.name || "Người dùng",
+        uid: auth.currentUser?.uid || '',
+        name: user.name || 'Người dùng',
         email: user.email,
         streak: 1,
         level: 1,
@@ -119,14 +135,14 @@ export function HomeDashboard({
         setProfile(updatedProfile);
         onUpdateUser({ ...user, ...updatedProfile });
       } else {
-        if (process.env.NODE_ENV === "development") {
-          console.error("Failed to create default profile");
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Failed to create default profile');
         }
         loadMockProfile();
       }
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.error("Error creating default profile:", error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error creating default profile:', error);
       }
       loadMockProfile();
     }
@@ -134,7 +150,7 @@ export function HomeDashboard({
 
   const updateProgress = async (
     wordsLearned: number,
-    studyTime: number = 5
+    studyTime: number = 5,
   ) => {
     if (!user.accessToken) {
       updateLocalProgress(wordsLearned, studyTime);
@@ -158,8 +174,8 @@ export function HomeDashboard({
         onUpdateUser({ ...user, ...updatedProfile });
       }
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.error("Error updating progress:", error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error updating progress:', error);
       }
       updateLocalProgress(wordsLearned, studyTime);
     } finally {
@@ -192,7 +208,7 @@ export function HomeDashboard({
 
   const progressPercentage = Math.min(
     ((profile.todayProgress || 0) / (profile.dailyGoal || 20)) * 100,
-    100
+    100,
   );
 
   return (
@@ -215,7 +231,7 @@ export function HomeDashboard({
             >
               <Zap
                 className="text-yellow-500 dark:text-yellow-400"
-                style={{ width: "10px", height: "10px", marginRight: "2px" }}
+                style={{ width: '10px', height: '10px', marginRight: '2px' }}
               />
               {profile.streak || 0} ngày
             </Badge>
@@ -233,7 +249,7 @@ export function HomeDashboard({
               <CardTitle className="text-base xl:text-lg text-gray-900 dark:text-[#f0f6fc] flex items-center">
                 <Target
                   className="text-blue-500 mr-2"
-                  style={{ width: "16px", height: "16px" }}
+                  style={{ width: '16px', height: '16px' }}
                 />
                 Progress hôm nay
               </CardTitle>
@@ -249,11 +265,11 @@ export function HomeDashboard({
                   {Math.round(progressPercentage)}% hoàn thành
                 </span>
                 <span className="text-gray-900 dark:text-[#f0f6fc]">
-                  Còn{" "}
+                  Còn{' '}
                   {Math.max(
                     0,
-                    (profile.dailyGoal || 20) - (profile.todayProgress || 0)
-                  )}{" "}
+                    (profile.dailyGoal || 20) - (profile.todayProgress || 0),
+                  )}{' '}
                   từ
                 </span>
               </div>
@@ -353,19 +369,19 @@ export function HomeDashboard({
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm shrink-0"
                   onClick={() => {
                     updateProgress(5);
-                    onTabChange && onTabChange("chat");
+                    onTabChange && onTabChange('chat');
                   }}
                   disabled={loading}
                 >
                   {loading ? (
                     <Loader2
                       className="text-yellow-400 animate-spin mr-2"
-                      style={{ width: "14px", height: "14px" }}
+                      style={{ width: '14px', height: '14px' }}
                     />
                   ) : (
                     <Play
                       className="text-yellow-400 mr-2"
-                      style={{ width: "14px", height: "14px" }}
+                      style={{ width: '14px', height: '14px' }}
                     />
                   )}
                   Học ngay
@@ -390,7 +406,7 @@ export function HomeDashboard({
               >
                 <BookOpen
                   className="text-blue-500 mr-3"
-                  style={{ width: "16px", height: "16px" }}
+                  style={{ width: '16px', height: '16px' }}
                 />
                 <span className="text-left">Ôn tập từ vựng đã học (+3 từ)</span>
               </Button>
@@ -403,7 +419,7 @@ export function HomeDashboard({
               >
                 <Target
                   className="text-green-500 mr-3"
-                  style={{ width: "16px", height: "16px" }}
+                  style={{ width: '16px', height: '16px' }}
                 />
                 <span className="text-left">Quiz kiểm tra nhanh (+5 từ)</span>
               </Button>
@@ -416,7 +432,7 @@ export function HomeDashboard({
               >
                 <Zap
                   className="text-yellow-500 mr-3"
-                  style={{ width: "16px", height: "16px" }}
+                  style={{ width: '16px', height: '16px' }}
                 />
                 <span className="text-left">Thử thách 5 phút (+2 từ)</span>
               </Button>

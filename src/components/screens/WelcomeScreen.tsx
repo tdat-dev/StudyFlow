@@ -1,15 +1,13 @@
-import React from "react";
-import Button from "../../components/ui/button";
-import { useAuth } from "../../contexts/AuthContext";
-import { useAppState } from "../../contexts/AppStateContext";
+import React from 'react';
+import Button from '../../components/ui/button';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface WelcomeScreenProps {
-  onNavigate: (screen: "login" | "register" | "onboarding") => void;
+  onNavigate: (screen: 'login' | 'register' | 'onboarding') => void;
 }
 
 export default function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {
   const { signInWithGoogle } = useAuth();
-  const { setCurrentScreen } = useAppState();
 
   const handleGoogleLogin = async () => {
     try {
@@ -17,7 +15,7 @@ export default function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {
       // Auth context will handle the state update
     } catch (error) {
       // Error is already handled by useAuth
-      console.error("Google login failed");
+      console.error('Google login failed');
     }
   };
 
@@ -35,7 +33,7 @@ export default function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {
         <div className="space-y-4">
           <Button
             className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 text-lg"
-            onClick={() => onNavigate("login")}
+            onClick={() => onNavigate('login')}
           >
             Đăng nhập
           </Button>
@@ -43,7 +41,7 @@ export default function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {
           <Button
             className="w-full bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 py-6 text-lg"
             variant="outline"
-            onClick={() => onNavigate("register")}
+            onClick={() => onNavigate('register')}
           >
             Đăng ký
           </Button>
@@ -93,7 +91,7 @@ export default function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {
           <Button
             className="w-full bg-transparent hover:bg-blue-100 text-blue-600 py-2"
             variant="ghost"
-            onClick={() => onNavigate("onboarding")}
+            onClick={() => onNavigate('onboarding')}
           >
             Xem giới thiệu tính năng
           </Button>

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import { formatDate, capitalizeFirst } from '@/utils/string';
+import { formatDate, capitalizeFirst } from '@/utils/string/utils';
 
 describe('String utilities', () => {
   describe('formatDate', () => {

@@ -1,11 +1,11 @@
-import React from "react";
+import React from 'react';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "../../../components/ui/card";
-import { Calendar } from "lucide-react";
+} from '../../../components/ui/card';
+import { Calendar } from 'lucide-react';
 
 interface HabitStreakChartProps {
   habitId: string;
@@ -16,7 +16,6 @@ interface HabitStreakChartProps {
 }
 
 export function HabitStreakChart({
-  habitId,
   title,
   monthlyData,
   color,
@@ -92,7 +91,7 @@ export function HabitStreakChart({
               Tháng {currentMonth + 1}/{currentYear}
             </p>
             <div className="grid grid-cols-7 gap-1 text-center">
-              {["CN", "T2", "T3", "T4", "T5", "T6", "T7"].map((day, index) => (
+              {['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'].map((day, index) => (
                 <div key={`header-${index}`} className="text-xs text-gray-500">
                   {day}
                 </div>
@@ -103,17 +102,16 @@ export function HabitStreakChart({
                 { length: new Date(currentYear, currentMonth, 1).getDay() },
                 (_, i) => (
                   <div key={`empty-start-${i}`} className="h-6"></div>
-                )
+                ),
               )}
 
               {/* Days of the month */}
-              {days.map((day) => {
+              {days.map(day => {
                 const isToday = day === currentDay;
                 const dayIndex = day - 1; // Adjust to 0-indexed
                 const isCompleted =
                   dayIndex < monthlyData.length && monthlyData[dayIndex];
                 const isPast = day < currentDay;
-                const isFuture = day > currentDay;
 
                 return (
                   <div
@@ -122,15 +120,15 @@ export function HabitStreakChart({
                       h-6 w-6 rounded-full flex items-center justify-center mx-auto text-xs
                       ${
                         isToday
-                          ? "border border-gray-300 dark:border-gray-600"
-                          : ""
+                          ? 'border border-gray-300 dark:border-gray-600'
+                          : ''
                       }
                       ${
                         isCompleted
                           ? `${color} text-white`
                           : isPast
-                          ? "bg-gray-200 dark:bg-gray-700 dark:text-gray-400"
-                          : "dark:text-gray-500"
+                            ? 'bg-gray-200 dark:bg-gray-700 dark:text-gray-400'
+                            : 'dark:text-gray-500'
                       }
                     `}
                   >

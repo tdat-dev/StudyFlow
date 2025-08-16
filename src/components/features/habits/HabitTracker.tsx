@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useCallback } from "react";
-import Button from "../../../components/ui/button";
+import React, { useState, useEffect } from 'react';
+import Button from '../../../components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../../../components/ui/card";
-import { Badge } from "../../../components/ui/badge";
-import { Progress } from "../../../components/ui/progress";
+} from '../../../components/ui/card';
+import { Badge } from '../../../components/ui/badge';
+import { Progress } from '../../../components/ui/progress';
 import {
   Check,
   Plus,
@@ -21,7 +21,7 @@ import {
   ArrowLeft,
   Trash2,
   AlertTriangle,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   collection,
   query,
@@ -29,12 +29,11 @@ import {
   getDocs,
   doc,
   updateDoc,
-  getDoc,
   addDoc,
   deleteDoc,
   Timestamp,
-} from "firebase/firestore";
-import { HabitStreakChart } from "./HabitStreakChart";
+} from 'firebase/firestore';
+import { HabitStreakChart } from './HabitStreakChart';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,8 +43,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "../../../components/ui/alert-dialog";
-import { auth, db } from "../../../services/firebase/config";
+} from '../../../components/ui/alert-dialog';
+import { auth, db } from '../../../services/firebase/config';
 
 interface HabitTrackerProps {
   user: any;
@@ -68,7 +67,7 @@ interface Habit {
 export function HabitTracker({ user }: HabitTrackerProps) {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(false);
-  const [currentView, setCurrentView] = useState<"list" | "detail">("list");
+  const [currentView, setCurrentView] = useState<'list' | 'detail'>('list');
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [habitToDelete, setHabitToDelete] = useState<Habit | null>(null);
@@ -79,7 +78,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
     const daysInMonth = new Date(
       today.getFullYear(),
       today.getMonth() + 1,
-      0
+      0,
     ).getDate();
     const result = Array(daysInMonth).fill(false);
 
@@ -102,32 +101,32 @@ export function HabitTracker({ user }: HabitTrackerProps) {
   const loadMockHabits = () => {
     const mockHabits = [
       {
-        id: "1",
-        title: "Học từ vựng mỗi ngày",
-        description: "Học ít nhất 10 từ mới mỗi ngày",
+        id: '1',
+        title: 'Học từ vựng mỗi ngày',
+        description: 'Học ít nhất 10 từ mới mỗi ngày',
         currentStreak: 5,
         todayCompleted: true,
         weeklyProgress: [true, true, true, true, true, false, false],
         monthlyProgress: generateMockMonthData(5),
         icon: BookOpen,
-        color: "bg-blue-500",
-        bgColor: "bg-blue-100",
-        textColor: "text-blue-600",
-        type: "vocabulary",
+        color: 'bg-blue-500',
+        bgColor: 'bg-blue-100',
+        textColor: 'text-blue-600',
+        type: 'vocabulary',
       },
       {
-        id: "2",
-        title: "Luyện nghe mỗi ngày",
-        description: "Nghe ít nhất 10 phút tiếng Anh mỗi ngày",
+        id: '2',
+        title: 'Luyện nghe mỗi ngày',
+        description: 'Nghe ít nhất 10 phút tiếng Anh mỗi ngày',
         currentStreak: 3,
         todayCompleted: false,
         weeklyProgress: [true, true, true, false, false, false, false],
         monthlyProgress: generateMockMonthData(3),
         icon: Headphones,
-        color: "bg-green-500",
-        bgColor: "bg-green-100",
-        textColor: "text-green-600",
-        type: "listening",
+        color: 'bg-green-500',
+        bgColor: 'bg-green-100',
+        textColor: 'text-green-600',
+        type: 'listening',
       },
     ];
     setHabits(mockHabits);
@@ -143,12 +142,12 @@ export function HabitTracker({ user }: HabitTrackerProps) {
 
     try {
       // Thử tải thói quen từ Firestore
-      const habitsRef = collection(db, "habits");
-      const q = query(habitsRef, where("userId", "==", auth.currentUser.uid));
+      const habitsRef = collection(db, 'habits');
+      const q = query(habitsRef, where('userId', '==', auth.currentUser.uid));
       const querySnapshot = await getDocs(q);
 
       const serverHabits: any[] = [];
-      querySnapshot.forEach((doc) => {
+      querySnapshot.forEach(doc => {
         serverHabits.push({
           id: doc.id,
           ...doc.data(),
@@ -162,18 +161,18 @@ export function HabitTracker({ user }: HabitTrackerProps) {
       }
 
       // Thêm biểu tượng và màu sắc cho thói quen
-      const habitsWithIcons = serverHabits.map((habit, index) => {
+      const habitsWithIcons = serverHabits.map(habit => {
         // Xác định icon dựa trên loại thói quen
         let icon = BookOpen;
-        let color = "bg-blue-500";
-        let bgColor = "bg-blue-100";
-        let textColor = "text-blue-600";
+        let color = 'bg-blue-500';
+        let bgColor = 'bg-blue-100';
+        let textColor = 'text-blue-600';
 
-        if (habit.type === "listening") {
+        if (habit.type === 'listening') {
           icon = Headphones;
-          color = "bg-green-500";
-          bgColor = "bg-green-100";
-          textColor = "text-green-600";
+          color = 'bg-green-500';
+          bgColor = 'bg-green-100';
+          textColor = 'text-green-600';
         }
 
         return {
@@ -187,8 +186,8 @@ export function HabitTracker({ user }: HabitTrackerProps) {
 
       setHabits(habitsWithIcons);
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.error("Failed to load habits:", error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to load habits:', error);
       }
 
       // Nếu có lỗi, hiển thị dữ liệu mẫu
@@ -201,32 +200,32 @@ export function HabitTracker({ user }: HabitTrackerProps) {
     if (!auth.currentUser) return;
 
     try {
-      const habitsRef = collection(db, "habits");
+      const habitsRef = collection(db, 'habits');
 
       // Thói quen học từ vựng
       const vocabularyHabit = {
         userId: auth.currentUser.uid,
-        title: "Học từ vựng mỗi ngày",
-        description: "Học ít nhất 10 từ mới mỗi ngày",
+        title: 'Học từ vựng mỗi ngày',
+        description: 'Học ít nhất 10 từ mới mỗi ngày',
         currentStreak: 0,
         todayCompleted: false,
         weeklyProgress: [false, false, false, false, false, false, false],
         monthlyProgress: Array(30).fill(false),
         createdAt: Timestamp.now(),
-        type: "vocabulary",
+        type: 'vocabulary',
       };
 
       // Thói quen luyện nghe
       const listeningHabit = {
         userId: auth.currentUser.uid,
-        title: "Luyện nghe mỗi ngày",
-        description: "Nghe ít nhất 10 phút tiếng Anh mỗi ngày",
+        title: 'Luyện nghe mỗi ngày',
+        description: 'Nghe ít nhất 10 phút tiếng Anh mỗi ngày',
         currentStreak: 0,
         todayCompleted: false,
         weeklyProgress: [false, false, false, false, false, false, false],
         monthlyProgress: Array(30).fill(false),
         createdAt: Timestamp.now(),
-        type: "listening",
+        type: 'listening',
       };
 
       // Lưu vào Firestore
@@ -238,8 +237,8 @@ export function HabitTracker({ user }: HabitTrackerProps) {
       // Tải lại thói quen
       loadHabits();
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.error("Failed to create default habits:", error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to create default habits:', error);
       }
       loadMockHabits();
     }
@@ -261,18 +260,18 @@ export function HabitTracker({ user }: HabitTrackerProps) {
     setLoading(true);
     try {
       // Tìm thói quen cần cập nhật
-      const habitToToggle = habits.find((h) => h.id === habitId);
+      const habitToToggle = habits.find(h => h.id === habitId);
       if (!habitToToggle) return;
 
       // Nếu ID bắt đầu bằng "local-", đây là dữ liệu mẫu, chỉ cập nhật trạng thái local
-      if (habitId.startsWith("local-")) {
+      if (habitId.startsWith('local-')) {
         updateLocalHabitState(habitId);
         setLoading(false);
         return;
       }
 
       // Cập nhật trong Firestore
-      const habitRef = doc(db, "habits", habitId);
+      const habitRef = doc(db, 'habits', habitId);
 
       // Lấy ngày hiện tại
       const today = new Date();
@@ -306,8 +305,8 @@ export function HabitTracker({ user }: HabitTrackerProps) {
       // Cập nhật trạng thái local
       updateLocalHabitState(habitId);
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.error("Error toggling habit:", error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error toggling habit:', error);
       }
       // Nếu có lỗi, vẫn cập nhật UI để trải nghiệm người dùng tốt hơn
       updateLocalHabitState(habitId);
@@ -319,7 +318,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
   // Cập nhật trạng thái local của thói quen
   const updateLocalHabitState = (habitId: string) => {
     // Tìm thói quen cần cập nhật
-    const habitToToggle = habits.find((h) => h.id === habitId);
+    const habitToToggle = habits.find(h => h.id === habitId);
     if (!habitToToggle) return;
 
     // Lấy ngày hiện tại
@@ -343,7 +342,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
     newMonthlyProgress[dayOfMonth] = newTodayCompleted;
 
     // Cập nhật state
-    const updatedHabits = habits.map((habit) =>
+    const updatedHabits = habits.map(habit =>
       habit.id === habitId
         ? {
             ...habit,
@@ -352,14 +351,14 @@ export function HabitTracker({ user }: HabitTrackerProps) {
             weeklyProgress: newWeeklyProgress,
             monthlyProgress: newMonthlyProgress,
           }
-        : habit
+        : habit,
     );
 
     setHabits(updatedHabits);
 
     // Cập nhật selected habit nếu đang ở chế độ xem chi tiết
     if (selectedHabit && selectedHabit.id === habitId) {
-      setSelectedHabit(updatedHabits.find((h) => h.id === habitId) || null);
+      setSelectedHabit(updatedHabits.find(h => h.id === habitId) || null);
     }
 
     // Hiệu ứng phản hồi khi đánh dấu hoàn thành
@@ -368,12 +367,12 @@ export function HabitTracker({ user }: HabitTrackerProps) {
       const habitCard = document.getElementById(`habit-card-${habitId}`);
       if (habitCard) {
         // Thêm class animation và xóa sau khi animation kết thúc
-        habitCard.classList.add("scale-[1.02]", "bg-green-50", "shadow-lg");
+        habitCard.classList.add('scale-[1.02]', 'bg-green-50', 'shadow-lg');
         setTimeout(() => {
           habitCard.classList.remove(
-            "scale-[1.02]",
-            "bg-green-50",
-            "shadow-lg"
+            'scale-[1.02]',
+            'bg-green-50',
+            'shadow-lg',
           );
         }, 800);
       }
@@ -382,29 +381,29 @@ export function HabitTracker({ user }: HabitTrackerProps) {
 
   const viewHabitDetail = (habit: Habit) => {
     setSelectedHabit(habit);
-    setCurrentView("detail");
+    setCurrentView('detail');
   };
 
   const getDayLabel = (index: number) => {
-    const days = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
+    const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
     const today = new Date().getDay();
     const dayIndex = (today - 6 + index) % 7;
     return days[dayIndex < 0 ? dayIndex + 7 : dayIndex];
   };
 
-  const completedToday = habits.filter((h) => h.todayCompleted).length;
+  const completedToday = habits.filter(h => h.todayCompleted).length;
   const totalHabits = habits.length;
   const completionRate =
     totalHabits > 0 ? (completedToday / totalHabits) * 100 : 0;
 
-  if (currentView === "detail" && selectedHabit) {
+  if (currentView === 'detail' && selectedHabit) {
     return (
       <div className="h-full overflow-y-auto p-6 pb-24 relative bg-white dark:bg-black">
         {/* Fixed Add New Habit Button */}
         <div className="fixed bottom-6 right-6 left-6 z-10">
           <Button
             className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl shadow-lg"
-            onClick={() => setCurrentView("list")}
+            onClick={() => setCurrentView('list')}
             disabled={loading}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -416,7 +415,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
         <div className="mb-6">
           <Button
             variant="ghost"
-            onClick={() => setCurrentView("list")}
+            onClick={() => setCurrentView('list')}
             className="pl-0 text-blue-600 mb-4"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -481,7 +480,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                 <div
                   key={index}
                   className="flex-1 text-center"
-                  onClick={(e) => {
+                  onClick={e => {
                     e.stopPropagation();
                     // Update weekly progress for the selected day
                     const newWeeklyProgress = [...selectedHabit.weeklyProgress];
@@ -493,8 +492,8 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                   <div
                     className={`w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-1 ${
                       completed
-                        ? selectedHabit.color + " text-white"
-                        : "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500"
+                        ? selectedHabit.color + ' text-white'
+                        : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
                     } cursor-pointer transition-all duration-200 hover:opacity-80 active:scale-95`}
                   >
                     {completed && <Check className="h-5 w-5" />}
@@ -514,8 +513,8 @@ export function HabitTracker({ user }: HabitTrackerProps) {
           disabled={loading}
           className={`w-full rounded-xl transition-all duration-300 ${
             selectedHabit.todayCompleted
-              ? "bg-green-600 hover:bg-green-700 text-white scale-100"
-              : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+              ? 'bg-green-600 hover:bg-green-700 text-white scale-100'
+              : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
           }`}
         >
           {loading ? (
@@ -526,7 +525,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
               Đã hoàn thành
             </>
           ) : (
-            "Đánh dấu hoàn thành"
+            'Đánh dấu hoàn thành'
           )}
         </Button>
       </div>
@@ -567,7 +566,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
           <CardDescription className="text-green-700">
             {habits.length > 0
               ? `${completedToday}/${totalHabits} thói quen đã hoàn thành`
-              : "Chưa có thói quen nào để theo dõi"}
+              : 'Chưa có thói quen nào để theo dõi'}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -584,19 +583,19 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                   Đánh dấu nhanh:
                 </h3>
                 <div className="space-y-2">
-                  {habits.map((habit) => (
+                  {habits.map(habit => (
                     <div
                       key={habit.id}
                       className={`flex items-center justify-between p-3 rounded-lg border ${
                         habit.todayCompleted
-                          ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
-                          : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                          ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                          : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
                       } transition-all duration-200`}
                     >
                       <div
                         className="flex items-center"
                         onClick={() => viewHabitDetail(habit)}
-                        style={{ cursor: "pointer" }}
+                        style={{ cursor: 'pointer' }}
                       >
                         <div
                           className={`w-8 h-8 rounded-lg ${habit.bgColor} flex items-center justify-center mr-3`}
@@ -608,8 +607,8 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                         <span
                           className={`text-sm font-medium ${
                             habit.todayCompleted
-                              ? "text-green-700"
-                              : "text-gray-700"
+                              ? 'text-green-700'
+                              : 'text-gray-700'
                           }`}
                         >
                           {habit.title}
@@ -620,8 +619,8 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                         size="sm"
                         className={`rounded-full w-8 h-8 p-0 ${
                           habit.todayCompleted
-                            ? "bg-green-500 text-white hover:bg-green-600"
-                            : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                            ? 'bg-green-500 text-white hover:bg-green-600'
+                            : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                         }`}
                         onClick={() => toggleHabitCompletion(habit.id)}
                       >
@@ -685,7 +684,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
         </Card>
       ) : (
         <div className="space-y-4 mb-6">
-          {habits.map((habit) => {
+          {habits.map(habit => {
             const Icon = habit.icon;
             const completedDays =
               habit.weeklyProgress?.filter(Boolean).length || 0;
@@ -714,7 +713,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                     </div>
                     <div className="flex items-center space-x-2">
                       <Badge
-                        variant={habit.todayCompleted ? "default" : "secondary"}
+                        variant={habit.todayCompleted ? 'default' : 'secondary'}
                       >
                         {habit.currentStreak || 0} ngày
                       </Badge>
@@ -722,7 +721,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           setHabitToDelete(habit);
                           setDeleteDialogOpen(true);
@@ -758,7 +757,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                         <div
                           key={index}
                           className="flex-1 text-center"
-                          onClick={(e) => {
+                          onClick={e => {
                             e.stopPropagation();
                             // Update weekly progress for the selected day
                             const newWeeklyProgress = [...habit.weeklyProgress];
@@ -770,8 +769,8 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                           <div
                             className={`w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-1 ${
                               completed
-                                ? habit.color + " text-white"
-                                : "bg-gray-200 text-gray-400"
+                                ? habit.color + ' text-white'
+                                : 'bg-gray-200 text-gray-400'
                             } cursor-pointer transition-all duration-200 hover:opacity-80 active:scale-95`}
                           >
                             {completed && <Check className="h-5 w-5" />}
@@ -786,15 +785,15 @@ export function HabitTracker({ user }: HabitTrackerProps) {
 
                   {/* Action Button */}
                   <Button
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation(); // Prevent card click event
                       toggleHabitCompletion(habit.id);
                     }}
                     disabled={loading}
                     className={`w-full rounded-xl transition-all duration-300 ${
                       habit.todayCompleted
-                        ? "bg-green-600 hover:bg-green-700 text-white scale-100"
-                        : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                        ? 'bg-green-600 hover:bg-green-700 text-white scale-100'
+                        : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                     }`}
                   >
                     {loading ? (
@@ -805,7 +804,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                         Đã hoàn thành
                       </>
                     ) : (
-                      "Đánh dấu hoàn thành"
+                      'Đánh dấu hoàn thành'
                     )}
                   </Button>
                 </CardContent>
@@ -849,24 +848,24 @@ export function HabitTracker({ user }: HabitTrackerProps) {
 
     try {
       // Xóa khỏi state
-      setHabits(habits.filter((habit) => habit.id !== habitToDelete.id));
+      setHabits(habits.filter(habit => habit.id !== habitToDelete.id));
 
       // Xóa khỏi Firestore nếu có auth.currentUser và không phải habit local
       if (
         auth.currentUser &&
         habitToDelete.id &&
-        !habitToDelete.id.startsWith("local-")
+        !habitToDelete.id.startsWith('local-')
       ) {
         try {
-          await deleteDoc(doc(db, "habits", habitToDelete.id));
+          await deleteDoc(doc(db, 'habits', habitToDelete.id));
           // Chỉ log trong môi trường development
-          if (process.env.NODE_ENV === "development") {
+          if (process.env.NODE_ENV === 'development') {
             console.log(`Deleted habit ${habitToDelete.id} from Firestore`);
           }
         } catch (error) {
           // Chỉ log trong môi trường development
-          if (process.env.NODE_ENV === "development") {
-            console.error("Error deleting habit from Firestore:", error);
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Error deleting habit from Firestore:', error);
           }
         }
       }
@@ -876,8 +875,8 @@ export function HabitTracker({ user }: HabitTrackerProps) {
       setHabitToDelete(null);
     } catch (error) {
       // Chỉ log trong môi trường development
-      if (process.env.NODE_ENV === "development") {
-        console.error("Failed to delete habit:", error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to delete habit:', error);
       }
     }
   };

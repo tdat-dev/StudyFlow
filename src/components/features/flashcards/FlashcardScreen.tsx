@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useCallback } from "react";
-import Button from "../../../components/ui/button";
+import React, { useState, useEffect, useCallback } from 'react';
+import Button from '../../../components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../../../components/ui/card";
-import { Badge } from "../../../components/ui/badge";
+} from '../../../components/ui/card';
+import { Badge } from '../../../components/ui/badge';
 import {
   ArrowLeft,
   RotateCcw,
@@ -22,7 +22,7 @@ import {
   Minus,
   Edit,
   Save,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   collection,
   query,
@@ -33,7 +33,7 @@ import {
   addDoc,
   deleteDoc,
   Timestamp,
-} from "firebase/firestore";
+} from 'firebase/firestore';
 import {
   Dialog,
   DialogContent,
@@ -41,10 +41,10 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "../../../components/ui/dialog";
-import { Input } from "../../../components/ui/input";
-import { Label } from "../../../components/ui/label";
-import { SwipeableFlashcard } from "./SwipeableFlashcard";
+} from '../../../components/ui/dialog';
+import { Input } from '../../../components/ui/input';
+import { Label } from '../../../components/ui/label';
+import { SwipeableFlashcard } from './SwipeableFlashcard';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -54,10 +54,10 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "../../../components/ui/alert-dialog";
-import { auth, db } from "../../../services/firebase/config";
-import { generateGeminiResponse } from "../../../services/gemini/config";
-import { useLevel } from "../../../contexts/LevelContext";
+} from '../../../components/ui/alert-dialog';
+import { auth, db } from '../../../services/firebase/config';
+import { generateGeminiResponse } from '../../../services/gemini/config';
+import { useLevel } from '../../../contexts/LevelContext';
 
 interface FlashcardsScreenProps {
   user: any;
@@ -74,7 +74,7 @@ interface Deck {
 }
 
 export function FlashcardScreen({ user }: FlashcardsScreenProps) {
-  const [currentView, setCurrentView] = useState<"list" | "player">("list");
+  const [currentView, setCurrentView] = useState<'list' | 'player'>('list');
   const [decks, setDecks] = useState<Deck[]>([]);
   const [selectedDeck, setSelectedDeck] = useState<Deck | null>(null);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
@@ -86,13 +86,13 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
   // State cho AI Flashcard Creator
   const [aiDialogOpen, setAiDialogOpen] = useState(false);
   const [creatingDeck, setCreatingDeck] = useState(false);
-  const [newDeckTitle, setNewDeckTitle] = useState("");
-  const [newDeckTopic, setNewDeckTopic] = useState("");
-  const [newDeckSubject, setNewDeckSubject] = useState("Tiếng Anh");
+  const [newDeckTitle, setNewDeckTitle] = useState('');
+  const [newDeckTopic, setNewDeckTopic] = useState('');
+  const [newDeckSubject, setNewDeckSubject] = useState('Tiếng Anh');
   const [cardCount, setCardCount] = useState(5);
   const [generatedCards, setGeneratedCards] = useState<any[]>([]);
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [cardLanguage, setCardLanguage] = useState("front-en-back-vi");
+  const [cardLanguage, setCardLanguage] = useState('front-en-back-vi');
 
   // State cho xóa deck
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -110,15 +110,15 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
     try {
       // Nếu có auth.currentUser, tải dữ liệu từ Firestore
       if (auth.currentUser) {
-        const flashcardsRef = collection(db, "flashcard_decks");
+        const flashcardsRef = collection(db, 'flashcard_decks');
         const q = query(
           flashcardsRef,
-          where("userId", "==", auth.currentUser.uid)
+          where('userId', '==', auth.currentUser.uid),
         );
         const querySnapshot = await getDocs(q);
 
         const serverDecks: any[] = [];
-        querySnapshot.forEach((doc) => {
+        querySnapshot.forEach(doc => {
           serverDecks.push({
             id: doc.id,
             ...doc.data(),
@@ -127,6 +127,7 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
 
         // Nếu không có deck nào, tạo deck mặc định và lưu vào Firestore
         if (serverDecks.length === 0) {
+          // eslint-disable-next-line react-hooks/exhaustive-deps
           await createDefaultFlashcardDeck();
           return;
         }
@@ -136,10 +137,10 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
           ...deck,
           color:
             index % 3 === 0
-              ? "bg-blue-500"
+              ? 'bg-blue-500'
               : index % 3 === 1
-              ? "bg-green-500"
-              : "bg-purple-500",
+                ? 'bg-green-500'
+                : 'bg-purple-500',
         }));
 
         setDecks(decksWithColors);
@@ -148,8 +149,8 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
         loadMockFlashcards();
       }
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.error("Failed to load flashcards:", error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to load flashcards:', error);
       }
       // Nếu có lỗi, hiển thị dữ liệu mẫu
       loadMockFlashcards();
@@ -166,85 +167,85 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
   const loadMockFlashcards = () => {
     const mockDecks = [
       {
-        id: "local-1",
-        title: "English Essentials",
-        description: "Từ vựng tiếng Anh cơ bản",
+        id: 'local-1',
+        title: 'English Essentials',
+        description: 'Từ vựng tiếng Anh cơ bản',
         total: 20,
         learned: 5,
-        color: "bg-blue-500",
+        color: 'bg-blue-500',
         cards: [
           {
-            id: "1",
-            front: "Hello",
-            back: "Xin chào",
-            example: "Hello, how are you?",
-            exampleTranslation: "Xin chào, bạn khỏe không?",
+            id: '1',
+            front: 'Hello',
+            back: 'Xin chào',
+            example: 'Hello, how are you?',
+            exampleTranslation: 'Xin chào, bạn khỏe không?',
             learned: false,
           },
           {
-            id: "2",
-            front: "Goodbye",
-            back: "Tạm biệt",
-            example: "Goodbye, see you tomorrow.",
-            exampleTranslation: "Tạm biệt, hẹn gặp lại ngày mai.",
+            id: '2',
+            front: 'Goodbye',
+            back: 'Tạm biệt',
+            example: 'Goodbye, see you tomorrow.',
+            exampleTranslation: 'Tạm biệt, hẹn gặp lại ngày mai.',
             learned: false,
           },
           {
-            id: "3",
-            front: "Thank you",
-            back: "Cảm ơn",
-            example: "Thank you for your help.",
-            exampleTranslation: "Cảm ơn vì sự giúp đỡ của bạn.",
+            id: '3',
+            front: 'Thank you',
+            back: 'Cảm ơn',
+            example: 'Thank you for your help.',
+            exampleTranslation: 'Cảm ơn vì sự giúp đỡ của bạn.',
             learned: false,
           },
           {
-            id: "4",
-            front: "Please",
-            back: "Làm ơn",
-            example: "Please help me with this.",
-            exampleTranslation: "Làm ơn giúp tôi việc này.",
+            id: '4',
+            front: 'Please',
+            back: 'Làm ơn',
+            example: 'Please help me with this.',
+            exampleTranslation: 'Làm ơn giúp tôi việc này.',
             learned: false,
           },
           {
-            id: "5",
-            front: "Sorry",
-            back: "Xin lỗi",
+            id: '5',
+            front: 'Sorry',
+            back: 'Xin lỗi',
             example: "I'm sorry for being late.",
-            exampleTranslation: "Tôi xin lỗi vì đến muộn.",
+            exampleTranslation: 'Tôi xin lỗi vì đến muộn.',
             learned: false,
           },
         ],
       },
       {
-        id: "local-2",
-        title: "Business English",
-        description: "Từ vựng tiếng Anh thương mại",
+        id: 'local-2',
+        title: 'Business English',
+        description: 'Từ vựng tiếng Anh thương mại',
         total: 15,
         learned: 3,
-        color: "bg-green-500",
+        color: 'bg-green-500',
         cards: [
           {
-            id: "1",
-            front: "Meeting",
-            back: "Cuộc họp",
-            example: "We have a meeting at 2 PM.",
-            exampleTranslation: "Chúng ta có một cuộc họp lúc 2 giờ chiều.",
+            id: '1',
+            front: 'Meeting',
+            back: 'Cuộc họp',
+            example: 'We have a meeting at 2 PM.',
+            exampleTranslation: 'Chúng ta có một cuộc họp lúc 2 giờ chiều.',
             learned: false,
           },
           {
-            id: "2",
-            front: "Deadline",
-            back: "Thời hạn",
-            example: "The deadline for this project is Friday.",
-            exampleTranslation: "Thời hạn cho dự án này là thứ Sáu.",
+            id: '2',
+            front: 'Deadline',
+            back: 'Thời hạn',
+            example: 'The deadline for this project is Friday.',
+            exampleTranslation: 'Thời hạn cho dự án này là thứ Sáu.',
             learned: false,
           },
           {
-            id: "3",
-            front: "Budget",
-            back: "Ngân sách",
-            example: "We need to stay within budget.",
-            exampleTranslation: "Chúng ta cần giữ trong ngân sách.",
+            id: '3',
+            front: 'Budget',
+            back: 'Ngân sách',
+            example: 'We need to stay within budget.',
+            exampleTranslation: 'Chúng ta cần giữ trong ngân sách.',
             learned: false,
           },
         ],
@@ -259,55 +260,55 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
     if (!auth.currentUser) return;
 
     try {
-      const flashcardsRef = collection(db, "flashcard_decks");
+      const flashcardsRef = collection(db, 'flashcard_decks');
 
       // Bộ flashcard tiếng Anh cơ bản
       const basicEnglishDeck = {
         userId: auth.currentUser.uid,
-        title: "English Essentials",
-        description: "Từ vựng tiếng Anh cơ bản",
+        title: 'English Essentials',
+        description: 'Từ vựng tiếng Anh cơ bản',
         total: 5,
         learned: 0,
         createdAt: Timestamp.now(),
         cards: [
           {
-            id: "1",
-            front: "Hello",
-            back: "Xin chào",
-            example: "Hello, how are you?",
-            exampleTranslation: "Xin chào, bạn khỏe không?",
+            id: '1',
+            front: 'Hello',
+            back: 'Xin chào',
+            example: 'Hello, how are you?',
+            exampleTranslation: 'Xin chào, bạn khỏe không?',
             learned: false,
           },
           {
-            id: "2",
-            front: "Goodbye",
-            back: "Tạm biệt",
-            example: "Goodbye, see you tomorrow.",
-            exampleTranslation: "Tạm biệt, hẹn gặp lại ngày mai.",
+            id: '2',
+            front: 'Goodbye',
+            back: 'Tạm biệt',
+            example: 'Goodbye, see you tomorrow.',
+            exampleTranslation: 'Tạm biệt, hẹn gặp lại ngày mai.',
             learned: false,
           },
           {
-            id: "3",
-            front: "Thank you",
-            back: "Cảm ơn",
-            example: "Thank you for your help.",
-            exampleTranslation: "Cảm ơn vì sự giúp đỡ của bạn.",
+            id: '3',
+            front: 'Thank you',
+            back: 'Cảm ơn',
+            example: 'Thank you for your help.',
+            exampleTranslation: 'Cảm ơn vì sự giúp đỡ của bạn.',
             learned: false,
           },
           {
-            id: "4",
-            front: "Please",
-            back: "Làm ơn",
-            example: "Please help me with this.",
-            exampleTranslation: "Làm ơn giúp tôi việc này.",
+            id: '4',
+            front: 'Please',
+            back: 'Làm ơn',
+            example: 'Please help me with this.',
+            exampleTranslation: 'Làm ơn giúp tôi việc này.',
             learned: false,
           },
           {
-            id: "5",
-            front: "Sorry",
-            back: "Xin lỗi",
+            id: '5',
+            front: 'Sorry',
+            back: 'Xin lỗi',
             example: "I'm sorry for being late.",
-            exampleTranslation: "Tôi xin lỗi vì đến muộn.",
+            exampleTranslation: 'Tôi xin lỗi vì đến muộn.',
             learned: false,
           },
         ],
@@ -319,8 +320,8 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
       // Tải lại flashcards
       loadFlashcards();
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.error("Failed to create default flashcard deck:", error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to create default flashcard deck:', error);
       }
       loadMockFlashcards();
     }
@@ -328,7 +329,7 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
 
   const startDeck = (deck: Deck) => {
     setSelectedDeck(deck);
-    setCurrentView("player");
+    setCurrentView('player');
     setCurrentCardIndex(0);
     setIsFlipped(false);
   };
@@ -354,7 +355,7 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
     if (!card) return;
 
     // Update card in state
-    const updatedDecks = decks.map((deck) => {
+    const updatedDecks = decks.map(deck => {
       if (deck.id === selectedDeck.id) {
         const updatedCards = deck.cards.map((c, idx) => {
           if (idx === currentCardIndex) {
@@ -377,14 +378,14 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
     setDecks(updatedDecks);
 
     // Update selected deck
-    const updatedDeck = updatedDecks.find((d) => d.id === selectedDeck.id);
+    const updatedDeck = updatedDecks.find(d => d.id === selectedDeck.id);
     if (updatedDeck) {
       setSelectedDeck(updatedDeck);
     }
 
     // Award XP for studying flashcard
     if (learned && !card.learned) {
-      await addUserXP("COMPLETE_FLASHCARD");
+      await addUserXP('COMPLETE_FLASHCARD');
       await updateStats({ flashcardsStudied: userStats.flashcardsStudied + 1 });
     }
 
@@ -395,10 +396,10 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
     if (
       auth.currentUser &&
       selectedDeck.id &&
-      !selectedDeck.id.startsWith("local-")
+      !selectedDeck.id.startsWith('local-')
     ) {
       try {
-        const deckRef = doc(db, "flashcard_decks", selectedDeck.id);
+        const deckRef = doc(db, 'flashcard_decks', selectedDeck.id);
         await updateDoc(deckRef, {
           [`cards.${currentCardIndex}.learned`]: learned,
           learned: learned
@@ -406,7 +407,7 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
             : selectedDeck.learned - (card.learned ? 1 : 0),
         });
       } catch (error) {
-        console.error("Failed to update card status:", error);
+        console.error('Failed to update card status:', error);
       }
     }
   };
@@ -430,17 +431,17 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
 
         // Loại bỏ các ký hiệu markdown và làm sạch câu ví dụ
         newExample = newExample
-          .replace(/\*\*/g, "") // Loại bỏ dấu **
-          .replace(/\*/g, "") // Loại bỏ dấu *
-          .replace(/`/g, "") // Loại bỏ dấu `
-          .replace(/^["'](.*)["']$/, "$1") // Loại bỏ dấu ngoặc kép/đơn bao quanh
+          .replace(/\*\*/g, '') // Loại bỏ dấu **
+          .replace(/\*/g, '') // Loại bỏ dấu *
+          .replace(/`/g, '') // Loại bỏ dấu `
+          .replace(/^["'](.*)["']$/, '$1') // Loại bỏ dấu ngoặc kép/đơn bao quanh
           .trim();
 
         if (!newExample || newExample.length < 10) {
-          throw new Error("Invalid response from AI");
+          throw new Error('Invalid response from AI');
         }
       } catch (aiError) {
-        console.error("Error calling AI:", aiError);
+        console.error('Error calling AI:', aiError);
         // Fallback nếu API lỗi
         const newExamples = [
           `I use the word "${card.front}" in my daily conversation.`,
@@ -452,7 +453,7 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
       }
 
       // Update the card with a new example
-      const updatedDecks = decks.map((deck) => {
+      const updatedDecks = decks.map(deck => {
         if (deck.id === selectedDeck.id) {
           const updatedCards = deck.cards.map((c, idx) => {
             if (idx === currentCardIndex) {
@@ -472,12 +473,12 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
       setDecks(updatedDecks);
 
       // Update selected deck
-      const updatedDeck = updatedDecks.find((d) => d.id === selectedDeck.id);
+      const updatedDeck = updatedDecks.find(d => d.id === selectedDeck.id);
       if (updatedDeck) {
         setSelectedDeck(updatedDeck);
       }
     } catch (error) {
-      console.error("Failed to generate new example:", error);
+      console.error('Failed to generate new example:', error);
     } finally {
       setGeneratingExample(false);
     }
@@ -489,24 +490,24 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
 
     try {
       // Xóa khỏi state
-      setDecks(decks.filter((deck) => deck.id !== deckToDelete.id));
+      setDecks(decks.filter(deck => deck.id !== deckToDelete.id));
 
       // Xóa khỏi Firestore nếu có auth.currentUser và không phải deck local
       if (
         auth.currentUser &&
         deckToDelete.id &&
-        !deckToDelete.id.startsWith("local-")
+        !deckToDelete.id.startsWith('local-')
       ) {
         try {
-          await deleteDoc(doc(db, "flashcard_decks", deckToDelete.id));
+          await deleteDoc(doc(db, 'flashcard_decks', deckToDelete.id));
           // Chỉ log trong môi trường development
-          if (process.env.NODE_ENV === "development") {
+          if (process.env.NODE_ENV === 'development') {
             console.log(`Deleted deck ${deckToDelete.id} from Firestore`);
           }
         } catch (error) {
           // Chỉ log trong môi trường development
-          if (process.env.NODE_ENV === "development") {
-            console.error("Error deleting deck from Firestore:", error);
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Error deleting deck from Firestore:', error);
           }
         }
       }
@@ -516,8 +517,8 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
       setDeckToDelete(null);
     } catch (error) {
       // Chỉ log trong môi trường development
-      if (process.env.NODE_ENV === "development") {
-        console.error("Failed to delete deck:", error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to delete deck:', error);
       }
     }
   };
@@ -536,60 +537,60 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
 
     try {
       // Tự động xác định ngôn ngữ dựa vào môn học
-      let frontLanguage = "tiếng Anh";
-      let backLanguage = "tiếng Việt";
-      let selectedCardLanguage = "front-en-back-vi";
+      let frontLanguage = 'tiếng Anh';
+      let backLanguage = 'tiếng Việt';
+      let selectedCardLanguage = 'front-en-back-vi';
 
       // Tự động xác định ngôn ngữ dựa vào môn học
-      if (newDeckSubject === "Tiếng Anh") {
-        frontLanguage = "tiếng Anh";
-        backLanguage = "tiếng Việt";
-        selectedCardLanguage = "front-en-back-vi";
-      } else if (newDeckSubject === "Tiếng Pháp") {
-        frontLanguage = "tiếng Pháp";
-        backLanguage = "tiếng Việt";
-        selectedCardLanguage = "front-fr-back-vi";
-      } else if (newDeckSubject === "Tiếng Nhật") {
-        frontLanguage = "tiếng Nhật";
-        backLanguage = "tiếng Việt";
-        selectedCardLanguage = "front-jp-back-vi";
-      } else if (newDeckSubject === "Tiếng Trung") {
-        frontLanguage = "tiếng Trung";
-        backLanguage = "tiếng Việt";
-        selectedCardLanguage = "front-cn-back-vi";
-      } else if (newDeckSubject === "Tiếng Hàn") {
-        frontLanguage = "tiếng Hàn";
-        backLanguage = "tiếng Việt";
-        selectedCardLanguage = "front-kr-back-vi";
+      if (newDeckSubject === 'Tiếng Anh') {
+        frontLanguage = 'tiếng Anh';
+        backLanguage = 'tiếng Việt';
+        selectedCardLanguage = 'front-en-back-vi';
+      } else if (newDeckSubject === 'Tiếng Pháp') {
+        frontLanguage = 'tiếng Pháp';
+        backLanguage = 'tiếng Việt';
+        selectedCardLanguage = 'front-fr-back-vi';
+      } else if (newDeckSubject === 'Tiếng Nhật') {
+        frontLanguage = 'tiếng Nhật';
+        backLanguage = 'tiếng Việt';
+        selectedCardLanguage = 'front-jp-back-vi';
+      } else if (newDeckSubject === 'Tiếng Trung') {
+        frontLanguage = 'tiếng Trung';
+        backLanguage = 'tiếng Việt';
+        selectedCardLanguage = 'front-cn-back-vi';
+      } else if (newDeckSubject === 'Tiếng Hàn') {
+        frontLanguage = 'tiếng Hàn';
+        backLanguage = 'tiếng Việt';
+        selectedCardLanguage = 'front-kr-back-vi';
       } else {
         // Sử dụng ngôn ngữ đã chọn nếu không phải là môn ngoại ngữ
-        if (cardLanguage === "front-vi-back-en") {
-          frontLanguage = "tiếng Việt";
-          backLanguage = "tiếng Anh";
-        } else if (cardLanguage === "front-fr-back-vi") {
-          frontLanguage = "tiếng Pháp";
-          backLanguage = "tiếng Việt";
-        } else if (cardLanguage === "front-vi-back-fr") {
-          frontLanguage = "tiếng Việt";
-          backLanguage = "tiếng Pháp";
-        } else if (cardLanguage === "front-jp-back-vi") {
-          frontLanguage = "tiếng Nhật";
-          backLanguage = "tiếng Việt";
-        } else if (cardLanguage === "front-vi-back-jp") {
-          frontLanguage = "tiếng Việt";
-          backLanguage = "tiếng Nhật";
-        } else if (cardLanguage === "front-cn-back-vi") {
-          frontLanguage = "tiếng Trung";
-          backLanguage = "tiếng Việt";
-        } else if (cardLanguage === "front-vi-back-cn") {
-          frontLanguage = "tiếng Việt";
-          backLanguage = "tiếng Trung";
-        } else if (cardLanguage === "front-kr-back-vi") {
-          frontLanguage = "tiếng Hàn";
-          backLanguage = "tiếng Việt";
-        } else if (cardLanguage === "front-vi-back-kr") {
-          frontLanguage = "tiếng Việt";
-          backLanguage = "tiếng Hàn";
+        if (cardLanguage === 'front-vi-back-en') {
+          frontLanguage = 'tiếng Việt';
+          backLanguage = 'tiếng Anh';
+        } else if (cardLanguage === 'front-fr-back-vi') {
+          frontLanguage = 'tiếng Pháp';
+          backLanguage = 'tiếng Việt';
+        } else if (cardLanguage === 'front-vi-back-fr') {
+          frontLanguage = 'tiếng Việt';
+          backLanguage = 'tiếng Pháp';
+        } else if (cardLanguage === 'front-jp-back-vi') {
+          frontLanguage = 'tiếng Nhật';
+          backLanguage = 'tiếng Việt';
+        } else if (cardLanguage === 'front-vi-back-jp') {
+          frontLanguage = 'tiếng Việt';
+          backLanguage = 'tiếng Nhật';
+        } else if (cardLanguage === 'front-cn-back-vi') {
+          frontLanguage = 'tiếng Trung';
+          backLanguage = 'tiếng Việt';
+        } else if (cardLanguage === 'front-vi-back-cn') {
+          frontLanguage = 'tiếng Việt';
+          backLanguage = 'tiếng Trung';
+        } else if (cardLanguage === 'front-kr-back-vi') {
+          frontLanguage = 'tiếng Hàn';
+          backLanguage = 'tiếng Việt';
+        } else if (cardLanguage === 'front-vi-back-kr') {
+          frontLanguage = 'tiếng Việt';
+          backLanguage = 'tiếng Hàn';
         }
         selectedCardLanguage = cardLanguage;
       }
@@ -631,61 +632,61 @@ Lưu ý quan trọng:
         if (tableMatch && tableMatch[1]) {
           // Tách các hàng từ bảng
           const rows = tableMatch[1]
-            .split("\n")
-            .filter((row) => row.trim() && row.includes("|"));
+            .split('\n')
+            .filter(row => row.trim() && row.includes('|'));
 
           cards = rows
             .map((row, index) => {
-              const columns = row.split("|").filter((col) => col.trim());
+              const columns = row.split('|').filter(col => col.trim());
 
               // Đảm bảo có ít nhất 2 cột (front và back)
               if (columns.length >= 2) {
                 // Loại bỏ dấu ngoặc kép và các ký hiệu markdown
                 const cleanFront = columns[0]
                   .trim()
-                  .replace(/^"(.*)"$/, "$1") // Loại bỏ dấu ngoặc kép
-                  .replace(/\*\*/g, "") // Loại bỏ dấu **
-                  .replace(/\*/g, "") // Loại bỏ dấu *
-                  .replace(/`/g, "") // Loại bỏ dấu `
-                  .replace(/^-+$/, "") // Loại bỏ dòng chỉ có dấu gạch ngang
-                  .replace(/^-+\s*$/, ""); // Loại bỏ dòng chỉ có dấu gạch ngang và khoảng trắng
+                  .replace(/^"(.*)"$/, '$1') // Loại bỏ dấu ngoặc kép
+                  .replace(/\*\*/g, '') // Loại bỏ dấu **
+                  .replace(/\*/g, '') // Loại bỏ dấu *
+                  .replace(/`/g, '') // Loại bỏ dấu `
+                  .replace(/^-+$/, '') // Loại bỏ dòng chỉ có dấu gạch ngang
+                  .replace(/^-+\s*$/, ''); // Loại bỏ dòng chỉ có dấu gạch ngang và khoảng trắng
 
                 const cleanBack = columns[1]
                   .trim()
-                  .replace(/\*\*/g, "")
-                  .replace(/\*/g, "")
-                  .replace(/`/g, "")
-                  .replace(/^-+$/, "") // Loại bỏ dòng chỉ có dấu gạch ngang
-                  .replace(/^-+\s*$/, ""); // Loại bỏ dòng chỉ có dấu gạch ngang và khoảng trắng
+                  .replace(/\*\*/g, '')
+                  .replace(/\*/g, '')
+                  .replace(/`/g, '')
+                  .replace(/^-+$/, '') // Loại bỏ dòng chỉ có dấu gạch ngang
+                  .replace(/^-+\s*$/, ''); // Loại bỏ dòng chỉ có dấu gạch ngang và khoảng trắng
 
-                let cleanExample = "";
+                let cleanExample = '';
                 if (columns.length > 2) {
                   cleanExample = columns[2]
                     .trim()
-                    .replace(/^"(.*)"$/, "$1")
-                    .replace(/\*\*/g, "")
-                    .replace(/\*/g, "")
-                    .replace(/`/g, "")
-                    .replace(/^-+$/, "") // Loại bỏ dòng chỉ có dấu gạch ngang
-                    .replace(/^-+\s*$/, ""); // Loại bỏ dòng chỉ có dấu gạch ngang và khoảng trắng
+                    .replace(/^"(.*)"$/, '$1')
+                    .replace(/\*\*/g, '')
+                    .replace(/\*/g, '')
+                    .replace(/`/g, '')
+                    .replace(/^-+$/, '') // Loại bỏ dòng chỉ có dấu gạch ngang
+                    .replace(/^-+\s*$/, ''); // Loại bỏ dòng chỉ có dấu gạch ngang và khoảng trắng
                 }
 
-                let cleanExampleTranslation = "";
+                let cleanExampleTranslation = '';
                 if (columns.length > 3) {
                   cleanExampleTranslation = columns[3]
                     .trim()
-                    .replace(/^"(.*)"$/, "$1")
-                    .replace(/\*\*/g, "")
-                    .replace(/\*/g, "")
-                    .replace(/`/g, "")
-                    .replace(/^-+$/, "") // Loại bỏ dòng chỉ có dấu gạch ngang
-                    .replace(/^-+\s*$/, ""); // Loại bỏ dòng chỉ có dấu gạch ngang và khoảng trắng
+                    .replace(/^"(.*)"$/, '$1')
+                    .replace(/\*\*/g, '')
+                    .replace(/\*/g, '')
+                    .replace(/`/g, '')
+                    .replace(/^-+$/, '') // Loại bỏ dòng chỉ có dấu gạch ngang
+                    .replace(/^-+\s*$/, ''); // Loại bỏ dòng chỉ có dấu gạch ngang và khoảng trắng
                 }
 
                 // Kiểm tra nếu front hoặc back chỉ chứa dấu gạch ngang hoặc rỗng, bỏ qua card này
                 if (
-                  cleanFront.trim() === "" ||
-                  cleanBack.trim() === "" ||
+                  cleanFront.trim() === '' ||
+                  cleanBack.trim() === '' ||
                   cleanFront.match(/^-+$/) ||
                   cleanBack.match(/^-+$/)
                 ) {
@@ -703,23 +704,23 @@ Lưu ý quan trọng:
               }
               return null;
             })
-            .filter((card) => card !== null);
+            .filter(card => card !== null);
         }
 
         // Nếu không tìm thấy bảng hoặc không có cards hợp lệ, tạo một số flashcards mặc định
         if (cards.length === 0) {
           // Tìm các cặp từ và nghĩa trong văn bản
-          const lines = aiResponse.split("\n");
+          const lines = aiResponse.split('\n');
           for (const line of lines) {
-            if (line.includes("-") || line.includes(":")) {
-              const parts = line.split(/[-:]/).map((part) => part.trim());
+            if (line.includes('-') || line.includes(':')) {
+              const parts = line.split(/[-:]/).map(part => part.trim());
               if (parts.length >= 2) {
                 cards.push({
                   id: `ai-card-${Date.now()}-${cards.length}`,
-                  front: parts[0].replace(/^"(.*)"$/, "$1"),
+                  front: parts[0].replace(/^"(.*)"$/, '$1'),
                   back: parts[1],
-                  example: "",
-                  exampleTranslation: "",
+                  example: '',
+                  exampleTranslation: '',
                   learned: false,
                 });
               }
@@ -727,7 +728,7 @@ Lưu ý quan trọng:
           }
         }
       } catch (parseError) {
-        console.error("Error parsing AI response:", parseError);
+        console.error('Error parsing AI response:', parseError);
       }
 
       // Nếu vẫn không có cards, tạo một số flashcards mặc định
@@ -735,16 +736,16 @@ Lưu ý quan trọng:
         cards = [
           {
             id: `ai-card-${Date.now()}-1`,
-            front: "Example",
-            back: "Ví dụ",
-            example: "This is an example.",
+            front: 'Example',
+            back: 'Ví dụ',
+            example: 'This is an example.',
             learned: false,
           },
           {
             id: `ai-card-${Date.now()}-2`,
-            front: "Flashcard",
-            back: "Thẻ ghi nhớ",
-            example: "I use flashcards to study.",
+            front: 'Flashcard',
+            back: 'Thẻ ghi nhớ',
+            example: 'I use flashcards to study.',
             learned: false,
           },
         ];
@@ -760,7 +761,7 @@ Lưu ý quan trọng:
 
       // Các bước lưu deck sẽ được thực hiện sau khi người dùng xác nhận từ dialog chỉnh sửa
     } catch (error) {
-      console.error("Failed to create AI flashcards:", error);
+      console.error('Failed to create AI flashcards:', error);
     } finally {
       setCreatingDeck(false);
     }
@@ -768,7 +769,7 @@ Lưu ý quan trọng:
 
   const currentCard = selectedDeck?.cards?.[currentCardIndex];
 
-  if (currentView === "player" && selectedDeck) {
+  if (currentView === 'player' && selectedDeck) {
     return (
       <div className="h-full flex flex-col bg-gradient-to-br from-blue-50 to-purple-50">
         {/* Header */}
@@ -776,7 +777,7 @@ Lưu ý quan trọng:
           <div className="flex items-center justify-between mb-4">
             <Button
               variant="ghost"
-              onClick={() => setCurrentView("list")}
+              onClick={() => setCurrentView('list')}
               className="text-blue-600"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -891,20 +892,20 @@ Lưu ý quan trọng:
         <div className="flex space-x-2">
           <Button
             onClick={() => {
-              setNewDeckTitle("");
-              setNewDeckTopic("");
-              setNewDeckSubject("Tiếng Anh");
+              setNewDeckTitle('');
+              setNewDeckTopic('');
+              setNewDeckSubject('Tiếng Anh');
               setGeneratedCards([
                 {
                   id: `manual-card-${Date.now()}-0`,
-                  front: "",
-                  back: "",
-                  example: "",
-                  exampleTranslation: "",
+                  front: '',
+                  back: '',
+                  example: '',
+                  exampleTranslation: '',
                   learned: false,
                 },
               ]);
-              setCardLanguage("front-en-back-vi");
+              setCardLanguage('front-en-back-vi');
               setShowEditDialog(true);
             }}
             className="bg-blue-500 hover:bg-blue-600 text-white rounded-xl flex items-center"
@@ -928,7 +929,7 @@ Lưu ý quan trọng:
         </div>
       ) : (
         <div className="space-y-4">
-          {decks.map((deck) => {
+          {decks.map(deck => {
             const progress =
               deck.total > 0 ? (deck.learned / deck.total) * 100 : 0;
 
@@ -959,7 +960,7 @@ Lưu ý quan trọng:
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           setDeckToDelete(deck);
                           setDeleteDialogOpen(true);
@@ -990,14 +991,14 @@ Lưu ý quan trọng:
                   </div>
 
                   <Button
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       startDeck(deck);
                     }}
                     className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl"
                     disabled={!deck.cards || deck.cards.length === 0}
                   >
-                    {deck.cards?.length > 0 ? "Bắt đầu học" : "Chưa có thẻ"}
+                    {deck.cards?.length > 0 ? 'Bắt đầu học' : 'Chưa có thẻ'}
                   </Button>
                 </CardContent>
               </Card>
@@ -1023,7 +1024,7 @@ Lưu ý quan trọng:
               <select
                 id="subject"
                 value={newDeckSubject}
-                onChange={(e) => setNewDeckSubject(e.target.value)}
+                onChange={e => setNewDeckSubject(e.target.value)}
                 className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <option value="Tiếng Anh">Tiếng Anh</option>
@@ -1048,7 +1049,7 @@ Lưu ý quan trọng:
               <Input
                 id="topic"
                 value={newDeckTopic}
-                onChange={(e) => setNewDeckTopic(e.target.value)}
+                onChange={e => setNewDeckTopic(e.target.value)}
                 className="col-span-3"
                 placeholder="Từ vựng học thuật, Ngữ pháp cơ bản..."
               />
@@ -1056,11 +1057,11 @@ Lưu ý quan trọng:
 
             {/* Chỉ hiển thị lựa chọn ngôn ngữ cho các môn không phải ngoại ngữ */}
             {![
-              "Tiếng Anh",
-              "Tiếng Pháp",
-              "Tiếng Nhật",
-              "Tiếng Trung",
-              "Tiếng Hàn",
+              'Tiếng Anh',
+              'Tiếng Pháp',
+              'Tiếng Nhật',
+              'Tiếng Trung',
+              'Tiếng Hàn',
             ].includes(newDeckSubject) && (
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="cardLanguage" className="text-right">
@@ -1069,7 +1070,7 @@ Lưu ý quan trọng:
                 <select
                   id="cardLanguage"
                   value={cardLanguage}
-                  onChange={(e) => setCardLanguage(e.target.value)}
+                  onChange={e => setCardLanguage(e.target.value)}
                   className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <option value="front-en-back-vi">
@@ -1113,7 +1114,7 @@ Lưu ý quan trọng:
               <Input
                 id="title"
                 value={newDeckTitle}
-                onChange={(e) => setNewDeckTitle(e.target.value)}
+                onChange={e => setNewDeckTitle(e.target.value)}
                 className="col-span-3"
                 placeholder="Tiêu đề cho bộ flashcards"
               />
@@ -1218,7 +1219,7 @@ Lưu ý quan trọng:
                       className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
                       onClick={() => {
                         const updatedCards = generatedCards.filter(
-                          (_, i) => i !== index
+                          (_, i) => i !== index,
                         );
                         setGeneratedCards(updatedCards);
                       }}
@@ -1235,7 +1236,7 @@ Lưu ý quan trọng:
                     <Input
                       id={`front-${index}`}
                       value={card.front}
-                      onChange={(e) => {
+                      onChange={e => {
                         const updatedCards = [...generatedCards];
                         updatedCards[index].front = e.target.value;
                         setGeneratedCards(updatedCards);
@@ -1247,7 +1248,7 @@ Lưu ý quan trọng:
                     <Input
                       id={`back-${index}`}
                       value={card.back}
-                      onChange={(e) => {
+                      onChange={e => {
                         const updatedCards = [...generatedCards];
                         updatedCards[index].back = e.target.value;
                         setGeneratedCards(updatedCards);
@@ -1264,7 +1265,7 @@ Lưu ý quan trọng:
                     <Input
                       id={`example-${index}`}
                       value={card.example}
-                      onChange={(e) => {
+                      onChange={e => {
                         const updatedCards = [...generatedCards];
                         updatedCards[index].example = e.target.value;
                         setGeneratedCards(updatedCards);
@@ -1277,8 +1278,8 @@ Lưu ý quan trọng:
                     </Label>
                     <Input
                       id={`exampleTranslation-${index}`}
-                      value={card.exampleTranslation || ""}
-                      onChange={(e) => {
+                      value={card.exampleTranslation || ''}
+                      onChange={e => {
                         const updatedCards = [...generatedCards];
                         updatedCards[index].exampleTranslation = e.target.value;
                         setGeneratedCards(updatedCards);
@@ -1298,10 +1299,10 @@ Lưu ý quan trọng:
                   ...generatedCards,
                   {
                     id: `ai-card-${Date.now()}-${generatedCards.length}`,
-                    front: "",
-                    back: "",
-                    example: "",
-                    exampleTranslation: "",
+                    front: '',
+                    back: '',
+                    example: '',
+                    exampleTranslation: '',
                     learned: false,
                   },
                 ]);
@@ -1318,7 +1319,7 @@ Lưu ý quan trọng:
                   description: `${newDeckSubject} - ${newDeckTopic}`,
                   userId: auth.currentUser
                     ? auth.currentUser.uid
-                    : "local-user",
+                    : 'local-user',
                   cards: generatedCards,
                   total: generatedCards.length,
                   learned: 0,
@@ -1328,23 +1329,23 @@ Lưu ý quan trọng:
                 // Tạo ID và color cho deck mới
                 let deckId = `local-${Date.now()}`;
                 const randomColor = [
-                  "blue",
-                  "green",
-                  "purple",
-                  "pink",
-                  "yellow",
+                  'blue',
+                  'green',
+                  'purple',
+                  'pink',
+                  'yellow',
                 ][Math.floor(Math.random() * 5)];
 
                 // Lưu vào Firestore nếu người dùng đã đăng nhập
                 if (auth.currentUser) {
                   try {
                     const docRef = await addDoc(
-                      collection(db, "flashcard_decks"),
-                      newDeck
+                      collection(db, 'flashcard_decks'),
+                      newDeck,
                     );
                     deckId = docRef.id;
                   } catch (dbError) {
-                    console.error("Error saving to database:", dbError);
+                    console.error('Error saving to database:', dbError);
                   }
                 }
 
@@ -1358,8 +1359,8 @@ Lưu ý quan trọng:
                 setDecks([...decks, deckWithColor]);
 
                 // Reset form và đóng dialog
-                setNewDeckTitle("");
-                setNewDeckTopic("");
+                setNewDeckTitle('');
+                setNewDeckTopic('');
                 setShowEditDialog(false);
               }}
               className="bg-green-600 hover:bg-green-700"

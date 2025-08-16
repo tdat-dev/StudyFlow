@@ -1,11 +1,31 @@
 /** @type {import('next').NextConfig} */
+const path = require('path');
+
 const nextConfig = {
   reactStrictMode: false, // Tắt Strict Mode để tránh double rendering
   swcMinify: true,
   output: 'export', // Enable static HTML export
   trailingSlash: true, // Add trailing slash for better compatibility
   images: {
-    unoptimized: true // Disable image optimization for static export
+    unoptimized: true, // Disable image optimization for static export
+    domains: [
+      'lh3.googleusercontent.com',
+      'platform-lookaside.fbsbx.com',
+      'graph.facebook.com',
+      'avatars.githubusercontent.com',
+    ],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+    ],
+  },
+
+  // Webpack config for path aliases
+  webpack: config => {
+    config.resolve.alias['@'] = path.join(__dirname, 'src');
+    return config;
   },
 
   // Cải thiện Fast Refresh
@@ -15,8 +35,8 @@ const nextConfig = {
   },
 
   experimental: {
-    optimizePackageImports: ["lucide-react"],
-    esmExternals: "loose",
+    optimizePackageImports: ['lucide-react'],
+    esmExternals: 'loose',
   },
 
   webpack: (config, { isServer, dev }) => {
@@ -30,8 +50,8 @@ const nextConfig = {
       // Giảm kích thước bundle để Fast Refresh nhanh hơn
       config.optimization = {
         ...config.optimization,
-        moduleIds: "named",
-        chunkIds: "named",
+        moduleIds: 'named',
+        chunkIds: 'named',
       };
     }
     return config;

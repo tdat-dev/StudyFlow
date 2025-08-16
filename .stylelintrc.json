@@ -1,8 +1,5 @@
 {
-  "extends": [
-    "stylelint-config-standard",
-    "stylelint-config-tailwindcss"
-  ],
+  "extends": ["stylelint-config-standard", "stylelint-config-tailwindcss"],
   "rules": {
     "at-rule-no-unknown": [
       true,
@@ -21,9 +18,5 @@
     "declaration-no-important": true,
     "selector-class-pattern": null
   },
-  "ignoreFiles": [
-    "node_modules/**/*",
-    ".next/**/*",
-    "out/**/*"
-  ]
+  "ignoreFiles": ["node_modules/**/*", ".next/**/*", "out/**/*"]
 }

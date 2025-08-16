@@ -22,33 +22,33 @@ interface FlashcardDeck {
 }
 import { User } from '../types/chat';
 // Mock Firebase functions
-const getFlashcardDecks = async (token: string): Promise<FlashcardDeck[]> => {
+const getFlashcardDecks = async (): Promise<FlashcardDeck[]> => {
   return [];
 };
 
-const createFlashcardDeck = async (token: string, deck: Partial<FlashcardDeck>): Promise<string> => {
+const createFlashcardDeck = async (): Promise<string> => {
   return 'mock-deck-id';
 };
 
-const deleteFlashcardDeck = async (deckId: string): Promise<void> => {
+const deleteFlashcardDeck = async (): Promise<void> => {
   return;
 };
 
-const updateFlashcard = async (deckId: string, cardId: string, learned: boolean): Promise<void> => {
+const updateFlashcard = async (): Promise<void> => {
   return;
 };
 
 // Mock AI function
-const generateAIResponse = async (prompt: string, user: any): Promise<string> => {
+const generateAIResponse = async (): Promise<string> => {
   return JSON.stringify({
     cards: [
       {
         front: 'Hello',
         back: 'Xin chào',
         example: 'Hello, how are you today?',
-        exampleTranslation: 'Xin chào, hôm nay bạn khỏe không?'
-      }
-    ]
+        exampleTranslation: 'Xin chào, hôm nay bạn khỏe không?',
+      },
+    ],
   });
 };
 
@@ -77,7 +77,7 @@ export function useFlashcards(user: User) {
             back: 'Xin chào',
             example: 'Hello, how are you today?',
             exampleTranslation: 'Xin chào, hôm nay bạn khỏe không?',
-            learned: false
+            learned: false,
           },
           {
             id: 'local-card-2',
@@ -85,14 +85,14 @@ export function useFlashcards(user: User) {
             back: 'Cảm ơn',
             example: 'Thank you for your help.',
             exampleTranslation: 'Cảm ơn vì sự giúp đỡ của bạn.',
-            learned: false
-          }
+            learned: false,
+          },
         ],
         total: 2,
-        learned: 0
-      }
+        learned: 0,
+      },
     ];
-    
+
     setDecks(mockDecks);
   };
 
@@ -108,13 +108,14 @@ export function useFlashcards(user: User) {
         return;
       }
 
-      const serverDecks = await getFlashcardDecks(user.accessToken);
-      
+      const serverDecks = await getFlashcardDecks();
+
       if (serverDecks.length === 0) {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         await createDefaultFlashcardDeck();
         return;
       }
-      
+
       setDecks(serverDecks);
     } catch (err) {
       if (process.env.NODE_ENV === 'development') {
@@ -130,32 +131,9 @@ export function useFlashcards(user: User) {
   // Định nghĩa hàm createDefaultFlashcardDeck
   const createDefaultFlashcardDeck = async () => {
     if (!user?.accessToken) return;
-    
+
     try {
-      const defaultDeck: Partial<FlashcardDeck> = {
-        title: 'English Essentials',
-        description: 'Basic English vocabulary for daily conversations',
-        cards: [
-          {
-            id: generateUniqueId('card'),
-            front: 'Hello',
-            back: 'Xin chào',
-            example: 'Hello, how are you today?',
-            exampleTranslation: 'Xin chào, hôm nay bạn khỏe không?',
-            learned: false
-          },
-          {
-            id: generateUniqueId('card'),
-            front: 'Thank you',
-            back: 'Cảm ơn',
-            example: 'Thank you for your help.',
-            exampleTranslation: 'Cảm ơn vì sự giúp đỡ của bạn.',
-            learned: false
-          }
-        ]
-      };
-      
-      await createFlashcardDeck(user.accessToken, defaultDeck);
+      await createFlashcardDeck();
       await loadFlashcards();
     } catch (err) {
       if (process.env.NODE_ENV === 'development') {
@@ -172,20 +150,14 @@ export function useFlashcards(user: User) {
     }
   }, [user, loadFlashcards]);
 
-  const createDeck = async (title: string, description: string) => {
+  const createDeck = async () => {
     if (!user?.accessToken) return;
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
-      const newDeck: Partial<FlashcardDeck> = {
-        title,
-        description,
-        cards: []
-      };
-      
-      await createFlashcardDeck(user.accessToken, newDeck);
+      await createFlashcardDeck();
       await loadFlashcards();
     } catch (err) {
       if (process.env.NODE_ENV === 'development') {
@@ -199,14 +171,14 @@ export function useFlashcards(user: User) {
 
   const deleteDeck = async (deckId: string) => {
     if (!user?.accessToken && !deckId.startsWith('local-')) return;
-    
+
     try {
       // Update local state first for immediate UI feedback
       setDecks(decks.filter(deck => deck.id !== deckId));
-      
+
       // Then delete from Firestore if it's not a local deck
       if (user?.accessToken && !deckId.startsWith('local-')) {
-        await deleteFlashcardDeck(deckId);
+        await deleteFlashcardDeck();
       }
     } catch (err) {
       if (process.env.NODE_ENV === 'development') {
@@ -218,9 +190,13 @@ export function useFlashcards(user: User) {
     }
   };
 
-  const markCardAsLearned = async (deckId: string, cardId: string, learned: boolean) => {
+  const markCardAsLearned = async (
+    deckId: string,
+    cardId: string,
+    learned: boolean,
+  ) => {
     if (!deckId || !cardId) return;
-    
+
     try {
       // Update local state first for immediate UI feedback
       const updatedDecks = decks.map(deck => {
@@ -231,23 +207,23 @@ export function useFlashcards(user: User) {
             }
             return card;
           });
-          
+
           const learnedCount = updatedCards.filter(card => card.learned).length;
-          
+
           return {
             ...deck,
             cards: updatedCards,
-            learned: learnedCount
+            learned: learnedCount,
           };
         }
         return deck;
       });
-      
+
       setDecks(updatedDecks);
-      
+
       // Then update Firestore if it's not a local deck
       if (user?.accessToken && !deckId.startsWith('local-')) {
-        await updateFlashcard(deckId, cardId, learned);
+        await updateFlashcard();
       }
     } catch (err) {
       if (process.env.NODE_ENV === 'development') {
@@ -259,56 +235,35 @@ export function useFlashcards(user: User) {
     }
   };
 
-  const generateFlashcards = async (topic: string, subject: string, count: number) => {
+  const generateFlashcards = async () => {
     if (!user) return null;
-    
+
     setLoading(true);
     setError(null);
-    
-    try {
-      // Create prompt for AI
-      const prompt = `Tạo ${count} flashcard về chủ đề "${topic}" cho môn học "${subject}".
 
-      Mỗi flashcard phải có:
-      1. Front: Từ/khái niệm/câu hỏi (tiếng Anh nếu là môn ngoại ngữ)
-      2. Back: Định nghĩa/giải thích/câu trả lời (tiếng Việt nếu là môn ngoại ngữ)
-      3. Example: Ví dụ cụ thể về cách sử dụng (tiếng Anh nếu là môn ngoại ngữ)
-      4. ExampleTranslation: Bản dịch của ví dụ (tiếng Việt nếu là môn ngoại ngữ)
-      
-      Trả về kết quả dưới dạng JSON array với cấu trúc như sau:
-      
-      [
-        {
-          "front": "Hello",
-          "back": "Xin chào",
-          "example": "Hello, how are you?",
-          "exampleTranslation": "Xin chào, bạn khỏe không?"
-        },
-        ...
-      ]`;
-      
+    try {
       // Call AI API
-      const aiResponse = await generateAIResponse(prompt, user);
-      
+      const aiResponse = await generateAIResponse();
+
       // Parse AI response
       let flashcards: Partial<Flashcard>[] = [];
-      
+
       try {
         // Find JSON array in response
         const jsonMatch = aiResponse.match(/\[\s*\{[\s\S]*\}\s*\]/);
-        
+
         if (jsonMatch) {
           const jsonStr = jsonMatch[0]
             .replace(/^-+$/, '') // Remove markdown separators
             .replace(/^-+\s*$/, ''); // Remove markdown separators with whitespace
-            
+
           flashcards = JSON.parse(jsonStr);
-          
+
           // Add unique IDs
           flashcards = flashcards.map(card => ({
             ...card,
             id: generateUniqueId('card'),
-            learned: false
+            learned: false,
           }));
         } else {
           throw new Error('Could not parse AI response');
@@ -319,7 +274,7 @@ export function useFlashcards(user: User) {
         }
         throw new Error('Failed to parse AI response');
       }
-      
+
       return flashcards as Flashcard[];
     } catch (err) {
       if (process.env.NODE_ENV === 'development') {
@@ -340,6 +295,6 @@ export function useFlashcards(user: User) {
     createDeck,
     deleteDeck,
     markCardAsLearned,
-    generateFlashcards
+    generateFlashcards,
   };
 }

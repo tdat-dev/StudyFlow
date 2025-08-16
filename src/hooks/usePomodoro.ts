@@ -11,15 +11,20 @@ interface PomodoroSession {
 }
 
 // Mock Firebase functions
-const getPomodoroSessions = async (token: string): Promise<PomodoroSession[]> => {
+const getPomodoroSessions = async (
+  _token: string,
+): Promise<PomodoroSession[]> => {
   return [];
 };
 
-const savePomodoroSession = async (token: string, session: Omit<PomodoroSession, 'id'>): Promise<string> => {
+const savePomodoroSession = async (
+  _token: string,
+  _session: Omit<PomodoroSession, 'id'>,
+): Promise<string> => {
   return 'mock-session-id';
 };
 
-const deletePomodoroSession = async (sessionId: string): Promise<void> => {
+const deletePomodoroSession = async (_sessionId: string): Promise<void> => {
   return;
 };
 
@@ -33,32 +38,34 @@ export function usePomodoro(user: User) {
   const [sessionsCompleted, setSessionsCompleted] = useState(0);
   const [totalFocusTime, setTotalFocusTime] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, _setError] = useState<string | null>(null);
 
   // Generate mock data
   const generateMockSessions = () => {
     const mockSessions: PomodoroSession[] = [
       {
-        id: "1",
-        title: "Tập trung học tập",
+        id: '1',
+        title: 'Tập trung học tập',
         duration: 25,
         completedAt: new Date().toISOString(),
-        type: 'focus'
+        type: 'focus',
       },
       {
-        id: "2", 
-        title: "Nghỉ ngơi",
+        id: '2',
+        title: 'Nghỉ ngơi',
         duration: 5,
         completedAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-        type: 'break'
-      }
+        type: 'break',
+      },
     ];
     setSessionHistory(mockSessions);
-    
+
     // Calculate stats
     const focusSessions = mockSessions.filter(s => s.type === 'focus');
     setSessionsCompleted(focusSessions.length);
-    setTotalFocusTime(focusSessions.reduce((total, session) => total + session.duration, 0));
+    setTotalFocusTime(
+      focusSessions.reduce((total, session) => total + session.duration, 0),
+    );
   };
 
   const loadSessions = async () => {
@@ -67,11 +74,13 @@ export function usePomodoro(user: User) {
       if (user?.accessToken) {
         const data = await getPomodoroSessions(user.accessToken);
         setSessionHistory(data);
-        
+
         // Calculate stats
         const focusSessions = data.filter(s => s.type === 'focus');
         setSessionsCompleted(focusSessions.length);
-        setTotalFocusTime(focusSessions.reduce((total, session) => total + session.duration, 0));
+        setTotalFocusTime(
+          focusSessions.reduce((total, session) => total + session.duration, 0),
+        );
       } else {
         generateMockSessions();
       }
@@ -86,40 +95,39 @@ export function usePomodoro(user: User) {
   const handleTimerComplete = async () => {
     setIsActive(false);
     setTimeRemaining(0);
-    
+
     // Save completed session
     try {
       const session: Omit<PomodoroSession, 'id'> = {
         title: `${currentMode === 'focus' ? 'Tập trung' : 'Nghỉ ngơi'} - ${formatTime(currentMode === 'focus' ? focusTime * 60 : breakTime * 60)}`,
         duration: currentMode === 'focus' ? focusTime : breakTime,
         completedAt: new Date().toISOString(),
-        type: currentMode
+        type: currentMode,
       };
-      
+
       if (user?.accessToken) {
         await savePomodoroSession(user.accessToken, session);
       }
-      
+
       // Add to local state
       const newSession: PomodoroSession = {
         ...session,
-        id: generateUniqueId('session')
+        id: generateUniqueId('session'),
       };
       setSessionHistory(prev => [newSession, ...prev]);
-      
+
       // Update stats
       if (currentMode === 'focus') {
         setSessionsCompleted(prev => prev + 1);
         setTotalFocusTime(prev => prev + focusTime);
       }
-      
+
       // Auto switch mode
       if (currentMode === 'focus') {
         switchMode('break');
       } else {
         switchMode('focus');
       }
-      
     } catch (error) {
       console.error('Error saving session:', error);
     }
@@ -129,7 +137,9 @@ export function usePomodoro(user: User) {
     // Simple beep sound simulation
     if (typeof window !== 'undefined' && window.Audio) {
       try {
-        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhCDGH0fPTgjMGHm7A7t2QQAoUXrTp66hVFApGn+DyvmwhCDGH0fPTgjMGHm7A7t2QQAoUXrTp66hVFApGn+DyvmwhCDGH0fPTgjMGHm7A7t2QQAoUXrTp66hVFApGn+DyvmwhCDGH0fPTgjMGHm7A7g==');
+        const audio = new Audio(
+          'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhCDGH0fPTgjMGHm7A7t2QQAoUXrTp66hVFApGn+DyvmwhCDGH0fPTgjMGHm7A7t2QQAoUXrTp66hVFApGn+DyvmwhCDGH0fPTgjMGHm7A7t2QQAoUXrTp66hVFApGn+DyvmwhCDGH0fPTgjMGHm7A7g==',
+        );
         audio.play();
       } catch (e) {
         // Fallback to no sound if audio fails
@@ -144,7 +154,7 @@ export function usePomodoro(user: User) {
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
-    
+
     if (isActive && timeRemaining > 0) {
       interval = setInterval(() => {
         setTimeRemaining(time => time - 1);
@@ -155,7 +165,7 @@ export function usePomodoro(user: User) {
       playAlarm();
       if (interval) clearInterval(interval);
     }
-    
+
     return () => {
       if (interval) clearInterval(interval);
     };
@@ -200,15 +210,18 @@ export function usePomodoro(user: User) {
       if (user?.accessToken && !sessionId.startsWith('local-')) {
         await deletePomodoroSession(sessionId);
       }
-      
-      setSessionHistory(prev => prev.filter(session => session.id !== sessionId));
-      
+
+      setSessionHistory(prev =>
+        prev.filter(session => session.id !== sessionId),
+      );
+
       // Recalculate stats
       const remainingSessions = sessionHistory.filter(s => s.id !== sessionId);
       const focusSessions = remainingSessions.filter(s => s.type === 'focus');
       setSessionsCompleted(focusSessions.length);
-      setTotalFocusTime(focusSessions.reduce((total, session) => total + session.duration, 0));
-      
+      setTotalFocusTime(
+        focusSessions.reduce((total, session) => total + session.duration, 0),
+      );
     } catch (error) {
       console.error('Error deleting session:', error);
     }
@@ -245,30 +258,30 @@ export function usePomodoro(user: User) {
     currentMode,
     focusTime,
     breakTime,
-    
+
     // Session data
     sessionHistory,
     sessionsCompleted,
     totalFocusTime,
     loading,
     error,
-    
+
     // Timer controls
     startTimer,
     pauseTimer,
     resetTimer,
     switchMode,
-    
+
     // Settings
     updateFocusTime,
     updateBreakTime,
-    
+
     // Session management
     deleteSession,
-    
+
     // Utility functions
     formatTime,
     calculateProgress,
-    formatTotalTime
+    formatTotalTime,
   };
 }

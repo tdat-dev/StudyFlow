@@ -3,8 +3,6 @@ import {
   MessageSquare,
   BookOpen,
   Calendar,
-  User,
-  Settings,
   Clock,
 } from "lucide-react";
 

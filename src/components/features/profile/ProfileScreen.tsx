@@ -1,23 +1,23 @@
-import React, { useState, useEffect } from "react";
-import Button from "../../ui/button";
+import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
+import Button from '../../ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../../ui/card";
-import { Badge } from "../../ui/badge";
-import { Separator } from "../../ui/separator";
-import { Switch } from "../../ui/switch";
-import { Progress } from "../../ui/progress";
-import { useTheme } from "next-themes";
+} from '../../ui/card';
+import { Badge } from '../../ui/badge';
+import { Separator } from '../../ui/separator';
+import { Switch } from '../../ui/switch';
+import { Progress } from '../../ui/progress';
+import { useTheme } from 'next-themes';
 import {
   User,
   Settings,
   LogOut,
   Trophy,
-  Calendar,
   BookOpen,
   Target,
   Bell,
@@ -39,14 +39,12 @@ import {
   MessageCircle,
   Crown,
   Zap,
-} from "lucide-react";
-import { useLevel } from "../../../contexts/LevelContext";
+} from 'lucide-react';
+import { useLevel } from '../../../contexts/LevelContext';
 import {
   getLevelInfo,
   getXPProgress,
-  LEVEL_THRESHOLDS,
-  XP_ACTIONS,
-} from "../../../services/level/levelSystem";
+} from '../../../services/level/levelSystem';
 
 interface ProfileScreenProps {
   user: any;
@@ -58,7 +56,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
     string | null
   >(null);
   const [mounted, setMounted] = useState(false);
-  const { userStats, addUserXP } = useLevel();
+  const { userStats } = useLevel();
   const { theme, setTheme } = useTheme();
 
   // Settings state
@@ -83,7 +81,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
   };
 
   const handlePrivacyToggle = (setting: string) => {
-    setPrivacySettings((prev) => ({
+    setPrivacySettings(prev => ({
       ...prev,
       [setting]: !prev[setting as keyof typeof prev],
     }));
@@ -107,20 +105,20 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
 
   // Get user initials for fallback avatar
   const getUserInitials = (user: any) => {
-    if (!user) return "U";
+    if (!user) return 'U';
     if (user.displayName || user.name) {
       const name = user.displayName || user.name;
       return name
-        .split(" ")
+        .split(' ')
         .map((n: string) => n[0])
-        .join("")
+        .join('')
         .substring(0, 2)
         .toUpperCase();
     }
     if (user.email) {
       return user.email[0].toUpperCase();
     }
-    return "U";
+    return 'U';
   };
 
   // Get level info
@@ -137,71 +135,71 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
     {
       icon: Flame,
       label: `${userStats.streakDays} ngày`,
-      description: "Streak hiện tại",
-      bgColor: "bg-orange-100",
-      color: "text-orange-600",
+      description: 'Streak hiện tại',
+      bgColor: 'bg-orange-100',
+      color: 'text-orange-600',
     },
     {
       icon: BookOpen,
       label: `${userStats.flashcardsStudied}`,
-      description: "Flashcard đã học",
-      bgColor: "bg-blue-100",
-      color: "text-blue-600",
+      description: 'Flashcard đã học',
+      bgColor: 'bg-blue-100',
+      color: 'text-blue-600',
     },
     {
       icon: Clock,
       label: `${Math.floor(userStats.studyTimeMinutes / 60)}h`,
-      description: "Giờ học tập",
-      bgColor: "bg-green-100",
-      color: "text-green-600",
+      description: 'Giờ học tập',
+      bgColor: 'bg-green-100',
+      color: 'text-green-600',
     },
     {
       icon: MessageCircle,
       label: `${userStats.chatMessages}`,
-      description: "Tin nhắn AI",
-      bgColor: "bg-purple-100",
-      color: "text-purple-600",
+      description: 'Tin nhắn AI',
+      bgColor: 'bg-purple-100',
+      color: 'text-purple-600',
     },
     {
       icon: Target,
       label: `${userStats.pomodoroSessions}`,
-      description: "Pomodoro hoàn thành",
-      bgColor: "bg-red-100",
-      color: "text-red-600",
+      description: 'Pomodoro hoàn thành',
+      bgColor: 'bg-red-100',
+      color: 'text-red-600',
     },
     {
       icon: Award,
       label: `${userStats.totalXP}`,
-      description: "Tổng XP",
-      bgColor: "bg-yellow-100",
-      color: "text-yellow-600",
+      description: 'Tổng XP',
+      bgColor: 'bg-yellow-100',
+      color: 'text-yellow-600',
     },
   ];
 
   const settingsItems = [
     {
       icon: Bell,
-      label: "Thông báo",
-      description: "Nhắc nhở học tập hàng ngày",
-      onClick: () => handleSettingClick("notifications"),
+      label: 'Thông báo',
+      description: 'Nhắc nhở học tập hàng ngày',
+      onClick: () => handleSettingClick('notifications'),
     },
     {
       icon: Palette,
-      label: "Giao diện",
-      description: "Chế độ sáng/tối",
-      onClick: () => handleSettingClick("theme"),
+      label: 'Giao diện',
+      description: 'Chế độ sáng/tối',
+      onClick: () => handleSettingClick('theme'),
     },
     {
       icon: Shield,
-      label: "Quyền riêng tư",
-      description: "Cài đặt bảo mật",
-      onClick: () => handleSettingClick("privacy"),
+      label: 'Quyền riêng tư',
+      description: 'Cài đặt bảo mật',
+      onClick: () => handleSettingClick('privacy'),
     },
     {
       icon: HelpCircle,
-      label: "Trợ giúp",
-      description: "FAQ và hướng dẫn",
-      onClick: () => handleSettingClick("help"),
+      label: 'Trợ giúp',
+      description: 'FAQ và hướng dẫn',
+      onClick: () => handleSettingClick('help'),
     },
   ];
 
@@ -239,7 +237,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
               <Switch
                 checked={notifications.studyReminders}
                 onCheckedChange={(checked: boolean) =>
-                  setNotifications((prev) => ({
+                  setNotifications(prev => ({
                     ...prev,
                     studyReminders: checked,
                   }))
@@ -265,7 +263,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
               <Switch
                 checked={notifications.achievementAlerts}
                 onCheckedChange={(checked: boolean) =>
-                  setNotifications((prev) => ({
+                  setNotifications(prev => ({
                     ...prev,
                     achievementAlerts: checked,
                   }))
@@ -295,7 +293,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
               <Switch
                 checked={notifications.soundEffects}
                 onCheckedChange={(checked: boolean) =>
-                  setNotifications((prev) => ({
+                  setNotifications(prev => ({
                     ...prev,
                     soundEffects: checked,
                   }))
@@ -358,9 +356,9 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
           </CardHeader>
           <CardContent className="space-y-3">
             <Button
-              variant={theme === "light" ? "default" : "outline"}
+              variant={theme === 'light' ? 'default' : 'outline'}
               className="w-full justify-start p-4 h-auto"
-              onClick={() => setTheme("light")}
+              onClick={() => setTheme('light')}
             >
               <Sun className="h-5 w-5 mr-3 text-yellow-600" />
               <div className="text-left">
@@ -372,9 +370,9 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
             </Button>
 
             <Button
-              variant={theme === "dark" ? "default" : "outline"}
+              variant={theme === 'dark' ? 'default' : 'outline'}
               className="w-full justify-start p-4 h-auto"
-              onClick={() => setTheme("dark")}
+              onClick={() => setTheme('dark')}
             >
               <Moon className="h-5 w-5 mr-3 text-blue-600" />
               <div className="text-left">
@@ -386,9 +384,9 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
             </Button>
 
             <Button
-              variant={theme === "system" ? "default" : "outline"}
+              variant={theme === 'system' ? 'default' : 'outline'}
               className="w-full justify-start p-4 h-auto dark:bg-gray-700 dark:hover:bg-gray-600"
-              onClick={() => setTheme("system")}
+              onClick={() => setTheme('system')}
             >
               <Smartphone className="h-5 w-5 mr-3 text-gray-600 dark:text-gray-400" />
               <div className="text-left">
@@ -409,7 +407,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              Chế độ đang sử dụng:{" "}
+              Chế độ đang sử dụng:{' '}
               <span className="font-medium capitalize dark:text-gray-100">
                 {theme}
               </span>
@@ -425,7 +423,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
     const {
       LEVEL_THRESHOLDS,
       XP_ACTIONS,
-    } = require("../../../services/level/levelSystem");
+    } = require('../../../services/level/levelSystem');
 
     return (
       <div className="h-full overflow-y-auto p-6 pb-20">
@@ -514,27 +512,27 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
                     key={level}
                     className={`flex items-center justify-between p-2 rounded-lg ${
                       isCurrentLevel
-                        ? "bg-blue-100 border border-blue-300"
+                        ? 'bg-blue-100 border border-blue-300'
                         : isCompleted
-                        ? "bg-green-50"
-                        : "bg-gray-50 dark:bg-gray-700"
+                          ? 'bg-green-50'
+                          : 'bg-gray-50 dark:bg-gray-700'
                     }`}
                   >
                     <div className="flex items-center">
                       <div
                         className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
                           isCurrentLevel
-                            ? "bg-blue-600 text-white"
+                            ? 'bg-blue-600 text-white'
                             : isCompleted
-                            ? "bg-green-600 text-white"
-                            : "bg-gray-400 text-white"
+                              ? 'bg-green-600 text-white'
+                              : 'bg-gray-400 text-white'
                         }`}
                       >
                         {level}
                       </div>
                       <span
                         className={`ml-3 font-medium ${
-                          isCurrentLevel ? "text-blue-900" : "text-gray-700"
+                          isCurrentLevel ? 'text-blue-900' : 'text-gray-700'
                         }`}
                       >
                         Cấp {level}
@@ -543,7 +541,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
                     <div className="text-right">
                       <span
                         className={`text-sm ${
-                          isCurrentLevel ? "text-blue-700" : "text-gray-600"
+                          isCurrentLevel ? 'text-blue-700' : 'text-gray-600'
                         }`}
                       >
                         {threshold} XP
@@ -602,7 +600,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
               </div>
               <Switch
                 checked={privacySettings.shareProgress}
-                onCheckedChange={() => handlePrivacyToggle("shareProgress")}
+                onCheckedChange={() => handlePrivacyToggle('shareProgress')}
               />
             </div>
 
@@ -620,7 +618,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
               <Switch
                 checked={privacySettings.analyticsCollection}
                 onCheckedChange={() =>
-                  handlePrivacyToggle("analyticsCollection")
+                  handlePrivacyToggle('analyticsCollection')
                 }
               />
             </div>
@@ -637,7 +635,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
               <Switch
                 checked={privacySettings.emailNotifications}
                 onCheckedChange={() =>
-                  handlePrivacyToggle("emailNotifications")
+                  handlePrivacyToggle('emailNotifications')
                 }
               />
             </div>
@@ -656,7 +654,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
             <Button
               variant="outline"
               className="w-full justify-start p-4 h-auto"
-              onClick={() => alert("Tính năng đổi mật khẩu sẽ sớm có!")}
+              onClick={() => alert('Tính năng đổi mật khẩu sẽ sớm có!')}
             >
               <Lock className="h-5 w-5 mr-3 text-blue-600" />
               <div className="text-left">
@@ -670,7 +668,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
             <Button
               variant="outline"
               className="w-full justify-start p-4 h-auto"
-              onClick={() => alert("Tính năng xác thực 2FA sẽ sớm có!")}
+              onClick={() => alert('Tính năng xác thực 2FA sẽ sớm có!')}
             >
               <Shield className="h-5 w-5 mr-3 text-green-600" />
               <div className="text-left">
@@ -695,7 +693,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
               variant="outline"
               className="w-full justify-start p-4 h-auto"
               onClick={() =>
-                alert("Chính sách quyền riêng tư sẽ được hiển thị!")
+                alert('Chính sách quyền riêng tư sẽ được hiển thị!')
               }
             >
               <FileQuestion className="h-5 w-5 mr-3 text-blue-600" />
@@ -713,10 +711,10 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
               onClick={() => {
                 if (
                   confirm(
-                    "Bạn có chắc muốn xóa tất cả dữ liệu? Hành động này không thể hoàn tác."
+                    'Bạn có chắc muốn xóa tất cả dữ liệu? Hành động này không thể hoàn tác.',
                   )
                 ) {
-                  alert("Tính năng xóa dữ liệu sẽ sớm có!");
+                  alert('Tính năng xóa dữ liệu sẽ sớm có!');
                 }
               }}
             >
@@ -759,8 +757,9 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
             <div className="border rounded-lg p-4">
               <p className="font-medium mb-2">Làm thế nào để tạo flashcard?</p>
               <p className="text-sm text-gray-600">
-                Vào tab Flashcards, nhấn nút "Tạo bộ mới" và điền thông tin cần
-                thiết. Bạn có thể tạo thủ công hoặc sử dụng AI để tạo tự động.
+                Vào tab Flashcards, nhấn nút &quot;Tạo bộ mới&quot; và điền
+                thông tin cần thiết. Bạn có thể tạo thủ công hoặc sử dụng AI để
+                tạo tự động.
               </p>
             </div>
 
@@ -779,8 +778,8 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
                 Làm thế nào để nâng cấp lên Premium?
               </p>
               <p className="text-sm text-gray-600">
-                Vào trang Hồ sơ, nhấn vào nút "Nâng cấp Premium" và làm theo
-                hướng dẫn.
+                Vào trang Hồ sơ, nhấn vào nút &quot;Nâng cấp Premium&quot; và
+                làm theo hướng dẫn.
               </p>
             </div>
           </CardContent>
@@ -794,23 +793,23 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
   };
 
   // Render theo section đang active
-  if (activeSettingSection === "notifications") {
+  if (activeSettingSection === 'notifications') {
     return renderNotificationsSettings();
   }
 
-  if (activeSettingSection === "theme") {
+  if (activeSettingSection === 'theme') {
     return renderThemeSettings();
   }
 
-  if (activeSettingSection === "privacy") {
+  if (activeSettingSection === 'privacy') {
     return renderPrivacySettings();
   }
 
-  if (activeSettingSection === "help") {
+  if (activeSettingSection === 'help') {
     return renderHelpSettings();
   }
 
-  if (activeSettingSection === "level-guide") {
+  if (activeSettingSection === 'level-guide') {
     return renderLevelGuide();
   }
 
@@ -829,19 +828,17 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
 
               {/* Overlay with actual photo if available */}
               {(user?.photoURL || user?.avatar || user?.picture) && (
-                <img
-                  src={user.photoURL || user.avatar || user.picture}
-                  alt={user?.displayName || user?.name || user?.email || "User"}
+                <Image
+                  src={user.photoURL || user.avatar || user.picture || ''}
+                  alt={user?.displayName || user?.name || user?.email || 'User'}
+                  width={80}
+                  height={80}
                   className="absolute inset-0 w-full h-full rounded-full object-cover"
-                  onLoad={(e) => {
-                    console.log("Profile avatar loaded:", e.currentTarget.src);
+                  onLoad={() => {
+                    console.log('Profile avatar loaded');
                   }}
-                  onError={(e) => {
-                    console.log(
-                      "Profile avatar failed to load:",
-                      e.currentTarget.src
-                    );
-                    (e.target as HTMLImageElement).style.display = "none";
+                  onError={() => {
+                    console.log('Profile avatar failed to load');
                   }}
                 />
               )}
@@ -850,11 +847,11 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
               <h2 className="text-blue-900 dark:text-blue-100 mb-1">
                 {user?.displayName ||
                   user?.name ||
-                  user?.email?.split("@")[0] ||
-                  "User"}
+                  user?.email?.split('@')[0] ||
+                  'User'}
               </h2>
               <p className="text-blue-700 dark:text-blue-300 text-sm mb-2">
-                {user?.email || "No email"}
+                {user?.email || 'No email'}
               </p>
               <div className="flex items-center space-x-2 mb-2">
                 <Badge
@@ -873,7 +870,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
                       variant="ghost"
                       size="sm"
                       className="h-5 w-5 p-0 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
-                      onClick={() => setActiveSettingSection("level-guide")}
+                      onClick={() => setActiveSettingSection('level-guide')}
                     >
                       <HelpCircle className="h-3 w-3" />
                     </Button>
@@ -964,7 +961,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
               variant="outline"
               className="dark:border-gray-600 dark:text-gray-300"
             >
-              {Math.floor(userStats.studyTimeMinutes / 60)} giờ{" "}
+              {Math.floor(userStats.studyTimeMinutes / 60)} giờ{' '}
               {userStats.studyTimeMinutes % 60} phút
             </Badge>
           </div>

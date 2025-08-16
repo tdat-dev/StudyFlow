@@ -4,14 +4,13 @@ import React, {
   useState,
   useEffect,
   ReactNode,
-} from "react";
+} from 'react';
 import {
   UserLevel,
   calculateLevel,
   addXP,
-  XPGain,
   XP_ACTIONS,
-} from "../services/level/levelSystem";
+} from '../services/level/levelSystem';
 
 interface UserStats {
   totalXP: number;
@@ -30,7 +29,7 @@ interface LevelContextType {
   userStats: UserStats;
   addUserXP: (
     action: keyof typeof XP_ACTIONS,
-    customAmount?: number
+    customAmount?: number,
   ) => Promise<void>;
   updateStats: (stats: Partial<UserStats>) => void;
   showLevelUpNotification: boolean;
@@ -81,13 +80,13 @@ export function LevelProvider({ children, userId }: LevelProviderProps) {
         });
       }
     } catch (error) {
-      console.error("Failed to load user stats:", error);
+      console.error('Failed to load user stats:', error);
     }
   };
 
   const loadLocalStats = () => {
     try {
-      const savedStats = localStorage.getItem("userStats_local");
+      const savedStats = localStorage.getItem('userStats_local');
       if (savedStats) {
         const parsed = JSON.parse(savedStats);
         setUserStats({
@@ -96,23 +95,23 @@ export function LevelProvider({ children, userId }: LevelProviderProps) {
         });
       }
     } catch (error) {
-      console.error("Failed to load local stats:", error);
+      console.error('Failed to load local stats:', error);
     }
   };
 
   const saveUserStats = async (stats: UserStats) => {
     try {
-      const key = userId ? `userStats_${userId}` : "userStats_local";
+      const key = userId ? `userStats_${userId}` : 'userStats_local';
       localStorage.setItem(key, JSON.stringify(stats));
       // TODO: Save to Firebase/API if userId exists
     } catch (error) {
-      console.error("Failed to save user stats:", error);
+      console.error('Failed to save user stats:', error);
     }
   };
 
   const addUserXP = async (
     action: keyof typeof XP_ACTIONS,
-    customAmount?: number
+    customAmount?: number,
   ) => {
     const xpAmount = customAmount || XP_ACTIONS[action].amount;
     const result = addXP(userStats.totalXP, xpAmount);
@@ -169,7 +168,7 @@ export function LevelProvider({ children, userId }: LevelProviderProps) {
 export const useLevel = () => {
   const context = useContext(LevelContext);
   if (context === undefined) {
-    throw new Error("useLevel must be used within a LevelProvider");
+    throw new Error('useLevel must be used within a LevelProvider');
   }
   return context;
 };

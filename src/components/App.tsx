@@ -17,7 +17,7 @@ const LoadingScreen = () => (
 );
 
 export default function App() {
-  const { user, loading, error, updateUser } = useAuth();
+  const { user, loading, error } = useAuth();
   const [showRegister, setShowRegister] = useState(false);
   const { handleError } = useErrorHandler();
 

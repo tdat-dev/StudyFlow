@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { User } from '../types/chat';
-import { Book, Calendar, Headphones, Music } from 'lucide-react';
+import { Book, Headphones } from 'lucide-react';
 import type { ElementType } from 'react';
 
 // Define Habit type locally
@@ -21,19 +21,25 @@ interface Habit {
 }
 
 // Mock Firebase functions
-const getHabits = async (token: string): Promise<Habit[]> => {
+const getHabits = async (_token: string): Promise<Habit[]> => {
   return [];
 };
 
-const createHabit = async (token: string, habit: Partial<Habit>): Promise<string> => {
+const createHabit = async (
+  _token: string,
+  _habit: Partial<Habit>,
+): Promise<string> => {
   return 'mock-habit-id';
 };
 
-const deleteHabit = async (habitId: string): Promise<void> => {
+const deleteHabit = async (_habitId: string): Promise<void> => {
   return;
 };
 
-const updateHabit = async (habitId: string, data: Partial<Habit>): Promise<void> => {
+const updateHabit = async (
+  _habitId: string,
+  _data: Partial<Habit>,
+): Promise<void> => {
   return;
 };
 
@@ -41,11 +47,6 @@ export function useHabits(user: User) {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Hàm tạo ID duy nhất
-  const generateUniqueId = (prefix: string = 'id') => {
-    return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-  };
 
   // Định nghĩa hàm loadMockHabits
   const loadMockHabits = () => {
@@ -61,7 +62,9 @@ export function useHabits(user: User) {
         currentStreak: 3,
         todayCompleted: false,
         weeklyProgress: [true, true, true, false, false, false, false],
-        monthlyProgress: Array(30).fill(false).map((_, i) => i < 15 ? Math.random() > 0.5 : false)
+        monthlyProgress: Array(30)
+          .fill(false)
+          .map((_, i) => (i < 15 ? Math.random() > 0.5 : false)),
       },
       {
         id: 'local-2',
@@ -74,10 +77,12 @@ export function useHabits(user: User) {
         currentStreak: 5,
         todayCompleted: true,
         weeklyProgress: [true, true, true, true, true, false, false],
-        monthlyProgress: Array(30).fill(false).map((_, i) => i < 20 ? Math.random() > 0.3 : false)
-      }
+        monthlyProgress: Array(30)
+          .fill(false)
+          .map((_, i) => (i < 20 ? Math.random() > 0.3 : false)),
+      },
     ];
-    
+
     setHabits(mockHabits);
   };
 
@@ -85,21 +90,21 @@ export function useHabits(user: User) {
   const updateLocalHabitState = (habitId: string, completed: boolean) => {
     // Get current day of week (0 = Sunday, 6 = Saturday)
     const today = new Date().getDay();
-    
+
     // Get current day of month (0-indexed)
     const dayOfMonth = new Date().getDate() - 1;
-    
-    setHabits(prevHabits => 
+
+    setHabits(prevHabits =>
       prevHabits.map(habit => {
         if (habit.id === habitId) {
           // Update weekly progress
           const newWeeklyProgress = [...habit.weeklyProgress];
           newWeeklyProgress[today] = completed;
-          
+
           // Update monthly progress
           const newMonthlyProgress = [...habit.monthlyProgress];
           newMonthlyProgress[dayOfMonth] = completed;
-          
+
           // Update streak
           let newStreak = habit.currentStreak;
           if (completed) {
@@ -107,17 +112,17 @@ export function useHabits(user: User) {
           } else {
             newStreak = Math.max(0, newStreak - 1);
           }
-          
+
           return {
             ...habit,
             todayCompleted: completed,
             currentStreak: newStreak,
             weeklyProgress: newWeeklyProgress,
-            monthlyProgress: newMonthlyProgress
+            monthlyProgress: newMonthlyProgress,
           };
         }
         return habit;
-      })
+      }),
     );
   };
 
@@ -134,12 +139,13 @@ export function useHabits(user: User) {
       }
 
       const serverHabits = await getHabits(user.accessToken);
-      
+
       if (serverHabits.length === 0) {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         await createDefaultHabits();
         return;
       }
-      
+
       setHabits(serverHabits);
     } catch (err) {
       if (process.env.NODE_ENV === 'development') {
@@ -155,7 +161,7 @@ export function useHabits(user: User) {
   // Định nghĩa hàm createDefaultHabits
   const createDefaultHabits = async () => {
     if (!user?.accessToken) return;
-    
+
     try {
       const defaultHabits: Partial<Habit>[] = [
         {
@@ -168,7 +174,7 @@ export function useHabits(user: User) {
           currentStreak: 0,
           todayCompleted: false,
           weeklyProgress: [false, false, false, false, false, false, false],
-          monthlyProgress: Array(30).fill(false)
+          monthlyProgress: Array(30).fill(false),
         },
         {
           title: 'Luyện nghe mỗi ngày',
@@ -180,14 +186,14 @@ export function useHabits(user: User) {
           currentStreak: 0,
           todayCompleted: false,
           weeklyProgress: [false, false, false, false, false, false, false],
-          monthlyProgress: Array(30).fill(false)
-        }
+          monthlyProgress: Array(30).fill(false),
+        },
       ];
-      
+
       for (const habit of defaultHabits) {
         await createHabit(user.accessToken, habit);
       }
-      
+
       await loadHabits();
     } catch (err) {
       if (process.env.NODE_ENV === 'development') {
@@ -206,10 +212,10 @@ export function useHabits(user: User) {
 
   const addHabit = async (habit: Partial<Habit>) => {
     if (!user?.accessToken) return;
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
       await createHabit(user.accessToken, habit);
       await loadHabits();
@@ -225,11 +231,11 @@ export function useHabits(user: User) {
 
   const removeHabit = async (habitId: string) => {
     if (!user?.accessToken && !habitId.startsWith('local-')) return;
-    
+
     try {
       // Update local state first for immediate UI feedback
       setHabits(habits.filter(habit => habit.id !== habitId));
-      
+
       // Then delete from Firestore if it's not a local habit
       if (user?.accessToken && !habitId.startsWith('local-')) {
         await deleteHabit(habitId);
@@ -246,18 +252,18 @@ export function useHabits(user: User) {
 
   const toggleHabitCompletion = async (habitId: string) => {
     if (!habitId) return;
-    
+
     try {
       // Find the habit to toggle
       const habitToToggle = habits.find(h => h.id === habitId);
       if (!habitToToggle) return;
-      
+
       // Toggle completion status
       const newCompletionStatus = !habitToToggle.todayCompleted;
-      
+
       // Update local state first
       updateLocalHabitState(habitId, newCompletionStatus);
-      
+
       // Then update Firestore if it's not a local habit
       if (user?.accessToken && !habitId.startsWith('local-')) {
         // Calculate new streak
@@ -267,25 +273,25 @@ export function useHabits(user: User) {
         } else {
           newStreak = Math.max(0, newStreak - 1);
         }
-        
+
         // Get current day of week (0 = Sunday, 6 = Saturday)
         const today = new Date().getDay();
-        
+
         // Update weekly progress
         const newWeeklyProgress = [...habitToToggle.weeklyProgress];
         newWeeklyProgress[today] = newCompletionStatus;
-        
+
         // Update monthly progress
         const dayOfMonth = new Date().getDate() - 1; // 0-indexed
         const newMonthlyProgress = [...habitToToggle.monthlyProgress];
         newMonthlyProgress[dayOfMonth] = newCompletionStatus;
-        
+
         // Update in Firestore
         await updateHabit(habitId, {
           todayCompleted: newCompletionStatus,
           currentStreak: newStreak,
           weeklyProgress: newWeeklyProgress,
-          monthlyProgress: newMonthlyProgress
+          monthlyProgress: newMonthlyProgress,
         });
       }
     } catch (err) {
@@ -306,6 +312,6 @@ export function useHabits(user: User) {
     addHabit,
     removeHabit,
     toggleHabitCompletion,
-    createDefaultHabits
+    createDefaultHabits,
   };
 }

@@ -1,32 +1,31 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "../../../components/ui/dialog";
-import Button from "../../../components/ui/button";
-import { Input } from "../../../components/ui/input";
-import { Loader2 } from "lucide-react";
-import { Message, ChatSession, User, QuickAction } from "../../../types/chat";
+} from '../../../components/ui/dialog';
+import Button from '../../../components/ui/button';
+import { Input } from '../../../components/ui/input';
+import { Message, ChatSession, User, QuickAction } from '../../../types/chat';
 // Gemini AI Tutor service
 import {
   generateTutorResponse,
   type ChatTurn,
-} from "../../../services/ai/tutor";
+} from '../../../services/ai/tutor';
 
-import { ChatHeader } from "./ChatHeader";
-import { ChatInput } from "./ChatInput";
-import { ChatMessage } from "./ChatMessage";
-import { ChatList } from "./ChatList";
-import { QuickActions } from "./QuickActions";
+import { ChatHeader } from './ChatHeader';
+import { ChatInput } from './ChatInput';
+import { ChatMessage } from './ChatMessage';
+import { ChatList } from './ChatList';
+import { QuickActions } from './QuickActions';
 import {
   BookOpen,
   FileQuestion,
   Headphones,
   MessageSquare,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   getChatSessions,
   getChatMessages,
@@ -34,50 +33,50 @@ import {
   deleteChatSession,
   renameChatSession,
   saveMessage,
-} from "../../../services/firebase/firestore";
+} from '../../../services/firebase/firestore';
 
 // Tin nhắn chào mừng mặc định
 const welcomeMessage: Message = {
-  id: "welcome-message",
+  id: 'welcome-message',
   content:
-    "Xin chào! Tôi là AI Tutor Agent, người bạn đồng hành của bạn. Tôi có thể giúp bạn:\n\n1. Tạo flashcards cho mọi môn học\n2. Giải thích các khái niệm học tập\n3. Đặt câu hỏi ôn tập kiến thức\n4. Gợi ý phương pháp học hiệu quả\n5. Trò chuyện và lắng nghe bạn về mọi chủ đề\n6. Hỗ trợ bạn bằng nhiều ngôn ngữ khác nhau\n\nBạn muốn trò chuyện về điều gì hôm nay?",
-  sender: "ai",
+    'Xin chào! Tôi là AI Tutor Agent, người bạn đồng hành của bạn. Tôi có thể giúp bạn:\n\n1. Tạo flashcards cho mọi môn học\n2. Giải thích các khái niệm học tập\n3. Đặt câu hỏi ôn tập kiến thức\n4. Gợi ý phương pháp học hiệu quả\n5. Trò chuyện và lắng nghe bạn về mọi chủ đề\n6. Hỗ trợ bạn bằng nhiều ngôn ngữ khác nhau\n\nBạn muốn trò chuyện về điều gì hôm nay?',
+  sender: 'ai',
   timestamp: new Date().toISOString(),
 };
 
 const quickActions: QuickAction[] = [
   {
     id: 1,
-    label: "Tạo flashcards",
+    label: 'Tạo flashcards',
     icon: BookOpen,
-    prompt: "Tạo flashcards tiếng Anh cho tôi với 5 từ vựng học thuật",
-    color: "text-blue-600",
-    bgColor: "bg-blue-100",
+    prompt: 'Tạo flashcards tiếng Anh cho tôi với 5 từ vựng học thuật',
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-100',
   },
   {
     id: 2,
-    label: "Ôn tập kiến thức",
+    label: 'Ôn tập kiến thức',
     icon: FileQuestion,
-    prompt: "Đặt câu hỏi để ôn tập kiến thức",
-    color: "text-green-600",
-    bgColor: "bg-green-100",
+    prompt: 'Đặt câu hỏi để ôn tập kiến thức',
+    color: 'text-green-600',
+    bgColor: 'bg-green-100',
   },
   {
     id: 3,
-    label: "Phương pháp học",
+    label: 'Phương pháp học',
     icon: Headphones,
     prompt:
-      "Giải thích cho tôi về các phương pháp học hiệu quả như Spaced Repetition, Active Recall, Pomodoro, Feynman Technique và Mind Mapping",
-    color: "text-purple-600",
-    bgColor: "bg-purple-100",
+      'Giải thích cho tôi về các phương pháp học hiệu quả như Spaced Repetition, Active Recall, Pomodoro, Feynman Technique và Mind Mapping',
+    color: 'text-purple-600',
+    bgColor: 'bg-purple-100',
   },
   {
     id: 4,
-    label: "Trò chuyện tiếng Anh",
+    label: 'Trò chuyện tiếng Anh',
     icon: MessageSquare,
     prompt: "Let's chat in English. How are you feeling today?",
-    color: "text-orange-600",
-    bgColor: "bg-orange-100",
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-100',
   },
 ];
 
@@ -98,17 +97,17 @@ export function ChatScreen({ user }: ChatScreenProps) {
   const [loadingSessions, setLoadingSessions] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [chatToRename, setChatToRename] = useState<string | null>(null);
-  const [newChatTitle, setNewChatTitle] = useState("");
+  const [newChatTitle, setNewChatTitle] = useState('');
 
   // Auto-scroll đến tin nhắn mới nhất
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
 
   // Scroll khi messages thay đổi
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, scrollToBottom]);
 
   // Định nghĩa các hàm trước khi sử dụng trong useEffect
   const loadChatSessions = useCallback(async () => {
@@ -116,8 +115,8 @@ export function ChatScreen({ user }: ChatScreenProps) {
 
     try {
       if (!user.accessToken) {
-        if (process.env.NODE_ENV === "development") {
-          console.error("User not logged in");
+        if (process.env.NODE_ENV === 'development') {
+          console.error('User not logged in');
         }
         setLoadingSessions(false);
         return;
@@ -134,8 +133,8 @@ export function ChatScreen({ user }: ChatScreenProps) {
         createNewChat();
       }
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.error("Failed to load chat sessions:", error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to load chat sessions:', error);
       }
     } finally {
       setLoadingSessions(false);
@@ -149,8 +148,8 @@ export function ChatScreen({ user }: ChatScreenProps) {
 
       try {
         if (!user.accessToken) {
-          if (process.env.NODE_ENV === "development") {
-            console.error("User not logged in");
+          if (process.env.NODE_ENV === 'development') {
+            console.error('User not logged in');
           }
           setLoading(false);
           return;
@@ -175,19 +174,19 @@ export function ChatScreen({ user }: ChatScreenProps) {
             setMessages(loadedMessages);
           }
         } catch (err) {
-          if (process.env.NODE_ENV === "development") {
-            console.error("Error loading chat history:", err);
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Error loading chat history:', err);
           }
         }
       } catch (error) {
-        if (process.env.NODE_ENV === "development") {
-          console.error("Failed to load chat history:", error);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Failed to load chat history:', error);
         }
       } finally {
         setLoading(false);
       }
     },
-    [user?.accessToken]
+    [user?.accessToken],
   );
 
   useEffect(() => {
@@ -195,7 +194,7 @@ export function ChatScreen({ user }: ChatScreenProps) {
       loadChatSessions();
     }
     // Chỉ chạy lại khi token người dùng thay đổi
-  }, [user?.accessToken, loadChatSessions]);
+  }, [user, loadChatSessions]);
 
   useEffect(() => {
     if (currentChatId) {
@@ -203,7 +202,7 @@ export function ChatScreen({ user }: ChatScreenProps) {
     }
   }, [currentChatId, loadChatHistory]);
 
-  const generateUniqueId = (prefix: string = "msg") => {
+  const generateUniqueId = (prefix: string = 'msg') => {
     return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   };
 
@@ -217,7 +216,7 @@ export function ChatScreen({ user }: ChatScreenProps) {
       // Cập nhật danh sách sessions
       const newSession: ChatSession = {
         id: newSessionId,
-        title: "Cuộc trò chuyện mới",
+        title: 'Cuộc trò chuyện mới',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         messageCount: 0,
@@ -226,8 +225,8 @@ export function ChatScreen({ user }: ChatScreenProps) {
       setChatSessions([newSession, ...chatSessions]);
       setCurrentChatId(newSessionId);
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.error("Failed to create new chat:", error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to create new chat:', error);
       }
     }
   };
@@ -241,7 +240,7 @@ export function ChatScreen({ user }: ChatScreenProps) {
 
       // Cập nhật danh sách sessions
       const updatedSessions = chatSessions.filter(
-        (session) => session.id !== chatId
+        session => session.id !== chatId,
       );
       setChatSessions(updatedSessions);
 
@@ -254,15 +253,15 @@ export function ChatScreen({ user }: ChatScreenProps) {
         }
       }
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.error("Failed to delete chat:", error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to delete chat:', error);
       }
     }
   };
 
   const handleRenameChat = (chatId: string) => {
     // Tìm tiêu đề hiện tại của chat
-    const chat = chatSessions.find((session) => session.id === chatId);
+    const chat = chatSessions.find(session => session.id === chatId);
     if (chat) {
       setNewChatTitle(chat.title);
       setChatToRename(chatId);
@@ -278,7 +277,7 @@ export function ChatScreen({ user }: ChatScreenProps) {
       await renameChatSession(chatToRename, newChatTitle.trim());
 
       // Cập nhật danh sách sessions
-      const updatedSessions = chatSessions.map((session) => {
+      const updatedSessions = chatSessions.map(session => {
         if (session.id === chatToRename) {
           return {
             ...session,
@@ -292,10 +291,10 @@ export function ChatScreen({ user }: ChatScreenProps) {
       setChatSessions(updatedSessions);
       setRenameDialogOpen(false);
       setChatToRename(null);
-      setNewChatTitle("");
+      setNewChatTitle('');
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.error("Failed to rename chat:", error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to rename chat:', error);
       }
     }
   };
@@ -308,13 +307,13 @@ export function ChatScreen({ user }: ChatScreenProps) {
     try {
       // Thêm tin nhắn người dùng vào UI
       const userMessage: Message = {
-        id: generateUniqueId("user"),
+        id: generateUniqueId('user'),
         content,
-        sender: "user",
+        sender: 'user',
         timestamp: new Date().toISOString(),
       };
 
-      setMessages((prev) => [...prev, userMessage]);
+      setMessages(prev => [...prev, userMessage]);
       setIsTyping(true);
 
       // Lưu tin nhắn người dùng vào Firestore
@@ -322,22 +321,22 @@ export function ChatScreen({ user }: ChatScreenProps) {
 
       try {
         // Tạo AI response từ Gemini với một phần lịch sử hội thoại gần nhất
-        const recentHistory: ChatTurn[] = messages.slice(-10).map((m) => ({
-          role: m.sender === "user" ? "user" : "model",
+        const recentHistory: ChatTurn[] = messages.slice(-10).map(m => ({
+          role: m.sender === 'user' ? 'user' : 'model',
           content: m.content,
         }));
         const aiResponse = await generateTutorResponse(content, recentHistory);
 
         // Tạo tin nhắn AI
         const aiMessage: Message = {
-          id: generateUniqueId("ai"),
+          id: generateUniqueId('ai'),
           content: aiResponse,
-          sender: "ai",
+          sender: 'ai',
           timestamp: new Date().toISOString(),
         };
 
         // Hiển thị tin nhắn AI
-        setMessages((prev) => [...prev, aiMessage]);
+        setMessages(prev => [...prev, aiMessage]);
 
         // Lưu tin nhắn AI vào Firestore
         await saveMessage(currentChatId, aiMessage);
@@ -345,12 +344,12 @@ export function ChatScreen({ user }: ChatScreenProps) {
         // Cập nhật tiêu đề chat nếu là tin nhắn đầu tiên của người dùng
         if (messages.length <= 1) {
           const title =
-            content.length > 30 ? content.substring(0, 30) + "..." : content;
+            content.length > 30 ? content.substring(0, 30) + '...' : content;
           await renameChatSession(currentChatId, title);
 
           // Cập nhật danh sách sessions
-          setChatSessions((prev) => {
-            return prev.map((session) => {
+          setChatSessions(prev => {
+            return prev.map(session => {
               if (session.id === currentChatId) {
                 return {
                   ...session,
@@ -363,28 +362,28 @@ export function ChatScreen({ user }: ChatScreenProps) {
           });
         }
       } catch (error) {
-        if (process.env.NODE_ENV === "development") {
-          console.error("Error generating AI response:", error);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Error generating AI response:', error);
         }
 
         // Hiển thị thông báo lỗi cho người dùng
         const errorMessage: Message = {
-          id: generateUniqueId("error"),
+          id: generateUniqueId('error'),
           content:
-            "Xin lỗi, tôi đang gặp sự cố kỹ thuật. Vui lòng thử lại sau.",
-          sender: "ai",
+            'Xin lỗi, tôi đang gặp sự cố kỹ thuật. Vui lòng thử lại sau.',
+          sender: 'ai',
           timestamp: new Date().toISOString(),
         };
 
-        setMessages((prev) => [...prev, errorMessage]);
+        setMessages(prev => [...prev, errorMessage]);
         await saveMessage(currentChatId, errorMessage);
       } finally {
         setIsTyping(false);
         setLoading(false);
       }
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.error("Error sending message:", error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error sending message:', error);
       }
       setIsTyping(false);
       setLoading(false);
@@ -406,7 +405,7 @@ export function ChatScreen({ user }: ChatScreenProps) {
           <div className="py-4">
             <Input
               value={newChatTitle}
-              onChange={(e) => setNewChatTitle(e.target.value)}
+              onChange={e => setNewChatTitle(e.target.value)}
               placeholder="Nhập tên mới cho cuộc trò chuyện"
               className="w-full"
               autoFocus
@@ -418,7 +417,7 @@ export function ChatScreen({ user }: ChatScreenProps) {
               onClick={() => {
                 setRenameDialogOpen(false);
                 setChatToRename(null);
-                setNewChatTitle("");
+                setNewChatTitle('');
               }}
             >
               Hủy
@@ -458,7 +457,7 @@ export function ChatScreen({ user }: ChatScreenProps) {
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.map((message) => (
+          {messages.map(message => (
             <ChatMessage key={message.id} message={message} />
           ))}
           <div ref={messagesEndRef} />
@@ -475,11 +474,11 @@ export function ChatScreen({ user }: ChatScreenProps) {
                     <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                     <div
                       className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                      style={{ animationDelay: "0.1s" }}
+                      style={{ animationDelay: '0.1s' }}
                     ></div>
                     <div
                       className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                      style={{ animationDelay: "0.2s" }}
+                      style={{ animationDelay: '0.2s' }}
                     ></div>
                   </div>
                 </div>

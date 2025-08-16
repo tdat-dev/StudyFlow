@@ -1,42 +1,42 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
 import {
-  User,
   LogOut,
   Settings,
   UserCircle,
   ChevronDown,
   RefreshCw,
-} from "lucide-react";
+} from 'lucide-react';
 
 // Button component
 const Button = ({
   children,
-  variant = "default",
-  size = "default",
-  className = "",
+  variant = 'default',
+  size = 'default',
+  className = '',
   onClick,
   ...props
 }: {
   children: React.ReactNode;
-  variant?: "default" | "outline" | "ghost";
-  size?: "default" | "sm";
+  variant?: 'default' | 'outline' | 'ghost';
+  size?: 'default' | 'sm';
   className?: string;
   onClick?: () => void;
   [key: string]: any;
 }) => {
   const baseClasses =
-    "inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50";
+    'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50';
 
   const variantClasses = {
-    default: "bg-blue-600 text-white hover:bg-blue-700",
+    default: 'bg-blue-600 text-white hover:bg-blue-700',
     outline:
-      "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-    ghost: "hover:bg-accent hover:text-accent-foreground",
+      'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
+    ghost: 'hover:bg-accent hover:text-accent-foreground',
   };
 
   const sizeClasses = {
-    default: "h-9 px-4 py-2",
-    sm: "h-8 rounded-md px-3 text-xs",
+    default: 'h-9 px-4 py-2',
+    sm: 'h-8 rounded-md px-3 text-xs',
   };
 
   return (
@@ -69,7 +69,7 @@ export function Header({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Debug user object
-  console.log("Header user object:", user);
+  console.log('Header user object:', user);
 
   // Đóng dropdown khi click bên ngoài hoặc nhấn ESC
   useEffect(() => {
@@ -83,19 +83,19 @@ export function Header({
     }
 
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
+      if (event.key === 'Escape') {
         setShowDropdown(false);
       }
     }
 
     if (showDropdown) {
-      document.addEventListener("mousedown", handleClickOutside);
-      document.addEventListener("keydown", handleKeyDown);
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
     }
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
     };
   }, [showDropdown]);
 
@@ -109,7 +109,7 @@ export function Header({
   const handleSettingsClick = () => {
     // TODO: Navigate to settings page or show settings modal
     setShowDropdown(false);
-    console.log("Navigate to settings");
+    console.log('Navigate to settings');
   };
 
   const handleLogout = () => {
@@ -128,7 +128,7 @@ export function Header({
     sessionStorage.clear();
 
     // Xóa service worker cache nếu có
-    if ("serviceWorker" in navigator) {
+    if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function (registrations) {
         for (let registration of registrations) {
           registration.unregister();
@@ -137,10 +137,10 @@ export function Header({
     }
 
     // Xóa tất cả cookies
-    document.cookie.split(";").forEach((c) => {
-      const eqPos = c.indexOf("=");
+    document.cookie.split(';').forEach(c => {
+      const eqPos = c.indexOf('=');
       const name = eqPos > -1 ? c.substr(0, eqPos) : c;
-      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+      document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
     });
 
     // Force reload với cache bypass
@@ -152,16 +152,16 @@ export function Header({
     if (user?.displayName || user?.name) {
       const name = user.displayName || user.name;
       return name
-        .split(" ")
+        .split(' ')
         .map((n: string) => n[0])
-        .join("")
+        .join('')
         .substring(0, 2)
         .toUpperCase();
     }
     if (user?.email) {
       return user.email[0].toUpperCase();
     }
-    return "U";
+    return 'U';
   };
 
   const userInitials = getUserInitials(user);
@@ -169,11 +169,11 @@ export function Header({
   // Debug: Log user object to see what properties are available
   useEffect(() => {
     if (user) {
-      console.log("User object in Header:", user);
-      console.log("photoURL:", user.photoURL);
-      console.log("avatar:", user.avatar);
-      console.log("picture:", user.picture);
-      console.log("displayName:", user.displayName);
+      console.log('User object in Header:', user);
+      console.log('photoURL:', user.photoURL);
+      console.log('avatar:', user.avatar);
+      console.log('picture:', user.picture);
+      console.log('displayName:', user.displayName);
     }
   }, [user]);
 
@@ -192,19 +192,19 @@ export function Header({
           {onTabChange && (
             <div className="hidden md:flex items-center space-x-8">
               {[
-                { id: "home", label: "Trang chủ", icon: "🏠" },
-                { id: "chat", label: "AI Tutor", icon: "💬" },
-                { id: "flashcards", label: "Flashcards", icon: "🃏" },
-                { id: "habits", label: "Thói quen", icon: "📈" },
-                { id: "pomodoro", label: "Pomodoro", icon: "🍅" },
-              ].map((tab) => (
+                { id: 'home', label: 'Trang chủ', icon: '🏠' },
+                { id: 'chat', label: 'AI Tutor', icon: '💬' },
+                { id: 'flashcards', label: 'Flashcards', icon: '🃏' },
+                { id: 'habits', label: 'Thói quen', icon: '📈' },
+                { id: 'pomodoro', label: 'Pomodoro', icon: '🍅' },
+              ].map(tab => (
                 <button
                   key={tab.id}
                   onClick={() => onTabChange(tab.id)}
                   className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     activeTab === tab.id
-                      ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
-                      : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
+                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
                   }`}
                 >
                   <span>{tab.icon}</span>
@@ -250,29 +250,24 @@ export function Header({
 
                     {/* Overlay with actual photo if available */}
                     {(user?.photoURL || user?.avatar || user?.picture) && (
-                      <img
-                        src={user.photoURL || user.avatar || user.picture}
+                      <Image
+                        src={user.photoURL || user.avatar || user.picture || ''}
                         alt={
                           user?.displayName ||
                           user?.name ||
                           user?.email ||
-                          "User"
+                          'User'
                         }
+                        width={40}
+                        height={40}
                         className="absolute inset-0 w-10 h-10 rounded-full object-cover ring-2 ring-gray-200"
-                        onLoad={(e) => {
+                        onLoad={() => {
                           // Image loaded successfully, keep it visible
-                          console.log(
-                            "Avatar loaded successfully:",
-                            e.currentTarget.src
-                          );
+                          console.log('Avatar loaded successfully');
                         }}
-                        onError={(e) => {
+                        onError={() => {
                           // Hide broken image, show fallback
-                          console.log(
-                            "Avatar failed to load:",
-                            e.currentTarget.src
-                          );
-                          (e.target as HTMLImageElement).style.display = "none";
+                          console.log('Avatar failed to load');
                         }}
                       />
                     )}
@@ -281,8 +276,8 @@ export function Header({
                     <ChevronDown
                       className={`h-4 w-4 text-gray-400 transition-all duration-200 ${
                         showDropdown
-                          ? "rotate-180 text-blue-500"
-                          : "hover:text-gray-600"
+                          ? 'rotate-180 text-blue-500'
+                          : 'hover:text-gray-600'
                       }`}
                     />
                   </div>
@@ -295,13 +290,14 @@ export function Header({
                     <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
                       <div className="flex items-center space-x-3">
                         {user.photoURL ? (
-                          <img
+                          <Image
                             src={user.photoURL}
                             alt={user.name || user.email}
+                            width={48}
+                            height={48}
                             className="w-12 h-12 rounded-full object-cover"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).style.display =
-                                "none";
+                            onError={() => {
+                              console.log('Dropdown avatar failed to load');
                             }}
                           />
                         ) : null}
@@ -316,7 +312,7 @@ export function Header({
                         )}
                         <div className="flex-1 min-w-0">
                           <div className="font-semibold text-gray-900 dark:text-white truncate">
-                            {user.name || user.displayName || "Người dùng"}
+                            {user.name || user.displayName || 'Người dùng'}
                           </div>
                           <div className="text-sm text-gray-500 dark:text-gray-400 truncate">
                             {user.email}

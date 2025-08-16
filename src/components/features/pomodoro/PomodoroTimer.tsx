@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from "react";
-import Button from "../../../components/ui/button";
+import React, { useState, useEffect } from 'react';
+import Button from '../../../components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../../../components/ui/card";
-import { Slider } from "../../../components/ui/slider";
-import { Badge } from "../../../components/ui/badge";
-import { Separator } from "../../../components/ui/separator";
-import { Input } from "../../../components/ui/input";
+} from '../../../components/ui/card';
+import { Slider } from '../../../components/ui/slider';
+import { Badge } from '../../../components/ui/badge';
+import { Input } from '../../../components/ui/input';
 import {
   Play,
   Pause,
@@ -19,8 +18,6 @@ import {
   Coffee,
   BookOpen,
   CheckCircle2,
-  Bell,
-  Volume2,
   Settings,
   ArrowLeft,
   List,
@@ -30,8 +27,8 @@ import {
   X,
   SkipForward,
   BarChart3,
-} from "lucide-react";
-import { auth, db } from "../../../services/firebase/config";
+} from 'lucide-react';
+import { auth, db } from '../../../services/firebase/config';
 import {
   collection,
   addDoc,
@@ -41,7 +38,7 @@ import {
   deleteDoc,
   doc,
   Timestamp,
-} from "firebase/firestore";
+} from 'firebase/firestore';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,9 +48,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "../../../components/ui/alert-dialog";
+} from '../../../components/ui/alert-dialog';
 
-type TimerMode = "pomodoro" | "shortBreak" | "longBreak";
+type TimerMode = 'pomodoro' | 'shortBreak' | 'longBreak';
 
 interface PomodoroTimerProps {
   user: any;
@@ -64,7 +61,7 @@ interface PomodoroSession {
   title: string;
   duration: number;
   completedAt?: string;
-  type: "focus" | "break";
+  type: 'focus' | 'break';
 }
 
 interface Task {
@@ -75,9 +72,9 @@ interface Task {
   completedPomodoros: number;
 }
 
-export function PomodoroTimer({ user }: PomodoroTimerProps) {
+export function PomodoroTimer({ user: _user }: PomodoroTimerProps) {
   // Timer modes và cài đặt
-  const [timerMode, setTimerMode] = useState<TimerMode>("pomodoro");
+  const [timerMode, setTimerMode] = useState<TimerMode>('pomodoro');
   const [pomodoroTime, setPomodoroTime] = useState(25);
   const [shortBreakTime, setShortBreakTime] = useState(5);
   const [longBreakTime, setLongBreakTime] = useState(15);
@@ -88,12 +85,12 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
   const [isActive, setIsActive] = useState(false);
   const [pomodoroCount, setPomodoroCount] = useState(0);
   const [currentSession, setCurrentSession] = useState<PomodoroSession | null>(
-    null
+    null,
   );
 
   // Tasks
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [newTaskText, setNewTaskText] = useState("");
+  const [newTaskText, setNewTaskText] = useState('');
   const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
 
   // Thống kê
@@ -105,7 +102,6 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
   const [showSettings, setShowSettings] = useState(false);
   const [showTasks, setShowTasks] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [sessionToDelete, setSessionToDelete] =
     useState<PomodoroSession | null>(null);
@@ -134,42 +130,40 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
       // Dữ liệu mẫu nếu không có người dùng
       const mockSessions = [
         {
-          id: "1",
-          title: "Học từ vựng",
+          id: '1',
+          title: 'Học từ vựng',
           duration: 25,
           completedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-          type: "focus",
+          type: 'focus',
         },
         {
-          id: "2",
-          title: "Nghỉ giải lao",
+          id: '2',
+          title: 'Nghỉ giải lao',
           duration: 5,
           completedAt: new Date(
-            Date.now() - 23.5 * 60 * 60 * 1000
+            Date.now() - 23.5 * 60 * 60 * 1000,
           ).toISOString(),
-          type: "break",
+          type: 'break',
         },
       ] as PomodoroSession[];
 
       setSessionHistory(mockSessions);
-      setSessionsCompleted(
-        mockSessions.filter((s) => s.type === "focus").length
-      );
+      setSessionsCompleted(mockSessions.filter(s => s.type === 'focus').length);
       setTotalFocusTime(
         mockSessions
-          .filter((s) => s.type === "focus")
-          .reduce((sum, s) => sum + s.duration, 0)
+          .filter(s => s.type === 'focus')
+          .reduce((sum, s) => sum + s.duration, 0),
       );
       return;
     }
 
     try {
-      const sessionsRef = collection(db, "pomodoro_sessions");
-      const q = query(sessionsRef, where("userId", "==", auth.currentUser.uid));
+      const sessionsRef = collection(db, 'pomodoro_sessions');
+      const q = query(sessionsRef, where('userId', '==', auth.currentUser.uid));
       const querySnapshot = await getDocs(q);
 
       const sessions: PomodoroSession[] = [];
-      querySnapshot.forEach((doc) => {
+      querySnapshot.forEach(doc => {
         const data = doc.data();
         sessions.push({
           id: doc.id,
@@ -190,15 +184,15 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
       });
 
       setSessionHistory(sessions);
-      setSessionsCompleted(sessions.filter((s) => s.type === "focus").length);
+      setSessionsCompleted(sessions.filter(s => s.type === 'focus').length);
       setTotalFocusTime(
         sessions
-          .filter((s) => s.type === "focus")
-          .reduce((sum, s) => sum + s.duration, 0)
+          .filter(s => s.type === 'focus')
+          .reduce((sum, s) => sum + s.duration, 0),
       );
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.error("Failed to load pomodoro sessions:", error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to load pomodoro sessions:', error);
       }
     }
   };
@@ -208,15 +202,15 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
     // Mock data cho tasks
     const mockTasks: Task[] = [
       {
-        id: "1",
-        text: "Học từ vựng tiếng Anh",
+        id: '1',
+        text: 'Học từ vựng tiếng Anh',
         completed: false,
         estimatedPomodoros: 2,
         completedPomodoros: 0,
       },
       {
-        id: "2",
-        text: "Luyện nghe IELTS",
+        id: '2',
+        text: 'Luyện nghe IELTS',
         completed: false,
         estimatedPomodoros: 3,
         completedPomodoros: 1,
@@ -231,10 +225,11 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
 
     if (isActive && timeLeft > 0) {
       interval = setInterval(() => {
-        setTimeLeft((prevTime) => prevTime - 1);
+        setTimeLeft(prevTime => prevTime - 1);
       }, 1000);
     } else if (isActive && timeLeft === 0) {
       // Kết thúc phiên
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       handleSessionComplete();
       playAlarm();
     } else if (interval) {
@@ -257,12 +252,12 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
         completedPomodoros: 0,
       };
       setTasks([...tasks, newTask]);
-      setNewTaskText("");
+      setNewTaskText('');
     }
   };
 
   const deleteTask = (taskId: string) => {
-    setTasks(tasks.filter((t) => t.id !== taskId));
+    setTasks(tasks.filter(t => t.id !== taskId));
     if (currentTaskId === taskId) {
       setCurrentTaskId(null);
     }
@@ -270,9 +265,7 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
 
   const toggleTask = (taskId: string) => {
     setTasks(
-      tasks.map((t) =>
-        t.id === taskId ? { ...t, completed: !t.completed } : t
-      )
+      tasks.map(t => (t.id === taskId ? { ...t, completed: !t.completed } : t)),
     );
   };
 
@@ -283,21 +276,21 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
   // Timer mode switching functions
   const switchToPomodoro = () => {
     if (!isActive) {
-      setTimerMode("pomodoro");
+      setTimerMode('pomodoro');
       setTimeLeft(pomodoroTime * 60);
     }
   };
 
   const switchToShortBreak = () => {
     if (!isActive) {
-      setTimerMode("shortBreak");
+      setTimerMode('shortBreak');
       setTimeLeft(shortBreakTime * 60);
     }
   };
 
   const switchToLongBreak = () => {
     if (!isActive) {
-      setTimerMode("longBreak");
+      setTimerMode('longBreak');
       setTimeLeft(longBreakTime * 60);
     }
   };
@@ -305,11 +298,11 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
   // Get current timer duration in minutes
   const getCurrentDuration = () => {
     switch (timerMode) {
-      case "pomodoro":
+      case 'pomodoro':
         return pomodoroTime;
-      case "shortBreak":
+      case 'shortBreak':
         return shortBreakTime;
-      case "longBreak":
+      case 'longBreak':
         return longBreakTime;
       default:
         return pomodoroTime;
@@ -317,12 +310,11 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
   };
 
   // Lưu phiên làm việc vào Firestore
-  const saveSession = async (session: Omit<PomodoroSession, "id">) => {
+  const saveSession = async (session: Omit<PomodoroSession, 'id'>) => {
     if (!auth.currentUser) return;
 
-    setLoading(true);
     try {
-      const sessionsRef = collection(db, "pomodoro_sessions");
+      const sessionsRef = collection(db, 'pomodoro_sessions');
       await addDoc(sessionsRef, {
         ...session,
         userId: auth.currentUser.uid,
@@ -332,11 +324,9 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
       // Tải lại lịch sử
       await loadSessionHistory();
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.error("Failed to save pomodoro session:", error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to save pomodoro session:', error);
       }
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -345,18 +335,18 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
     setIsActive(true);
 
     const duration = getCurrentDuration();
-    const currentTask = tasks.find((t) => t.id === currentTaskId);
+    const currentTask = tasks.find(t => t.id === currentTaskId);
     const title = currentTask
       ? currentTask.text
-      : timerMode === "pomodoro"
-      ? "Tập trung học tập"
-      : "Nghỉ ngơi";
+      : timerMode === 'pomodoro'
+        ? 'Tập trung học tập'
+        : 'Nghỉ ngơi';
 
     const newSession: PomodoroSession = {
       id: Math.random().toString(36).substring(2, 9),
       title,
       duration,
-      type: timerMode === "pomodoro" ? "focus" : "break",
+      type: timerMode === 'pomodoro' ? 'focus' : 'break',
     };
 
     setCurrentSession(newSession);
@@ -381,19 +371,19 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
 
   // Skip to next session
   const skipSession = () => {
-    if (timerMode === "pomodoro") {
-      setPomodoroCount((prev) => prev + 1);
+    if (timerMode === 'pomodoro') {
+      setPomodoroCount(prev => prev + 1);
       // Chuyển sang break (short hoặc long)
       if ((pomodoroCount + 1) % longBreakInterval === 0) {
-        setTimerMode("longBreak");
+        setTimerMode('longBreak');
         setTimeLeft(longBreakTime * 60);
       } else {
-        setTimerMode("shortBreak");
+        setTimerMode('shortBreak');
         setTimeLeft(shortBreakTime * 60);
       }
     } else {
       // Từ break chuyển về pomodoro
-      setTimerMode("pomodoro");
+      setTimerMode('pomodoro');
       setTimeLeft(pomodoroTime * 60);
     }
 
@@ -413,22 +403,22 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
       };
 
       // Thêm vào lịch sử local
-      setSessionHistory((prev) => [completedSession, ...prev]);
+      setSessionHistory(prev => [completedSession, ...prev]);
 
       // Cập nhật thống kê
-      if (completedSession.type === "focus") {
-        setSessionsCompleted((prev) => prev + 1);
-        setTotalFocusTime((prev) => prev + completedSession.duration);
-        setPomodoroCount((prev) => prev + 1);
+      if (completedSession.type === 'focus') {
+        setSessionsCompleted(prev => prev + 1);
+        setTotalFocusTime(prev => prev + completedSession.duration);
+        setPomodoroCount(prev => prev + 1);
 
         // Cập nhật completed pomodoros cho task hiện tại
         if (currentTaskId) {
           setTasks(
-            tasks.map((t) =>
+            tasks.map(t =>
               t.id === currentTaskId
                 ? { ...t, completedPomodoros: t.completedPomodoros + 1 }
-                : t
-            )
+                : t,
+            ),
           );
         }
       }
@@ -437,18 +427,18 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
       await saveSession(completedSession);
 
       // Auto-switch sang session tiếp theo
-      if (timerMode === "pomodoro") {
+      if (timerMode === 'pomodoro') {
         // Chuyển sang break
         if (pomodoroCount % longBreakInterval === 0) {
-          setTimerMode("longBreak");
+          setTimerMode('longBreak');
           setTimeLeft(longBreakTime * 60);
         } else {
-          setTimerMode("shortBreak");
+          setTimerMode('shortBreak');
           setTimeLeft(shortBreakTime * 60);
         }
       } else {
         // Từ break chuyển về pomodoro
-        setTimerMode("pomodoro");
+        setTimerMode('pomodoro');
         setTimeLeft(pomodoroTime * 60);
       }
 
@@ -459,12 +449,12 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
   // Phát âm thanh báo khi kết thúc phiên
   const playAlarm = () => {
     try {
-      const audio = new Audio("/sounds/bell.mp3");
+      const audio = new Audio('/sounds/bell.mp3');
       audio.play();
     } catch (error) {
       // Xử lý lỗi khi không thể phát âm thanh
-      if (process.env.NODE_ENV === "development") {
-        console.error("Failed to play alarm sound:", error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to play alarm sound:', error);
       }
     }
   };
@@ -473,9 +463,9 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs
+    return `${mins.toString().padStart(2, '0')}:${secs
       .toString()
-      .padStart(2, "0")}`;
+      .padStart(2, '0')}`;
   };
 
   // Tính toán phần trăm thời gian còn lại
@@ -487,37 +477,37 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
   // Get timer colors based on mode
   const getTimerColors = () => {
     switch (timerMode) {
-      case "pomodoro":
+      case 'pomodoro':
         return {
-          bg: "bg-purple-500",
-          bgLight: "bg-purple-50",
-          text: "text-purple-600",
-          textLight: "text-purple-500",
-          border: "border-purple-200",
+          bg: 'bg-purple-500',
+          bgLight: 'bg-purple-50',
+          text: 'text-purple-600',
+          textLight: 'text-purple-500',
+          border: 'border-purple-200',
         };
-      case "shortBreak":
+      case 'shortBreak':
         return {
-          bg: "bg-green-500",
-          bgLight: "bg-green-50",
-          text: "text-green-600",
-          textLight: "text-green-500",
-          border: "border-green-200",
+          bg: 'bg-green-500',
+          bgLight: 'bg-green-50',
+          text: 'text-green-600',
+          textLight: 'text-green-500',
+          border: 'border-green-200',
         };
-      case "longBreak":
+      case 'longBreak':
         return {
-          bg: "bg-blue-500",
-          bgLight: "bg-blue-50",
-          text: "text-blue-600",
-          textLight: "text-blue-500",
-          border: "border-blue-200",
+          bg: 'bg-blue-500',
+          bgLight: 'bg-blue-50',
+          text: 'text-blue-600',
+          textLight: 'text-blue-500',
+          border: 'border-blue-200',
         };
       default:
         return {
-          bg: "bg-purple-500",
-          bgLight: "bg-purple-50",
-          text: "text-purple-600",
-          textLight: "text-purple-500",
-          border: "border-purple-200",
+          bg: 'bg-purple-500',
+          bgLight: 'bg-purple-50',
+          text: 'text-purple-600',
+          textLight: 'text-purple-500',
+          border: 'border-purple-200',
         };
     }
   };
@@ -528,7 +518,7 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
     if (minutes < 60) return `${minutes} phút`;
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
-    return `${hours} giờ ${mins > 0 ? `${mins} phút` : ""}`;
+    return `${hours} giờ ${mins > 0 ? `${mins} phút` : ''}`;
   };
 
   // Hiển thị cài đặt
@@ -567,7 +557,7 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
                 min={1}
                 max={60}
                 step={1}
-                onValueChange={(value) => setPomodoroTime(value[0])}
+                onValueChange={value => setPomodoroTime(value[0])}
                 className="mb-2"
               />
               <div className="flex justify-between text-sm text-gray-500">
@@ -592,7 +582,7 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
                 min={1}
                 max={30}
                 step={1}
-                onValueChange={(value) => setShortBreakTime(value[0])}
+                onValueChange={value => setShortBreakTime(value[0])}
                 className="mb-2"
               />
               <div className="flex justify-between text-sm text-gray-500">
@@ -617,7 +607,7 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
                 min={5}
                 max={60}
                 step={5}
-                onValueChange={(value) => setLongBreakTime(value[0])}
+                onValueChange={value => setLongBreakTime(value[0])}
                 className="mb-2"
               />
               <div className="flex justify-between text-sm text-gray-500">
@@ -644,7 +634,7 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
                 min={2}
                 max={8}
                 step={1}
-                onValueChange={(value) => setLongBreakInterval(value[0])}
+                onValueChange={value => setLongBreakInterval(value[0])}
                 className="mb-2"
               />
               <div className="flex justify-between text-sm text-gray-500">
@@ -717,15 +707,15 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
               <Card
                 key={session.id || index}
                 className={
-                  session.type === "focus"
-                    ? "border-blue-200"
-                    : "border-green-200"
+                  session.type === 'focus'
+                    ? 'border-blue-200'
+                    : 'border-green-200'
                 }
               >
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      {session.type === "focus" ? (
+                      {session.type === 'focus' ? (
                         <Clock className="h-5 w-5 mr-3 text-blue-600" />
                       ) : (
                         <Coffee className="h-5 w-5 mr-3 text-green-600" />
@@ -733,34 +723,34 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
                       <div>
                         <p className="font-medium">{session.title}</p>
                         <p className="text-sm text-gray-500">
-                          {session.duration} phút •{" "}
+                          {session.duration} phút •{' '}
                           {session.completedAt
                             ? new Date(session.completedAt).toLocaleDateString(
-                                "vi-VN",
+                                'vi-VN',
                                 {
-                                  day: "numeric",
-                                  month: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                }
+                                  day: 'numeric',
+                                  month: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                },
                               )
-                            : "Đang tiến hành"}
+                            : 'Đang tiến hành'}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Badge
                         variant={
-                          session.type === "focus" ? "default" : "secondary"
+                          session.type === 'focus' ? 'default' : 'secondary'
                         }
                       >
-                        {session.type === "focus" ? "Tập trung" : "Nghỉ ngơi"}
+                        {session.type === 'focus' ? 'Tập trung' : 'Nghỉ ngơi'}
                       </Badge>
                       <Button
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation();
                           setSessionToDelete(session);
                           setDeleteDialogOpen(true);
@@ -794,40 +784,40 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
         {/* Timer Mode Tabs */}
         <div className="flex bg-white/20 backdrop-blur-sm rounded-lg p-1 mb-8">
           <Button
-            variant={timerMode === "pomodoro" ? "default" : "ghost"}
+            variant={timerMode === 'pomodoro' ? 'default' : 'ghost'}
             size="sm"
             onClick={switchToPomodoro}
             disabled={isActive}
             className={`rounded-md ${
-              timerMode === "pomodoro"
-                ? "bg-white dark:bg-gray-700 text-purple-600 dark:text-purple-400 shadow-sm"
-                : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+              timerMode === 'pomodoro'
+                ? 'bg-white dark:bg-gray-700 text-purple-600 dark:text-purple-400 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
             }`}
           >
             Pomodoro
           </Button>
           <Button
-            variant={timerMode === "shortBreak" ? "default" : "ghost"}
+            variant={timerMode === 'shortBreak' ? 'default' : 'ghost'}
             size="sm"
             onClick={switchToShortBreak}
             disabled={isActive}
             className={`rounded-md ${
-              timerMode === "shortBreak"
-                ? "bg-white dark:bg-gray-700 text-green-600 dark:text-green-400 shadow-sm"
-                : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+              timerMode === 'shortBreak'
+                ? 'bg-white dark:bg-gray-700 text-green-600 dark:text-green-400 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
             }`}
           >
             Nghỉ Ngắn
           </Button>
           <Button
-            variant={timerMode === "longBreak" ? "default" : "ghost"}
+            variant={timerMode === 'longBreak' ? 'default' : 'ghost'}
             size="sm"
             onClick={switchToLongBreak}
             disabled={isActive}
             className={`rounded-md ${
-              timerMode === "longBreak"
-                ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm"
-                : "text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200"
+              timerMode === 'longBreak'
+                ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
             }`}
           >
             Nghỉ Dài
@@ -857,7 +847,7 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
               onClick={currentSession ? resumeSession : startSession}
             >
               <Play className="h-5 w-5 mr-2" />
-              {currentSession ? "TIẾP TỤC" : "BẮT ĐẦU"}
+              {currentSession ? 'TIẾP TỤC' : 'BẮT ĐẦU'}
             </Button>
           )}
 
@@ -895,8 +885,8 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
         {/* Session Info */}
         {currentTaskId && (
           <div className="text-white/90 text-lg mb-4">
-            #{pomodoroCount + 1} -{" "}
-            {tasks.find((t) => t.id === currentTaskId)?.text}
+            #{pomodoroCount + 1} -{' '}
+            {tasks.find(t => t.id === currentTaskId)?.text}
           </div>
         )}
       </div>
@@ -921,8 +911,8 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
             <Input
               placeholder="Bạn đang làm gì?"
               value={newTaskText}
-              onChange={(e) => setNewTaskText(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && addTask()}
+              onChange={e => setNewTaskText(e.target.value)}
+              onKeyPress={e => e.key === 'Enter' && addTask()}
               className="flex-1"
             />
             <Button onClick={addTask} disabled={!newTaskText.trim()}>
@@ -932,13 +922,13 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
 
           {/* Task List */}
           <div className="space-y-2">
-            {tasks.map((task) => (
+            {tasks.map(task => (
               <div
                 key={task.id}
                 className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${
                   currentTaskId === task.id
                     ? `${colors.bgLight} ${colors.border} border-2`
-                    : "bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600"
+                    : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600'
                 }`}
                 onClick={() => selectTask(task.id)}
               >
@@ -947,14 +937,14 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
                     type="checkbox"
                     checked={task.completed}
                     onChange={() => toggleTask(task.id)}
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={e => e.stopPropagation()}
                     className="h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
                   />
                   <span
                     className={
                       task.completed
-                        ? "text-gray-500 dark:text-gray-400 line-through"
-                        : "text-gray-900 dark:text-gray-100"
+                        ? 'text-gray-500 dark:text-gray-400 line-through'
+                        : 'text-gray-900 dark:text-gray-100'
                     }
                   >
                     {task.text}
@@ -968,7 +958,7 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       deleteTask(task.id);
                     }}
@@ -1084,29 +1074,27 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
     try {
       // Xóa khỏi state
       setSessionHistory(
-        sessionHistory.filter((session) => session.id !== sessionToDelete.id)
+        sessionHistory.filter(session => session.id !== sessionToDelete.id),
       );
 
       // Cập nhật thống kê nếu là phiên tập trung
-      if (sessionToDelete.type === "focus") {
-        setSessionsCompleted((prev) => Math.max(0, prev - 1));
-        setTotalFocusTime((prev) =>
-          Math.max(0, prev - sessionToDelete.duration)
-        );
+      if (sessionToDelete.type === 'focus') {
+        setSessionsCompleted(prev => Math.max(0, prev - 1));
+        setTotalFocusTime(prev => Math.max(0, prev - sessionToDelete.duration));
       }
 
       // Xóa khỏi Firestore nếu có auth.currentUser
       if (auth.currentUser && sessionToDelete.id) {
         try {
-          await deleteDoc(doc(db, "pomodoro_sessions", sessionToDelete.id));
+          await deleteDoc(doc(db, 'pomodoro_sessions', sessionToDelete.id));
           // Chỉ log trong môi trường development
-          if (process.env.NODE_ENV === "development") {
+          if (process.env.NODE_ENV === 'development') {
             console.log(`Deleted session ${sessionToDelete.id} from Firestore`);
           }
         } catch (error) {
           // Chỉ log trong môi trường development
-          if (process.env.NODE_ENV === "development") {
-            console.error("Error deleting session from Firestore:", error);
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Error deleting session from Firestore:', error);
           }
         }
       }
@@ -1116,8 +1104,8 @@ export function PomodoroTimer({ user }: PomodoroTimerProps) {
       setSessionToDelete(null);
     } catch (error) {
       // Chỉ log trong môi trường development
-      if (process.env.NODE_ENV === "development") {
-        console.error("Failed to delete session:", error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to delete session:', error);
       }
     }
   };
