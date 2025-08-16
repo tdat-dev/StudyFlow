@@ -42,6 +42,58 @@ export default function App() {
           content="Học tiếng Anh thông minh với AI, Flashcards, Pomodoro Timer và theo dõi thói quen"
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        {/* Favicon */}
+        <link rel="icon" href="/images/favicon.ico" />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/images/logo-32.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/images/logo-16.png"
+        />
+
+        {/* Apple Touch Icons */}
+        <link rel="apple-touch-icon" href="/images/logo-180.png" />
+        <link
+          rel="apple-touch-icon"
+          sizes="152x152"
+          href="/images/logo-152.png"
+        />
+        <link
+          rel="apple-touch-icon"
+          sizes="144x144"
+          href="/images/logo-144.png"
+        />
+        <link
+          rel="apple-touch-icon"
+          sizes="120x120"
+          href="/images/logo-120.png"
+        />
+
+        {/* PWA Manifest */}
+        <link rel="manifest" href="/manifest.json" />
+
+        {/* Theme Color */}
+        <meta name="theme-color" content="#4F46E5" />
+        <meta name="msapplication-TileColor" content="#4F46E5" />
+
+        {/* Open Graph */}
+        <meta
+          property="og:title"
+          content="StudyFlow - Smart Learning Platform"
+        />
+        <meta
+          property="og:description"
+          content="Học tiếng Anh thông minh với AI, Flashcards & Pomodoro"
+        />
+        <meta property="og:image" content="/images/logo.png" />
+        <meta property="og:type" content="website" />
       </Head>
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
         {user ? (

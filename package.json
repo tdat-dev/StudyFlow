@@ -17,7 +17,12 @@
     "test:coverage": "vitest run --coverage",
     "export": "next build",
     "deploy": "npm run export && firebase deploy --only hosting",
-    "deploy:complete": "npm run export && firebase deploy"
+    "deploy:complete": "npm run export && firebase deploy",
+    "generate-logos": "node scripts/generate-logo-sizes.js",
+    "generate-logos:sharp": "node scripts/generate-logos-sharp.js",
+    "generate-logos:win": "scripts\\generate-logo-sizes.bat",
+    "generate-logos:unix": "bash scripts/generate-logo-sizes.sh",
+    "check-logo": "node scripts/check-logo.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -97,6 +102,7 @@
     "jsdom": "^23.0.0",
     "postcss": "^8.4.35",
     "prettier": "^3.0.0",
+    "sharp": "^0.34.3",
     "stylelint": "^15.11.0",
     "stylelint-config-standard": "^34.0.0",
     "stylelint-config-tailwindcss": "^0.0.7",

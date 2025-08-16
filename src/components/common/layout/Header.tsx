@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
+import Logo from '../../ui/Logo';
 import {
   LogOut,
   Settings,
@@ -182,11 +183,7 @@ export function Header({
       <div className="px-4 md:px-8 py-3">
         <div className="flex items-center justify-between">
           {/* Logo/Brand */}
-          <div className="flex items-center">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-              StudyFlow
-            </h1>
-          </div>
+          <Logo size="medium" />
 
           {/* Desktop Navigation */}
           {onTabChange && (

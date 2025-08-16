@@ -1,4 +1,5 @@
 import React from 'react';
+import Logo from '../../components/ui/Logo';
 import Button from '../../components/ui/button';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -23,8 +24,8 @@ export default function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-yellow-50 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md text-center">
         <div className="mb-8">
-          <div className="w-24 h-24 bg-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-            <span className="text-3xl font-bold text-white">SF</span>
+          <div className="mx-auto mb-4 flex items-center justify-center">
+            <Logo size="large" showText={false} />
           </div>
           <h1 className="text-3xl font-bold text-blue-900 mb-2">StudyFlow</h1>
           <p className="text-gray-600">

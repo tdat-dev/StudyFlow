@@ -3,13 +3,14 @@
 @tailwind utilities;
 
 /* Import component styles */
-@import "./components.css";
+@import './components.css';
 
 /* Ensure styles are properly loaded */
 @layer base {
   html {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-      "Helvetica Neue", Arial, sans-serif;
+    font-family:
+      -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+      Arial, sans-serif;
   }
 }
 
@@ -148,7 +149,7 @@
  * Base typography. This is not applied to elements which have an ancestor with a Tailwind text class.
  */
 @layer base {
-  :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) {
+  :where(:not(:has([class*=' text-']), :not(:has([class^='text-'])))) {
     h1 {
       font-size: var(--text-2xl);
       font-weight: var(--font-weight-medium);
@@ -495,4 +496,23 @@ html {
 
 .dark .dark-text-secondary {
   color: #8b949e;
+}
+
+/* Logo styles - remove borders and outlines */
+img[alt*='Logo'],
+img[src*='logo'],
+.logo-image {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  ring: none !important;
+}
+
+/* Specific logo image styling */
+img[src='/images/logo.png'],
+img[src*='/images/logo-'] {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
 }

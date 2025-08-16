@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logo Test - StudyFlow</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .logo-test {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        .logo-test img {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
+        }
+        h1, h2 { color: #333; }
+        .size-label { 
+            font-weight: bold; 
+            color: #666; 
+            min-width: 80px;
+        }
+        .dark-test {
+            background: #1a1a1a;
+            color: white;
+        }
+        .grid-test {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .grid-item {
+            text-align: center;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        .grid-item img {
+            display: block;
+            margin: 0 auto 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 StudyFlow Logo Test - Kiểm tra viền</h1>
+    
+    <div class="test-container">
+        <h2>📏 Logo sizes test (không có viền)</h2>
+        
+        <div class="logo-test">
+            <span class="size-label">16px:</span>
+            <img src="logo-16.png" alt="Logo 16px" width="16" height="16">
+            <span>Favicon size</span>
+        </div>
+        
+        <div class="logo-test">
+            <span class="size-label">32px:</span>
+            <img src="logo-32.png" alt="Logo 32px" width="32" height="32">
+            <span>Small icons</span>
+        </div>
+        
+        <div class="logo-test">
+            <span class="size-label">48px:</span>
+            <img src="logo-48.png" alt="Logo 48px" width="48" height="48">
+            <span>Standard icons</span>
+        </div>
+        
+        <div class="logo-test">
+            <span class="size-label">72px:</span>
+            <img src="logo-72.png" alt="Logo 72px" width="72" height="72">
+            <span>Medium icons</span>
+        </div>
+        
+        <div class="logo-test">
+            <span class="size-label">96px:</span>
+            <img src="logo-96.png" alt="Logo 96px" width="96" height="96">
+            <span>Large icons</span>
+        </div>
+        
+        <div class="logo-test">
+            <span class="size-label">144px:</span>
+            <img src="logo-144.png" alt="Logo 144px" width="144" height="144">
+            <span>Windows tiles</span>
+        </div>
+        
+        <div class="logo-test">
+            <span class="size-label">192px:</span>
+            <img src="logo-192.png" alt="Logo 192px" width="192" height="192">
+            <span>PWA icons</span>
+        </div>
+    </div>
+    
+    <div class="test-container dark-test">
+        <h2>🌙 Dark background test</h2>
+        <div class="logo-test">
+            <img src="logo-96.png" alt="Logo on dark" width="96" height="96">
+            <span>Logo trên nền tối</span>
+        </div>
+    </div>
+    
+    <div class="test-container">
+        <h2>🎯 Grid layout test</h2>
+        <div class="grid-test">
+            <div class="grid-item">
+                <img src="logo-48.png" alt="Grid 1" width="48" height="48">
+                <div>Grid 1</div>
+            </div>
+            <div class="grid-item">
+                <img src="logo-48.png" alt="Grid 2" width="48" height="48">
+                <div>Grid 2</div>
+            </div>
+            <div class="grid-item">
+                <img src="logo-48.png" alt="Grid 3" width="48" height="48">
+                <div>Grid 3</div>
+            </div>
+            <div class="grid-item">
+                <img src="logo-48.png" alt="Grid 4" width="48" height="48">
+                <div>Grid 4</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="test-container">
+        <h2>✅ Expected results:</h2>
+        <ul>
+            <li>✅ Logo không có viền đen/border</li>
+            <li>✅ Logo hiển thị sắc nét trên mọi sizes</li>
+            <li>✅ Logo hoạt động tốt trên nền tối</li>
+            <li>✅ Logo scale đúng tỷ lệ</li>
+            <li>❌ Nếu vẫn thấy viền → cần thêm CSS fixes</li>
+        </ul>
+    </div>
+    
+    <p><a href="http://localhost:3000" style="color: #4F46E5; text-decoration: none;">← Quay lại StudyFlow website</a></p>
+</body>
+</html>
