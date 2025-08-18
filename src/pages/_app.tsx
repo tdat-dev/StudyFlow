@@ -27,7 +27,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <ErrorBoundary onError={handleError}>
-      <ThemeProvider attribute="class" defaultTheme="light">
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <LanguageProvider>
           <AppStateProvider>
             <AuthProvider>
