@@ -47,21 +47,67 @@ export const generateGeminiResponse = async (
       );
     }
 
+<<<<<<< HEAD
+=======
+    console.log("Calling Gemini API with chat history length:", chatHistory.length);
+    
+>>>>>>> origin/main
     const model = getGeminiModel();
 
     // Tạo chat session với lịch sử cuộc hội thoại
     let result;
 
     try {
-      // Sử dụng generateContent thay vì chat history để tránh lỗi
-      result = await model.generateContent(prompt);
+      // Sử dụng startChat để duy trì ngữ cảnh trò chuyện
+      const chat = model.startChat({
+        history: chatHistory.map(msg => ({
+          role: msg.role === 'user' ? 'user' : 'model',
+          parts: [{ text: msg.content }]
+        })),
+        generationConfig: {
+          maxOutputTokens: geminiConfig.maxOutputTokens,
+          temperature: geminiConfig.temperature,
+          topP: geminiConfig.topP,
+          topK: geminiConfig.topK,
+        },
+      });
+      
+      // Gửi tin nhắn mới và nhận phản hồi
+      result = await chat.sendMessage(prompt);
     } catch (error) {
+<<<<<<< HEAD
       // Chỉ log trong môi trường development
       if (process.env.NODE_ENV === 'development') {
         console.error('Error generating content from AI:', error);
       }
       // Không truyền lỗi gốc vì có thể chứa thông tin nhạy cảm
       throw new Error('Failed to generate AI response');
+=======
+      console.error("Error using chat API, falling back to direct generation");
+      
+      try {
+        // Fallback: Tạo prompt bao gồm lịch sử trò chuyện
+        let fullPrompt = "";
+        
+        // Thêm lịch sử trò chuyện vào prompt
+        if (chatHistory.length > 0) {
+          fullPrompt += "Lịch sử trò chuyện:\n\n";
+          chatHistory.forEach(msg => {
+            const role = msg.role === 'user' ? 'Người dùng' : 'AI';
+            fullPrompt += `${role}: ${msg.content}\n\n`;
+          });
+          fullPrompt += "Tin nhắn hiện tại:\n\n";
+        }
+        
+        fullPrompt += prompt;
+        
+        // Sử dụng generateContent với prompt đầy đủ
+        result = await model.generateContent(fullPrompt);
+      } catch (fallbackError) {
+        console.error("Error with fallback generation");
+        throw new Error("Failed to generate AI response");
+      }
+>>>>>>> origin/main
     }
 
     const response = await result.response;
@@ -69,12 +115,17 @@ export const generateGeminiResponse = async (
 
     return text;
   } catch (error) {
+<<<<<<< HEAD
     // Chỉ log trong môi trường development
     if (process.env.NODE_ENV === 'development') {
       console.error('Error generating Gemini response:', error);
     }
     // Không truyền lỗi gốc vì có thể chứa thông tin nhạy cảm
     throw new Error('Failed to generate AI response');
+=======
+    console.error("Error generating Gemini response");
+    throw new Error("Failed to generate AI response");
+>>>>>>> origin/main
   }
 };
 

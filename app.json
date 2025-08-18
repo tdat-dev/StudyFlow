@@ -18,6 +18,7 @@
       }
     },
     "android": {
+<<<<<<< HEAD
       "package": "com.tdat.studyflow",
       "permissions": ["android.permission.RECORD_AUDIO"]
     },
@@ -29,6 +30,9 @@
       "eas": {
         "projectId": "f14401f5-260e-4e86-9826-63e2c1aaa039"
       }
+=======
+      "package": "com.tdat.ungdunghoctienganh"
+>>>>>>> origin/main
     }
   }
 }
