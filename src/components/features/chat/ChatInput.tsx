@@ -1,10 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Mic, Paperclip, MicOff } from 'lucide-react';
-import {
-  processFile,
-  FileContent,
-  createFilePreviewMessage,
-} from '../../../services/fileProcessor';
+import { processFile, FileContent } from '../../../services/fileProcessor';
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -21,7 +17,6 @@ export function ChatInput({
 }: ChatInputProps) {
   const [inputMessage, setInputMessage] = useState('');
   const [isRecording, setIsRecording] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<FileContent | null>(null);
   const [processingFile, setProcessingFile] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -55,7 +50,6 @@ export function ChatInput({
       }
 
       // Xóa file đã chọn sau khi gửi
-      setSelectedFile(null);
       onFileAttach(null);
     }
   };
@@ -86,7 +80,6 @@ export function ChatInput({
       try {
         const fileContent = await processFile(file);
         console.log('✅ File processed thành công:', fileContent);
-        setSelectedFile(fileContent);
         // Thông báo file lên ChatScreen
         onFileAttach(fileContent);
         console.log('📡 Đã gọi onFileAttach với:', fileContent);

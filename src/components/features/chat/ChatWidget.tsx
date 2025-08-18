@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { X, MessageSquare, Minus, Maximize2, Minimize2 } from 'lucide-react';
 import { Message, ChatSession, User } from '../../../types/chat';
+import { FileContent } from '../../../services/fileProcessor';
 import { studyFlowWelcomeMessage } from './welcome-config';
 import { generateTutorResponse } from '../../../services/ai';
 import { ChatMessage } from './ChatMessage';
@@ -127,6 +128,11 @@ export function ChatWidget({ user }: ChatWidgetProps) {
       loadChatHistory(currentChatId);
     }
   }, [currentChatId, widgetState, loadChatHistory]);
+
+  const handleFileAttach = (file: FileContent | null) => {
+    // TODO: Implement file handling logic
+    console.log('File attached:', file);
+  };
 
   const handleSendMessage = async (content: string) => {
     if (!content.trim() || !currentChatId) return;
@@ -379,6 +385,7 @@ export function ChatWidget({ user }: ChatWidgetProps) {
         <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-white/10">
           <ChatInput
             onSendMessage={handleSendMessage}
+            onFileAttach={handleFileAttach}
             loading={loading}
             disabled={!currentChatId}
           />

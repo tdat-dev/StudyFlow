@@ -51,7 +51,7 @@ export function MainApp({ user, onLogout }: MainAppProps) {
       case 'habits':
         return <HabitTracker user={currentUser} />;
       case 'pomodoro':
-        return <PomodoroTimer user={currentUser} />;
+        return <PomodoroTimer />;
       case 'profile':
         return <ProfileScreen user={currentUser} onLogout={onLogout} />;
       default:

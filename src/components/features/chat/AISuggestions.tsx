@@ -110,6 +110,8 @@ export function AISuggestions({
 
       return () => clearTimeout(timer);
     }
+    // Return undefined khi không có cleanup function
+    return undefined;
   }, [chatHistory.length]);
 
   if (loading) {

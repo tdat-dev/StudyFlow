@@ -41,10 +41,10 @@ export function PomodoroTimer() {
     null,
   );
 
-  // Settings
-  const [pomodoroTime, setPomodoroTime] = useState(25);
-  const [shortBreakTime, setShortBreakTime] = useState(5);
-  const [longBreakTime, setLongBreakTime] = useState(15);
+  // Settings (read-only for now)
+  const pomodoroTime = 25;
+  const shortBreakTime = 5;
+  const longBreakTime = 15;
 
   // Tasks
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -53,13 +53,13 @@ export function PomodoroTimer() {
 
   // UI state
   const [showTasks, setShowTasks] = useState(true);
-  const [showSettings, setShowSettings] = useState(false);
+  const [, setShowSettings] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
 
   // Statistics
   const [pomodoroCount, setPomodoroCount] = useState(0);
-  const [sessionsCompleted, setSessionsCompleted] = useState(0);
-  const [totalFocusTime, setTotalFocusTime] = useState(0);
+  const [, setSessionsCompleted] = useState(0);
+  const [, setTotalFocusTime] = useState(0);
 
   // Set dynamic accent colors based on timer mode
   const setAccentColors = (mode: TimerMode) => {
