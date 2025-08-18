@@ -61,6 +61,249 @@
   --app-glass-border: rgba(255, 255, 255, 0.1);
 }
 
+/* Pomodoro Timer Accent Colors */
+:root {
+  /* Accent colors for timer states */
+  --accent-work: #ef4444;
+  --accent-short: #22c55e;
+  --accent-long: #06b6d4;
+
+  /* Dynamic accent RGB (will be set by JS based on current mode) */
+  --accent-rgb: 239, 68, 68; /* Default to work mode */
+  --accent-tint-04: rgba(var(--accent-rgb), 0.04);
+  --accent-tint-12: rgba(var(--accent-rgb), 0.12);
+
+  /* Timer progress track colors */
+  --timer-track-light: rgba(0, 0, 0, 0.08);
+  --timer-track-dark: rgba(255, 255, 255, 0.12);
+}
+
+/* Pomodoro Timer Components */
+.pomodoro-page {
+  background-color: var(--app-bg);
+  min-height: 100vh;
+}
+
+.pomodoro-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.pomodoro-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .pomodoro-container {
+    padding: 32px;
+  }
+
+  .pomodoro-grid {
+    grid-template-columns: 65% 35%;
+  }
+}
+
+.timer-card {
+  background-color: var(--app-card);
+  border: 1px solid var(--app-border);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.tasks-card {
+  background-color: var(--app-card);
+  border: 1px solid var(--app-border);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+/* Segmented Control */
+.timer-tabs {
+  display: flex;
+  gap: 4px;
+  background-color: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.timer-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+}
+
+.timer-tab:hover {
+  background-color: var(--accent-tint-04);
+}
+
+.timer-tab.active {
+  background-color: var(--accent-tint-12);
+  border: 1px solid transparent;
+}
+
+.timer-tab.active.work {
+  color: var(--accent-work);
+}
+.timer-tab.active.short {
+  color: var(--accent-short);
+}
+.timer-tab.active.long {
+  color: var(--accent-long);
+}
+
+.timer-tab:not(.active) {
+  color: var(--app-text-muted);
+}
+
+/* Timer Display */
+.timer-display {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(72px, 12vw, 140px);
+  color: var(--app-text);
+  text-align: center;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+/* Progress Ring */
+.progress-ring {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.progress-track {
+  stroke: var(--timer-track-light);
+}
+
+.dark .progress-track {
+  stroke: var(--timer-track-dark);
+}
+
+.dark .timer-track-light {
+  background-color: var(--timer-track-dark);
+}
+
+.progress-bar {
+  stroke-width: 12px;
+  fill: none;
+  transition: stroke-dasharray 0.3s ease;
+}
+
+.progress-bar.work {
+  stroke: var(--accent-work);
+}
+.progress-bar.short {
+  stroke: var(--accent-short);
+}
+.progress-bar.long {
+  stroke: var(--accent-long);
+}
+
+/* Control Buttons */
+.timer-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.control-primary {
+  height: 48px;
+  padding: 0 24px;
+  background-color: var(--app-primary);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.control-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.control-primary:focus-visible {
+  outline: 2px solid var(--app-ring);
+  outline-offset: 2px;
+}
+
+.control-ghost {
+  height: 44px;
+  width: 44px;
+  background: transparent;
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  color: var(--app-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.control-ghost:hover {
+  background-color: var(--accent-tint-04);
+  border-color: transparent;
+}
+
+/* Task Items */
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+.task-item:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.dark .task-item:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.task-checkbox {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--app-border);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.task-text {
+  flex: 1;
+  color: var(--app-text);
+  font-size: 14px;
+}
+
+.task-text.completed {
+  color: var(--app-text-muted);
+  text-decoration: line-through;
+}
+
 /* Component-specific utility classes */
 /* Modern buttons */
 .btn-primary {
@@ -945,14 +1188,15 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 10px 12px;
   background-color: var(--app-surface);
   border: 1px solid var(--app-border);
-  border-radius: 12px;
+  border-radius: 8px;
   position: relative;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
   max-width: var(--content-w);
   margin: 0 auto;
+  transition: all 0.15s ease;
 }
 
 .dark .attached-file-content {
@@ -960,24 +1204,37 @@
 }
 
 .attached-file-image {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 6px;
   flex-shrink: 0;
   background-color: var(--app-card);
 }
 
 .attached-file-icon {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--app-primary);
-  border-radius: 8px;
+  background-color: #3b82f6;
+  border-radius: 6px;
   color: white;
   flex-shrink: 0;
+}
+
+/* File type specific colors */
+.attached-file-icon.pdf {
+  background-color: #dc2626;
+}
+
+.attached-file-icon.image {
+  background-color: #059669;
+}
+
+.attached-file-icon.text {
+  background-color: #7c3aed;
 }
 
 .attached-file-info {

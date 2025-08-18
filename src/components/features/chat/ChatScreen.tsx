@@ -91,18 +91,21 @@ export function ChatScreen({ user }: ChatScreenProps) {
     return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   };
 
-  // Lấy icon phù hợp cho file
+  // Lấy icon và class phù hợp cho file
   const getFileIcon = (file: FileContent) => {
     if (file.type.startsWith('image/')) {
-      return <Image className="h-5 w-5" />;
+      return { icon: <Image className="h-4 w-4" />, className: 'image' };
+    }
+    if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+      return { icon: <File className="h-4 w-4" />, className: 'pdf' };
     }
     if (
       file.type.includes('text') ||
       file.name.match(/\.(txt|md|js|ts|css|html|json)$/i)
     ) {
-      return <FileText className="h-5 w-5" />;
+      return { icon: <FileText className="h-4 w-4" />, className: 'text' };
     }
-    return <File className="h-5 w-5" />;
+    return { icon: <File className="h-4 w-4" />, className: '' };
   };
 
   // Load chat sessions
@@ -165,11 +168,6 @@ export function ChatScreen({ user }: ChatScreenProps) {
   const handleFileAttach = (file: FileContent | null) => {
     console.log('🔥 handleFileAttach được gọi với file:', file);
     setAttachedFile(file);
-  };
-
-  // Xóa file đã attach
-  const handleRemoveAttachedFile = () => {
-    setAttachedFile(null);
   };
 
   // Xóa chat
@@ -554,9 +552,16 @@ export function ChatScreen({ user }: ChatScreenProps) {
                         className="attached-file-image"
                       />
                     ) : (
-                      <div className="attached-file-icon">
-                        {getFileIcon(attachedFile)}
-                      </div>
+                      (() => {
+                        const fileIconData = getFileIcon(attachedFile);
+                        return (
+                          <div
+                            className={`attached-file-icon ${fileIconData.className}`}
+                          >
+                            {fileIconData.icon}
+                          </div>
+                        );
+                      })()
                     )}
                     <div className="attached-file-info">
                       <div className="attached-file-name">
