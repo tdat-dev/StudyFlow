@@ -32,7 +32,6 @@ import {
   updateDoc,
   addDoc,
   deleteDoc,
-  Timestamp,
 } from 'firebase/firestore';
 import {
   Dialog,
@@ -88,11 +87,10 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
   const [creatingDeck, setCreatingDeck] = useState(false);
   const [newDeckTitle, setNewDeckTitle] = useState('');
   const [newDeckTopic, setNewDeckTopic] = useState('');
-  const [newDeckSubject, setNewDeckSubject] = useState('Tiếng Anh');
+  const [newDeckSubject, setNewDeckSubject] = useState('');
   const [cardCount, setCardCount] = useState(5);
   const [generatedCards, setGeneratedCards] = useState<any[]>([]);
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [cardLanguage, setCardLanguage] = useState('front-en-back-vi');
 
   // State cho xóa deck
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -100,60 +98,49 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
 
   // Định nghĩa hàm loadFlashcards
   const loadFlashcards = useCallback(async () => {
-    if (!user.accessToken) {
-      // Nếu không có người dùng, hiển thị dữ liệu mẫu
-      loadMockFlashcards();
+    if (!user.accessToken || !auth.currentUser) {
+      // Nếu không có người dùng, không hiển thị dữ liệu gì
+      setDecks([]);
+      setLoading(false);
       return;
     }
 
     setLoading(true);
     try {
-      // Nếu có auth.currentUser, tải dữ liệu từ Firestore
-      if (auth.currentUser) {
-        const flashcardsRef = collection(db, 'flashcard_decks');
-        const q = query(
-          flashcardsRef,
-          where('userId', '==', auth.currentUser.uid),
-        );
-        const querySnapshot = await getDocs(q);
+      // Tải dữ liệu từ Firestore
+      const flashcardsRef = collection(db, 'flashcard_decks');
+      const q = query(
+        flashcardsRef,
+        where('userId', '==', auth.currentUser.uid),
+      );
+      const querySnapshot = await getDocs(q);
 
-        const serverDecks: any[] = [];
-        querySnapshot.forEach(doc => {
-          serverDecks.push({
-            id: doc.id,
-            ...doc.data(),
-          });
+      const serverDecks: any[] = [];
+      querySnapshot.forEach(doc => {
+        serverDecks.push({
+          id: doc.id,
+          ...doc.data(),
         });
+      });
 
-        // Nếu không có deck nào, tạo deck mặc định và lưu vào Firestore
-        if (serverDecks.length === 0) {
-          // eslint-disable-next-line react-hooks/exhaustive-deps
-          await createDefaultFlashcardDeck();
-          return;
-        }
+      // Thêm màu sắc cho các deck
+      const decksWithColors = serverDecks.map((deck, index) => ({
+        ...deck,
+        color:
+          index % 3 === 0
+            ? 'bg-blue-500'
+            : index % 3 === 1
+              ? 'bg-green-500'
+              : 'bg-purple-500',
+      }));
 
-        // Thêm màu sắc cho các deck
-        const decksWithColors = serverDecks.map((deck, index) => ({
-          ...deck,
-          color:
-            index % 3 === 0
-              ? 'bg-blue-500'
-              : index % 3 === 1
-                ? 'bg-green-500'
-                : 'bg-purple-500',
-        }));
-
-        setDecks(decksWithColors);
-      } else {
-        // Nếu không có auth.currentUser, hiển thị dữ liệu mẫu
-        loadMockFlashcards();
-      }
+      setDecks(decksWithColors);
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
         console.error('Failed to load flashcards:', error);
       }
-      // Nếu có lỗi, hiển thị dữ liệu mẫu
-      loadMockFlashcards();
+      // Nếu có lỗi, chỉ để empty state
+      setDecks([]);
     } finally {
       setLoading(false);
     }
@@ -162,170 +149,6 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
   useEffect(() => {
     loadFlashcards();
   }, [loadFlashcards]);
-
-  // Tải dữ liệu flashcard mẫu
-  const loadMockFlashcards = () => {
-    const mockDecks = [
-      {
-        id: 'local-1',
-        title: 'English Essentials',
-        description: 'Từ vựng tiếng Anh cơ bản',
-        total: 20,
-        learned: 5,
-        color: 'bg-blue-500',
-        cards: [
-          {
-            id: '1',
-            front: 'Hello',
-            back: 'Xin chào',
-            example: 'Hello, how are you?',
-            exampleTranslation: 'Xin chào, bạn khỏe không?',
-            learned: false,
-          },
-          {
-            id: '2',
-            front: 'Goodbye',
-            back: 'Tạm biệt',
-            example: 'Goodbye, see you tomorrow.',
-            exampleTranslation: 'Tạm biệt, hẹn gặp lại ngày mai.',
-            learned: false,
-          },
-          {
-            id: '3',
-            front: 'Thank you',
-            back: 'Cảm ơn',
-            example: 'Thank you for your help.',
-            exampleTranslation: 'Cảm ơn vì sự giúp đỡ của bạn.',
-            learned: false,
-          },
-          {
-            id: '4',
-            front: 'Please',
-            back: 'Làm ơn',
-            example: 'Please help me with this.',
-            exampleTranslation: 'Làm ơn giúp tôi việc này.',
-            learned: false,
-          },
-          {
-            id: '5',
-            front: 'Sorry',
-            back: 'Xin lỗi',
-            example: "I'm sorry for being late.",
-            exampleTranslation: 'Tôi xin lỗi vì đến muộn.',
-            learned: false,
-          },
-        ],
-      },
-      {
-        id: 'local-2',
-        title: 'Business English',
-        description: 'Từ vựng tiếng Anh thương mại',
-        total: 15,
-        learned: 3,
-        color: 'bg-green-500',
-        cards: [
-          {
-            id: '1',
-            front: 'Meeting',
-            back: 'Cuộc họp',
-            example: 'We have a meeting at 2 PM.',
-            exampleTranslation: 'Chúng ta có một cuộc họp lúc 2 giờ chiều.',
-            learned: false,
-          },
-          {
-            id: '2',
-            front: 'Deadline',
-            back: 'Thời hạn',
-            example: 'The deadline for this project is Friday.',
-            exampleTranslation: 'Thời hạn cho dự án này là thứ Sáu.',
-            learned: false,
-          },
-          {
-            id: '3',
-            front: 'Budget',
-            back: 'Ngân sách',
-            example: 'We need to stay within budget.',
-            exampleTranslation: 'Chúng ta cần giữ trong ngân sách.',
-            learned: false,
-          },
-        ],
-      },
-    ];
-
-    setDecks(mockDecks);
-  };
-
-  // Tạo bộ flashcard mặc định và lưu vào Firestore
-  const createDefaultFlashcardDeck = async () => {
-    if (!auth.currentUser) return;
-
-    try {
-      const flashcardsRef = collection(db, 'flashcard_decks');
-
-      // Bộ flashcard tiếng Anh cơ bản
-      const basicEnglishDeck = {
-        userId: auth.currentUser.uid,
-        title: 'English Essentials',
-        description: 'Từ vựng tiếng Anh cơ bản',
-        total: 5,
-        learned: 0,
-        createdAt: Timestamp.now(),
-        cards: [
-          {
-            id: '1',
-            front: 'Hello',
-            back: 'Xin chào',
-            example: 'Hello, how are you?',
-            exampleTranslation: 'Xin chào, bạn khỏe không?',
-            learned: false,
-          },
-          {
-            id: '2',
-            front: 'Goodbye',
-            back: 'Tạm biệt',
-            example: 'Goodbye, see you tomorrow.',
-            exampleTranslation: 'Tạm biệt, hẹn gặp lại ngày mai.',
-            learned: false,
-          },
-          {
-            id: '3',
-            front: 'Thank you',
-            back: 'Cảm ơn',
-            example: 'Thank you for your help.',
-            exampleTranslation: 'Cảm ơn vì sự giúp đỡ của bạn.',
-            learned: false,
-          },
-          {
-            id: '4',
-            front: 'Please',
-            back: 'Làm ơn',
-            example: 'Please help me with this.',
-            exampleTranslation: 'Làm ơn giúp tôi việc này.',
-            learned: false,
-          },
-          {
-            id: '5',
-            front: 'Sorry',
-            back: 'Xin lỗi',
-            example: "I'm sorry for being late.",
-            exampleTranslation: 'Tôi xin lỗi vì đến muộn.',
-            learned: false,
-          },
-        ],
-      };
-
-      // Lưu vào Firestore
-      await addDoc(flashcardsRef, basicEnglishDeck);
-
-      // Tải lại flashcards
-      loadFlashcards();
-    } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to create default flashcard deck:', error);
-      }
-      loadMockFlashcards();
-    }
-  };
 
   const startDeck = (deck: Deck) => {
     setSelectedDeck(deck);
@@ -539,64 +362,28 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
       // Tự động xác định ngôn ngữ dựa vào môn học
       let frontLanguage = 'tiếng Anh';
       let backLanguage = 'tiếng Việt';
-      let selectedCardLanguage = 'front-en-back-vi';
 
       // Tự động xác định ngôn ngữ dựa vào môn học
       if (newDeckSubject === 'Tiếng Anh') {
         frontLanguage = 'tiếng Anh';
         backLanguage = 'tiếng Việt';
-        selectedCardLanguage = 'front-en-back-vi';
       } else if (newDeckSubject === 'Tiếng Pháp') {
         frontLanguage = 'tiếng Pháp';
         backLanguage = 'tiếng Việt';
-        selectedCardLanguage = 'front-fr-back-vi';
       } else if (newDeckSubject === 'Tiếng Nhật') {
         frontLanguage = 'tiếng Nhật';
         backLanguage = 'tiếng Việt';
-        selectedCardLanguage = 'front-jp-back-vi';
       } else if (newDeckSubject === 'Tiếng Trung') {
         frontLanguage = 'tiếng Trung';
         backLanguage = 'tiếng Việt';
-        selectedCardLanguage = 'front-cn-back-vi';
       } else if (newDeckSubject === 'Tiếng Hàn') {
         frontLanguage = 'tiếng Hàn';
         backLanguage = 'tiếng Việt';
-        selectedCardLanguage = 'front-kr-back-vi';
       } else {
-        // Sử dụng ngôn ngữ đã chọn nếu không phải là môn ngoại ngữ
-        if (cardLanguage === 'front-vi-back-en') {
-          frontLanguage = 'tiếng Việt';
-          backLanguage = 'tiếng Anh';
-        } else if (cardLanguage === 'front-fr-back-vi') {
-          frontLanguage = 'tiếng Pháp';
-          backLanguage = 'tiếng Việt';
-        } else if (cardLanguage === 'front-vi-back-fr') {
-          frontLanguage = 'tiếng Việt';
-          backLanguage = 'tiếng Pháp';
-        } else if (cardLanguage === 'front-jp-back-vi') {
-          frontLanguage = 'tiếng Nhật';
-          backLanguage = 'tiếng Việt';
-        } else if (cardLanguage === 'front-vi-back-jp') {
-          frontLanguage = 'tiếng Việt';
-          backLanguage = 'tiếng Nhật';
-        } else if (cardLanguage === 'front-cn-back-vi') {
-          frontLanguage = 'tiếng Trung';
-          backLanguage = 'tiếng Việt';
-        } else if (cardLanguage === 'front-vi-back-cn') {
-          frontLanguage = 'tiếng Việt';
-          backLanguage = 'tiếng Trung';
-        } else if (cardLanguage === 'front-kr-back-vi') {
-          frontLanguage = 'tiếng Hàn';
-          backLanguage = 'tiếng Việt';
-        } else if (cardLanguage === 'front-vi-back-kr') {
-          frontLanguage = 'tiếng Việt';
-          backLanguage = 'tiếng Hàn';
-        }
-        selectedCardLanguage = cardLanguage;
+        // Đối với các môn khác, mặc định sử dụng tiếng Anh - tiếng Việt
+        frontLanguage = 'tiếng Anh';
+        backLanguage = 'tiếng Việt';
       }
-
-      // Cập nhật state cardLanguage để phản ánh ngôn ngữ đã xác định
-      setCardLanguage(selectedCardLanguage);
 
       // Tạo prompt cho AI để sinh flashcards
       const prompt = `Tạo flashcards môn ${newDeckSubject}, chủ đề ${newDeckTopic}. Hãy tạo ${cardCount} flashcard có chất lượng cao, mỗi flashcard có front (${frontLanguage}), back (${backLanguage}), example (câu ví dụ bằng ${frontLanguage}) và exampleTranslation (bản dịch của câu ví dụ sang ${backLanguage}).
@@ -894,7 +681,7 @@ Lưu ý quan trọng:
             onClick={() => {
               setNewDeckTitle('');
               setNewDeckTopic('');
-              setNewDeckSubject('Tiếng Anh');
+              setNewDeckSubject('');
               setGeneratedCards([
                 {
                   id: `manual-card-${Date.now()}-0`,
@@ -905,7 +692,6 @@ Lưu ý quan trọng:
                   learned: false,
                 },
               ]);
-              setCardLanguage('front-en-back-vi');
               setShowEditDialog(true);
             }}
             className="bg-blue-500 hover:bg-blue-600 text-white rounded-xl flex items-center"
@@ -926,6 +712,49 @@ Lưu ý quan trọng:
       {loading ? (
         <div className="flex justify-center items-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        </div>
+      ) : decks.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="bg-gray-100 rounded-full p-6 mb-4">
+            <BrainCircuit className="h-12 w-12 text-gray-400" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            Chưa có flashcard nào
+          </h3>
+          <p className="text-gray-500 mb-6 max-w-sm">
+            Tạo bộ flashcard đầu tiên để bắt đầu học từ vựng hiệu quả
+          </p>
+          <div className="flex space-x-3">
+            <Button
+              onClick={() => {
+                setNewDeckTitle('');
+                setNewDeckTopic('');
+                setNewDeckSubject('');
+                setGeneratedCards([
+                  {
+                    id: `manual-card-${Date.now()}-0`,
+                    front: '',
+                    back: '',
+                    example: '',
+                    exampleTranslation: '',
+                    learned: false,
+                  },
+                ]);
+                setShowEditDialog(true);
+              }}
+              className="bg-blue-500 hover:bg-blue-600 text-white rounded-xl flex items-center"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Tạo thủ công
+            </Button>
+            <Button
+              onClick={() => setAiDialogOpen(true)}
+              className="bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl flex items-center"
+            >
+              <BrainCircuit className="h-4 w-4 mr-2" />
+              Tạo với AI
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="space-y-4">
@@ -1009,41 +838,36 @@ Lưu ý quan trọng:
 
       {/* Dialog tạo flashcards bằng AI */}
       <Dialog open={aiDialogOpen} onOpenChange={setAiDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] bg-white dark:bg-gray-900 border-2 shadow-2xl">
           <DialogHeader>
-            <DialogTitle>Tạo flashcards bằng AI</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-gray-900 dark:text-gray-100">
+              Tạo flashcards bằng AI
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 dark:text-gray-400">
               Nhập thông tin để AI tạo bộ flashcards mới cho bạn
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="subject" className="text-right">
+              <Label
+                htmlFor="subject"
+                className="text-right text-gray-700 dark:text-gray-300 font-medium"
+              >
                 Môn học
               </Label>
-              <select
+              <Input
                 id="subject"
                 value={newDeckSubject}
                 onChange={e => setNewDeckSubject(e.target.value)}
-                className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="Tiếng Anh">Tiếng Anh</option>
-                <option value="Toán học">Toán học</option>
-                <option value="Vật lý">Vật lý</option>
-                <option value="Hóa học">Hóa học</option>
-                <option value="Sinh học">Sinh học</option>
-                <option value="Lịch sử">Lịch sử</option>
-                <option value="Địa lý">Địa lý</option>
-                <option value="Tin học">Tin học</option>
-                <option value="Văn học">Văn học</option>
-                <option value="Tiếng Pháp">Tiếng Pháp</option>
-                <option value="Tiếng Nhật">Tiếng Nhật</option>
-                <option value="Tiếng Trung">Tiếng Trung</option>
-                <option value="Tiếng Hàn">Tiếng Hàn</option>
-              </select>
+                placeholder="Ví dụ: Tiếng Anh, Toán học, Vật lý..."
+                className="col-span-3"
+              />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="topic" className="text-right">
+              <Label
+                htmlFor="topic"
+                className="text-right text-gray-700 dark:text-gray-300 font-medium"
+              >
                 Chủ đề
               </Label>
               <Input
@@ -1054,61 +878,11 @@ Lưu ý quan trọng:
                 placeholder="Từ vựng học thuật, Ngữ pháp cơ bản..."
               />
             </div>
-
-            {/* Chỉ hiển thị lựa chọn ngôn ngữ cho các môn không phải ngoại ngữ */}
-            {![
-              'Tiếng Anh',
-              'Tiếng Pháp',
-              'Tiếng Nhật',
-              'Tiếng Trung',
-              'Tiếng Hàn',
-            ].includes(newDeckSubject) && (
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="cardLanguage" className="text-right">
-                  Ngôn ngữ
-                </Label>
-                <select
-                  id="cardLanguage"
-                  value={cardLanguage}
-                  onChange={e => setCardLanguage(e.target.value)}
-                  className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <option value="front-en-back-vi">
-                    Tiếng Anh - Tiếng Việt
-                  </option>
-                  <option value="front-vi-back-en">
-                    Tiếng Việt - Tiếng Anh
-                  </option>
-                  <option value="front-fr-back-vi">
-                    Tiếng Pháp - Tiếng Việt
-                  </option>
-                  <option value="front-vi-back-fr">
-                    Tiếng Việt - Tiếng Pháp
-                  </option>
-                  <option value="front-jp-back-vi">
-                    Tiếng Nhật - Tiếng Việt
-                  </option>
-                  <option value="front-vi-back-jp">
-                    Tiếng Việt - Tiếng Nhật
-                  </option>
-                  <option value="front-cn-back-vi">
-                    Tiếng Trung - Tiếng Việt
-                  </option>
-                  <option value="front-vi-back-cn">
-                    Tiếng Việt - Tiếng Trung
-                  </option>
-                  <option value="front-kr-back-vi">
-                    Tiếng Hàn - Tiếng Việt
-                  </option>
-                  <option value="front-vi-back-kr">
-                    Tiếng Việt - Tiếng Hàn
-                  </option>
-                  <option value="custom">Tùy chỉnh</option>
-                </select>
-              </div>
-            )}
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="title" className="text-right">
+              <Label
+                htmlFor="title"
+                className="text-right text-gray-700 dark:text-gray-300 font-medium"
+              >
                 Tiêu đề
               </Label>
               <Input
@@ -1120,7 +894,10 @@ Lưu ý quan trọng:
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="cardCount" className="text-right">
+              <Label
+                htmlFor="cardCount"
+                className="text-right text-gray-700 dark:text-gray-300 font-medium"
+              >
                 Số lượng thẻ
               </Label>
               <div className="flex items-center col-span-3">
@@ -1150,7 +927,7 @@ Lưu ý quan trọng:
               disabled={
                 creatingDeck || !newDeckTitle.trim() || !newDeckTopic.trim()
               }
-              className="bg-yellow-500 hover:bg-yellow-600"
+              className="bg-yellow-500 hover:bg-yellow-600 text-white font-medium"
             >
               {creatingDeck ? (
                 <>
@@ -1170,22 +947,24 @@ Lưu ý quan trọng:
 
       {/* Dialog xác nhận xóa flashcard */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-white dark:bg-gray-900 border-2 shadow-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center">
+            <AlertDialogTitle className="flex items-center text-gray-900 dark:text-gray-100">
               <AlertTriangle className="h-5 w-5 text-red-500 mr-2" />
               Xác nhận xóa
             </AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription className="text-gray-600 dark:text-gray-400">
               Bạn có chắc chắn muốn xóa bộ flashcard &quot;{deckToDelete?.title}
               &quot;? Hành động này không thể hoàn tác và tất cả các thẻ trong
               bộ này sẽ bị mất.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogCancel className="text-gray-700 dark:text-gray-300">
+              Hủy
+            </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-red-500 hover:bg-red-600"
+              className="bg-red-500 hover:bg-red-600 text-white font-medium"
               onClick={() => handleDeleteDeck()}
             >
               Xóa
@@ -1196,10 +975,12 @@ Lưu ý quan trọng:
 
       {/* Dialog chỉnh sửa flashcards */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto bg-white dark:bg-gray-900 border-2 shadow-2xl">
           <DialogHeader>
-            <DialogTitle>Chỉnh sửa flashcards</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-gray-900 dark:text-gray-100">
+              Chỉnh sửa flashcards
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 dark:text-gray-400">
               Chỉnh sửa các flashcard trước khi lưu vào bộ sưu tập của bạn
             </DialogDescription>
           </DialogHeader>
