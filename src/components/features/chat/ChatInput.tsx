@@ -24,13 +24,36 @@ export function ChatInput({
   const [selectedFile, setSelectedFile] = useState<FileContent | null>(null);
   const [processingFile, setProcessingFile] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+
+  // Auto-resize textarea
+  const autoResize = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      const newHeight = Math.min(Math.max(textarea.scrollHeight, 24), 200); // Min 24px, max 200px
+      textarea.style.height = newHeight + 'px';
+    }
+  };
+
+  // Handle input change with auto-resize
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInputMessage(e.target.value);
+    autoResize();
+  };
 
   const handleSend = async () => {
     if (inputMessage.trim() && !loading && !processingFile) {
       // Gửi tin nhắn
       await onSendMessage(inputMessage);
       setInputMessage('');
+
+      // Reset textarea height
+      if (textareaRef.current) {
+        textareaRef.current.style.height = '24px';
+      }
+
       // Xóa file đã chọn sau khi gửi
       setSelectedFile(null);
       onFileAttach(null);
@@ -58,14 +81,17 @@ export function ChatInput({
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      console.log('📎 File được chọn:', file.name, file.type);
       setProcessingFile(true);
       try {
         const fileContent = await processFile(file);
+        console.log('✅ File processed thành công:', fileContent);
         setSelectedFile(fileContent);
         // Thông báo file lên ChatScreen
         onFileAttach(fileContent);
+        console.log('📡 Đã gọi onFileAttach với:', fileContent);
       } catch (error) {
-        console.error('Error processing file:', error);
+        console.error('❌ Error processing file:', error);
         alert(error instanceof Error ? error.message : 'Lỗi xử lý file');
       } finally {
         setProcessingFile(false);
@@ -140,14 +166,20 @@ export function ChatInput({
       {/* Input container */}
       <div className="composer-input-container">
         <textarea
+          ref={textareaRef}
           value={inputMessage}
-          onChange={e => setInputMessage(e.target.value)}
+          onChange={handleInputChange}
           placeholder="Hỏi bất kỳ điều gì"
           className="chatgpt-input"
           disabled={loading || disabled || processingFile}
           onKeyDown={handleKeyPress}
           rows={1}
-          style={{ resize: 'none', overflow: 'hidden' }}
+          style={{
+            resize: 'none',
+            overflow: 'hidden',
+            minHeight: '24px',
+            maxHeight: '200px',
+          }}
         />
 
         {/* Right side icons */}

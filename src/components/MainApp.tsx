@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { ChatWidget } from './features/chat/ChatWidget';
 import { ChatScreen } from './features/chat/ChatScreen';
 import { FlashcardScreen } from './features/flashcards/FlashcardScreen';
 import { HabitTracker } from './features/habits/HabitTracker';
@@ -90,9 +89,6 @@ export function MainApp({ user, onLogout }: MainAppProps) {
           onTabChange={t => setActiveTab(t as TabType)}
         />
       </div>
-
-      {/* Chat Widget - luôn hiển thị */}
-      <ChatWidget user={currentUser} />
     </div>
   );
 }

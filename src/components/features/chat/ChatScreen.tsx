@@ -163,6 +163,7 @@ export function ChatScreen({ user }: ChatScreenProps) {
 
   // Xử lý file attachment
   const handleFileAttach = (file: FileContent | null) => {
+    console.log('🔥 handleFileAttach được gọi với file:', file);
     setAttachedFile(file);
   };
 
@@ -482,42 +483,6 @@ export function ChatScreen({ user }: ChatScreenProps) {
             />
           ) : (
             <>
-              {/* File Preview in Chat Area */}
-              {attachedFile && (
-                <div className="content-column mb-4">
-                  <div className="attached-file-preview">
-                    <div className="attached-file-content">
-                      {attachedFile.preview ? (
-                        <img
-                          src={attachedFile.preview}
-                          alt={attachedFile.name}
-                          className="attached-file-image"
-                        />
-                      ) : (
-                        <div className="attached-file-icon">
-                          {getFileIcon(attachedFile)}
-                        </div>
-                      )}
-                      <div className="attached-file-info">
-                        <div className="attached-file-name">
-                          {attachedFile.name}
-                        </div>
-                        <div className="attached-file-size">
-                          {(attachedFile.size / 1024).toFixed(1)}KB
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => setAttachedFile(null)}
-                        className="attached-file-remove"
-                        title="Xóa file"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
               <MessageList messages={messages} />
 
               {/* Typing Indicator */}
@@ -576,6 +541,44 @@ export function ChatScreen({ user }: ChatScreenProps) {
           className="flex-shrink-0 py-4 border-t glass-surface"
           style={{ borderColor: 'var(--app-border)' }}
         >
+          {/* File Preview - Show right above input */}
+          {attachedFile && (
+            <div className="px-4 lg:px-6 mb-3">
+              <div className="content-column">
+                <div className="attached-file-preview">
+                  <div className="attached-file-content">
+                    {attachedFile.preview ? (
+                      <img
+                        src={attachedFile.preview}
+                        alt={attachedFile.name}
+                        className="attached-file-image"
+                      />
+                    ) : (
+                      <div className="attached-file-icon">
+                        {getFileIcon(attachedFile)}
+                      </div>
+                    )}
+                    <div className="attached-file-info">
+                      <div className="attached-file-name">
+                        {attachedFile.name}
+                      </div>
+                      <div className="attached-file-size">
+                        {(attachedFile.size / 1024).toFixed(1)}KB
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setAttachedFile(null)}
+                      className="attached-file-remove"
+                      title="Xóa file"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="composer-container px-4 lg:px-6">
             <ChatInput
               onSendMessage={handleSendMessage}
