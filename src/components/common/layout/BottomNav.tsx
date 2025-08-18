@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageSquare, BookOpen, Calendar, Clock } from 'lucide-react';
+import { BookOpen, Calendar, Clock, Home, MessageSquare } from 'lucide-react';
 
 type TabType =
   | 'home'
@@ -21,7 +21,7 @@ const tabs: Array<{
   label: string;
   icon: React.ComponentType<{ className?: string }>;
 }> = [
-  { id: 'home', label: 'Trang chủ', icon: Calendar },
+  { id: 'home', label: 'Trang chủ', icon: Home },
   { id: 'chat', label: 'Trợ lý AI', icon: MessageSquare },
   { id: 'flashcards', label: 'Flashcards', icon: BookOpen },
   { id: 'habits', label: 'Thói quen', icon: Calendar },

@@ -130,7 +130,7 @@ export function ChatList({
           sessions.map(session => (
             <div
               key={session.id}
-              className={`chat-item ${currentChatId === session.id ? 'active' : ''} ${showOptionsMenu === session.id ? 'has-open-menu' : ''}`}
+              className={`chat-item ${currentChatId === session.id ? 'active' : ''}`}
             >
               <button
                 onClick={() => onSelectChat(session.id)}

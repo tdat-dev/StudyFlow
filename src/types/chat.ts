@@ -29,4 +29,5 @@ export interface QuickAction {
   icon: ElementType;
   color: string;
   bgColor: string;
+  category?: 'math' | 'language' | 'science' | 'general';
 }

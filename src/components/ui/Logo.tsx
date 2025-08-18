@@ -40,7 +40,10 @@ const Logo: React.FC<LogoProps> = ({
         priority
       />
       {showText && (
-        <span className={`font-bold text-gray-900 dark:text-white ${textSize}`}>
+        <span
+          className={`font-bold ${textSize}`}
+          style={{ color: 'var(--app-text)' }}
+        >
           StudyFlow
         </span>
       )}
