@@ -126,19 +126,19 @@ export function SwipeableFlashcard({
     <div className="relative w-full max-w-sm aspect-[4/3] perspective-1000 select-none">
       {/* Swipe indicators */}
       <div
-        className={`absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center transition-opacity z-10 ${
+        className={`absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-[var(--danger)]/10 flex items-center justify-center transition-opacity z-10 ${
           swipeIndicator === 'left' ? 'opacity-100' : 'opacity-0'
         }`}
       >
-        <X className="text-red-600 h-6 w-6" />
+        <X className="text-[var(--danger)] h-6 w-6" />
       </div>
 
       <div
-        className={`absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-green-100 flex items-center justify-center transition-opacity z-10 ${
+        className={`absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-[var(--success)]/10 flex items-center justify-center transition-opacity z-10 ${
           swipeIndicator === 'right' ? 'opacity-100' : 'opacity-0'
         }`}
       >
-        <Check className="text-green-600 h-6 w-6" />
+        <Check className="text-[var(--success)] h-6 w-6" />
       </div>
 
       {/* Card */}
@@ -164,28 +164,28 @@ export function SwipeableFlashcard({
           onMouseLeave={handleDragEnd}
         >
           {/* Front - English only */}
-          <Card className="absolute inset-0 backface-hidden cursor-pointer hover:shadow-lg transition-shadow overflow-hidden">
+          <Card className="absolute inset-0 backface-hidden cursor-pointer hover:shadow-lg transition-shadow overflow-hidden bg-[var(--surface)] border-[var(--border)]">
             <CardContent className="flex flex-col h-full p-6">
               <div className="w-full h-full flex flex-col">
-                <div className="mb-4 px-3 py-1 bg-blue-100 text-blue-800 rounded-md inline-block text-sm font-medium">
+                <div className="mb-4 px-3 py-1 bg-[var(--primary)]/10 text-[var(--primary)] rounded-md inline-block text-sm font-medium">
                   English
                 </div>
                 <div className="flex-grow flex items-center justify-center">
-                  <h2 className="text-blue-900 text-2xl font-bold text-center leading-relaxed">
+                  <h2 className="text-[var(--text)] text-2xl font-bold text-center leading-relaxed">
                     {front}
                   </h2>
                 </div>
 
                 {example && (
-                  <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-100 w-full">
-                    <p className="text-gray-700 dark:text-gray-300 text-sm italic">
+                  <div className="mt-6 p-4 bg-[var(--surface)] rounded-lg border border-[var(--border)] w-full">
+                    <p className="text-[var(--muted)] text-sm italic">
                       &quot;{example}&quot;
                     </p>
                   </div>
                 )}
 
                 <div className="mt-auto pt-4 text-center">
-                  <p className="text-gray-500 text-sm opacity-80">
+                  <p className="text-[var(--subtle)] text-sm opacity-80">
                     Tap to see Vietnamese meaning
                   </p>
                 </div>
@@ -194,31 +194,31 @@ export function SwipeableFlashcard({
           </Card>
 
           {/* Back - Vietnamese only */}
-          <Card className="absolute inset-0 backface-hidden rotate-y-180 cursor-pointer hover:shadow-lg transition-shadow overflow-hidden">
+          <Card className="absolute inset-0 backface-hidden rotate-y-180 cursor-pointer hover:shadow-lg transition-shadow overflow-hidden bg-[var(--surface)] border-[var(--border)]">
             <CardContent
               className="flex flex-col h-full p-6"
               style={{ transform: 'rotateY(180deg)' }}
             >
               <div className="w-full h-full flex flex-col">
-                <div className="mb-4 px-3 py-1 bg-green-100 text-green-800 rounded-md inline-block text-sm font-medium">
+                <div className="mb-4 px-3 py-1 bg-[var(--success)]/10 text-[var(--success)] rounded-md inline-block text-sm font-medium">
                   Vietnamese
                 </div>
                 <div className="flex-grow flex items-center justify-center">
-                  <h2 className="text-green-900 text-2xl font-bold text-center leading-relaxed">
+                  <h2 className="text-[var(--text)] text-2xl font-bold text-center leading-relaxed">
                     {back}
                   </h2>
                 </div>
 
                 {exampleTranslation && (
-                  <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-100 w-full">
-                    <p className="text-gray-700 dark:text-gray-300 text-sm italic">
+                  <div className="mt-6 p-4 bg-[var(--surface)] rounded-lg border border-[var(--border)] w-full">
+                    <p className="text-[var(--muted)] text-sm italic">
                       &quot;{exampleTranslation}&quot;
                     </p>
                   </div>
                 )}
 
                 <div className="mt-auto pt-4 text-center">
-                  <p className="text-gray-500 text-sm opacity-80">
+                  <p className="text-[var(--subtle)] text-sm opacity-80">
                     Tap to see English word
                   </p>
                 </div>

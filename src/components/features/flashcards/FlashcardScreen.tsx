@@ -128,10 +128,10 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
         ...deck,
         color:
           index % 3 === 0
-            ? 'bg-blue-500'
+            ? 'bg-[var(--primary)]'
             : index % 3 === 1
-              ? 'bg-green-500'
-              : 'bg-purple-500',
+              ? 'bg-[var(--success)]'
+              : 'bg-[var(--warning)]',
       }));
 
       setDecks(decksWithColors);
@@ -558,14 +558,14 @@ Lưu ý quan trọng:
 
   if (currentView === 'player' && selectedDeck) {
     return (
-      <div className="h-full flex flex-col bg-gradient-to-br from-blue-50 to-purple-50">
+      <div className="min-h-dvh bg-[var(--bg)] text-[var(--text)] flex flex-col">
         {/* Header */}
         <div className="p-6 pb-4">
           <div className="flex items-center justify-between mb-4">
             <Button
               variant="ghost"
               onClick={() => setCurrentView('list')}
-              className="text-blue-600"
+              className="bg-transparent text-[var(--muted)] hover:text-[var(--text)] focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Quay lại
@@ -574,7 +574,7 @@ Lưu ý quan trọng:
               {currentCardIndex + 1}/{selectedDeck.cards?.length || 0}
             </Badge>
           </div>
-          <h2 className="text-blue-900">{selectedDeck?.title}</h2>
+          <h2 className="text-[var(--text)]">{selectedDeck?.title}</h2>
         </div>
 
         {/* Flashcard */}
@@ -589,7 +589,7 @@ Lưu ý quan trọng:
               onSwipeRight={() => markCardAsLearned(true)}
             />
           ) : (
-            <div className="text-center text-gray-500">
+            <div className="text-center text-[var(--muted)]">
               <p>Không có thẻ nào trong bộ này</p>
             </div>
           )}
@@ -603,7 +603,7 @@ Lưu ý quan trọng:
                 variant="outline"
                 onClick={prevCard}
                 disabled={currentCardIndex === 0}
-                className="rounded-xl"
+                className="bg-[var(--surface)] border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] focus-visible:ring-2 focus-visible:ring-[var(--ring)] rounded-xl"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
@@ -611,7 +611,7 @@ Lưu ý quan trọng:
               <Button
                 variant="outline"
                 onClick={() => setIsFlipped(!isFlipped)}
-                className="rounded-xl"
+                className="bg-[var(--surface)] border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] focus-visible:ring-2 focus-visible:ring-[var(--ring)] rounded-xl"
               >
                 <RotateCcw className="h-4 w-4 mr-2" />
                 Lật thẻ
@@ -623,14 +623,14 @@ Lưu ý quan trọng:
                 disabled={
                   currentCardIndex === (selectedDeck.cards?.length || 0) - 1
                 }
-                className="rounded-xl"
+                className="bg-[var(--surface)] border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] focus-visible:ring-2 focus-visible:ring-[var(--ring)] rounded-xl"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
 
             <Button
-              className="w-full bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl"
+              className="w-full bg-[var(--warning)] hover:bg-[var(--warning)]/90 text-white rounded-xl focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
               onClick={generateNewExample}
               disabled={generatingExample}
             >
@@ -650,14 +650,14 @@ Lưu ý quan trọng:
             <div className="flex space-x-3">
               <Button
                 variant="outline"
-                className="flex-1 border-red-200 text-red-600 hover:bg-red-50 rounded-xl"
+                className="flex-1 bg-[var(--surface)] border-[var(--border)] text-[var(--danger)] hover:bg-[rgb(239_68_68/0.06)] focus-visible:ring-2 focus-visible:ring-[var(--ring)] rounded-xl"
                 onClick={() => markCardAsLearned(false)}
               >
                 Chưa nhớ
               </Button>
               <Button
                 variant="outline"
-                className="flex-1 border-green-200 text-green-600 hover:bg-green-50 rounded-xl"
+                className="flex-1 bg-[var(--surface)] border-[var(--border)] text-[var(--success)] hover:bg-[rgb(34_197_94/0.08)] focus-visible:ring-2 focus-visible:ring-[var(--ring)] rounded-xl"
                 onClick={() => markCardAsLearned(true)}
               >
                 Đã nhớ
@@ -670,11 +670,11 @@ Lưu ý quan trọng:
   }
 
   return (
-    <div className="h-full overflow-y-auto p-6 pb-20">
+    <div className="min-h-dvh bg-[var(--bg)] text-[var(--text)] overflow-y-auto p-6 pb-20">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-blue-900 mb-2">Flashcards</h1>
-          <p className="text-gray-600">Chọn bộ thẻ để bắt đầu học</p>
+          <h1 className="text-[var(--text)] mb-2">Flashcards</h1>
+          <p className="text-[var(--muted)]">Chọn bộ thẻ để bắt đầu học</p>
         </div>
         <div className="flex space-x-2">
           <Button
@@ -694,14 +694,14 @@ Lưu ý quan trọng:
               ]);
               setShowEditDialog(true);
             }}
-            className="bg-blue-500 hover:bg-blue-600 text-white rounded-xl flex items-center"
+            className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center focus-visible:ring-2 focus-visible:ring-blue-500/40"
           >
             <Plus className="h-4 w-4 mr-2" />
             Tạo thủ công
           </Button>
           <Button
             onClick={() => setAiDialogOpen(true)}
-            className="bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl flex items-center"
+            className="bg-[var(--warning)] hover:bg-[var(--warning)]/90 text-white rounded-xl flex items-center focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
           >
             <BrainCircuit className="h-4 w-4 mr-2" />
             Tạo với AI
@@ -711,17 +711,17 @@ Lưu ý quan trọng:
 
       {loading ? (
         <div className="flex justify-center items-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <Loader2 className="h-8 w-8 animate-spin text-[var(--primary)]" />
         </div>
       ) : decks.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center">
-          <div className="bg-gray-100 rounded-full p-6 mb-4">
-            <BrainCircuit className="h-12 w-12 text-gray-400" />
+          <div className="bg-gray-100 dark:bg-gray-800 rounded-full p-6 mb-4">
+            <BrainCircuit className="h-12 w-12 text-[var(--muted)]" />
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <h3 className="text-lg font-medium text-[var(--text)] mb-2">
             Chưa có flashcard nào
           </h3>
-          <p className="text-gray-500 mb-6 max-w-sm">
+          <p className="text-[var(--muted)] mb-6 max-w-sm">
             Tạo bộ flashcard đầu tiên để bắt đầu học từ vựng hiệu quả
           </p>
           <div className="flex space-x-3">
@@ -742,14 +742,14 @@ Lưu ý quan trọng:
                 ]);
                 setShowEditDialog(true);
               }}
-              className="bg-blue-500 hover:bg-blue-600 text-white rounded-xl flex items-center"
+              className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center focus-visible:ring-2 focus-visible:ring-blue-500/40"
             >
               <Plus className="h-4 w-4 mr-2" />
               Tạo thủ công
             </Button>
             <Button
               onClick={() => setAiDialogOpen(true)}
-              className="bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl flex items-center"
+              className="bg-[var(--warning)] hover:bg-[var(--warning)]/90 text-white rounded-xl flex items-center focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
             >
               <BrainCircuit className="h-4 w-4 mr-2" />
               Tạo với AI
@@ -765,7 +765,7 @@ Lưu ý quan trọng:
             return (
               <Card
                 key={deck.id}
-                className="hover:shadow-lg transition-shadow cursor-pointer"
+                className="bg-[var(--card)] border-[var(--border)] hover:shadow-lg transition-shadow cursor-pointer"
                 onClick={() => startDeck(deck)}
               >
                 <CardHeader className="pb-3">
@@ -775,7 +775,7 @@ Lưu ý quan trọng:
                         className={`w-4 h-4 rounded-full ${deck.color} mr-3`}
                       />
                       <div>
-                        <CardTitle className="text-gray-900">
+                        <CardTitle className="text-[var(--text)]">
                           {deck.title}
                         </CardTitle>
                         <CardDescription>{deck.description}</CardDescription>
@@ -788,7 +788,7 @@ Lưu ý quan trọng:
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                        className="h-8 w-8 text-[var(--danger)] hover:text-[var(--danger)] hover:bg-[rgb(239_68_68/0.06)] focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
                         onClick={e => {
                           e.stopPropagation();
                           setDeckToDelete(deck);
@@ -804,16 +804,14 @@ Lưu ý quan trọng:
                 <CardContent>
                   <div className="mb-3">
                     <div className="flex justify-between text-sm mb-1">
-                      <span className="text-gray-600 dark:text-gray-400">
-                        Tiến trình
-                      </span>
-                      <span className="text-gray-600 dark:text-gray-400">
+                      <span className="text-[var(--muted)]">Tiến trình</span>
+                      <span className="text-[var(--muted)]">
                         {Math.round(progress)}%
                       </span>
                     </div>
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="w-full bg-[rgba(0,0,0,.08)] dark:bg-[rgba(255,255,255,.08)] rounded-full h-2">
                       <div
-                        className={`h-2 rounded-full ${deck.color}`}
+                        className="h-2 rounded-full bg-[color:rgb(37_99_235_/_0.8)]"
                         style={{ width: `${progress}%` }}
                       />
                     </div>
@@ -824,7 +822,7 @@ Lưu ý quan trọng:
                       e.stopPropagation();
                       startDeck(deck);
                     }}
-                    className="w-full bg-blue-600 hover:bg-blue-700 rounded-xl"
+                    className="h-11 w-full rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-500/40"
                     disabled={!deck.cards || deck.cards.length === 0}
                   >
                     {deck.cards?.length > 0 ? 'Bắt đầu học' : 'Chưa có thẻ'}
@@ -838,12 +836,12 @@ Lưu ý quan trọng:
 
       {/* Dialog tạo flashcards bằng AI */}
       <Dialog open={aiDialogOpen} onOpenChange={setAiDialogOpen}>
-        <DialogContent className="sm:max-w-[425px] bg-white dark:bg-gray-900 border-2 shadow-2xl">
+        <DialogContent className="sm:max-w-[425px] bg-[var(--surface)] border-[var(--border)] shadow-2xl">
           <DialogHeader>
-            <DialogTitle className="text-gray-900 dark:text-gray-100">
+            <DialogTitle className="text-[var(--text)]">
               Tạo flashcards bằng AI
             </DialogTitle>
-            <DialogDescription className="text-gray-600 dark:text-gray-400">
+            <DialogDescription className="text-[var(--muted)]">
               Nhập thông tin để AI tạo bộ flashcards mới cho bạn
             </DialogDescription>
           </DialogHeader>
@@ -851,7 +849,7 @@ Lưu ý quan trọng:
             <div className="grid grid-cols-4 items-center gap-4">
               <Label
                 htmlFor="subject"
-                className="text-right text-gray-700 dark:text-gray-300 font-medium"
+                className="text-right text-[var(--text)] font-medium"
               >
                 Môn học
               </Label>
@@ -866,7 +864,7 @@ Lưu ý quan trọng:
             <div className="grid grid-cols-4 items-center gap-4">
               <Label
                 htmlFor="topic"
-                className="text-right text-gray-700 dark:text-gray-300 font-medium"
+                className="text-right text-[var(--text)] font-medium"
               >
                 Chủ đề
               </Label>
@@ -881,7 +879,7 @@ Lưu ý quan trọng:
             <div className="grid grid-cols-4 items-center gap-4">
               <Label
                 htmlFor="title"
-                className="text-right text-gray-700 dark:text-gray-300 font-medium"
+                className="text-right text-[var(--text)] font-medium"
               >
                 Tiêu đề
               </Label>
@@ -896,7 +894,7 @@ Lưu ý quan trọng:
             <div className="grid grid-cols-4 items-center gap-4">
               <Label
                 htmlFor="cardCount"
-                className="text-right text-gray-700 dark:text-gray-300 font-medium"
+                className="text-right text-[var(--text)] font-medium"
               >
                 Số lượng thẻ
               </Label>
@@ -927,7 +925,7 @@ Lưu ý quan trọng:
               disabled={
                 creatingDeck || !newDeckTitle.trim() || !newDeckTopic.trim()
               }
-              className="bg-yellow-500 hover:bg-yellow-600 text-white font-medium"
+              className="bg-[var(--warning)] hover:bg-[var(--warning)]/90 text-white font-medium focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
             >
               {creatingDeck ? (
                 <>
@@ -947,24 +945,24 @@ Lưu ý quan trọng:
 
       {/* Dialog xác nhận xóa flashcard */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className="bg-white dark:bg-gray-900 border-2 shadow-2xl">
+        <AlertDialogContent className="bg-[var(--surface)] border-[var(--border)] shadow-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center text-gray-900 dark:text-gray-100">
-              <AlertTriangle className="h-5 w-5 text-red-500 mr-2" />
+            <AlertDialogTitle className="flex items-center text-[var(--text)]">
+              <AlertTriangle className="h-5 w-5 text-[var(--danger)] mr-2" />
               Xác nhận xóa
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-600 dark:text-gray-400">
+            <AlertDialogDescription className="text-[var(--muted)]">
               Bạn có chắc chắn muốn xóa bộ flashcard &quot;{deckToDelete?.title}
               &quot;? Hành động này không thể hoàn tác và tất cả các thẻ trong
               bộ này sẽ bị mất.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="text-gray-700 dark:text-gray-300">
+            <AlertDialogCancel className="text-[var(--text)] bg-[var(--surface)] border-[var(--border)] hover:bg-[var(--surface)]/80">
               Hủy
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-red-500 hover:bg-red-600 text-white font-medium"
+              className="bg-[var(--danger)] hover:bg-[var(--danger)]/90 text-white font-medium focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
               onClick={() => handleDeleteDeck()}
             >
               Xóa
@@ -975,9 +973,9 @@ Lưu ý quan trọng:
 
       {/* Dialog chỉnh sửa flashcards */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto bg-white dark:bg-gray-900 border-2 shadow-2xl">
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto bg-[var(--surface)] border-[var(--border)] shadow-2xl">
           <DialogHeader>
-            <DialogTitle className="text-gray-900 dark:text-gray-100">
+            <DialogTitle className="text-[var(--text)]">
               Chỉnh sửa flashcards
             </DialogTitle>
             <DialogDescription className="text-gray-600 dark:text-gray-400">
