@@ -1,4 +1,5 @@
-**Add your own guidelines here**
+**Add your own guidelines here** ## AI Commit Messages - Luôn viết commit message BẰNG TIẾNG VIỆT. - Theo Conventional Commits: <type>: <mô tả ngắn> - type: feat | fix | docs | style | refactor | test | chore - Dùng thì hiện, không viết hoa trừ danh từ riêng. - Ví dụ: "feat: thêm màn hình tạo flashcard tiếng Pháp"
+
 <!--
 
 System Guidelines

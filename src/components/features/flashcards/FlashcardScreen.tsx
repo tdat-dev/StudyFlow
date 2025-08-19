@@ -245,11 +245,18 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
 
     try {
       // Sử dụng Gemini API để tạo ví dụ mới
-      const prompt = `Hãy tạo một câu ví dụ ngắn gọn, dễ hiểu bằng tiếng Anh sử dụng từ hoặc cụm từ "${card.front}" (nghĩa: "${card.back}"). Câu ví dụ nên ngắn gọn, rõ ràng và phù hợp với ngữ cảnh thông thường. Không sử dụng markdown. Chỉ trả về một câu ví dụ.`;
+      const prompt = `Tạo một câu ví dụ tiếng Anh KHÁC với câu hiện tại "${card.example || ''}" sử dụng từ hoặc cụm từ "${card.front}" (nghĩa: "${card.back}"). Câu ví dụ nên:
+- Ngắn gọn (10-15 từ)
+- Rõ ràng và dễ hiểu
+- Khác hoàn toàn với ví dụ cũ
+- Phù hợp với ngữ cảnh thông thường
+Chỉ trả về MỘT câu ví dụ, không có markdown.`;
 
       let newExample;
+      let exampleTranslation;
+
       try {
-        // Gọi API AI
+        // Gọi API AI để tạo ví dụ mới
         newExample = await generateGeminiResponse(prompt);
 
         // Loại bỏ các ký hiệu markdown và làm sạch câu ví dụ
@@ -263,19 +270,37 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
         if (!newExample || newExample.length < 10) {
           throw new Error('Invalid response from AI');
         }
+
+        // Tạo bản dịch tiếng Việt cho ví dụ mới
+        const translationPrompt = `Hãy dịch câu tiếng Anh sau sang tiếng Việt một cách tự nhiên và dễ hiểu: "${newExample}"`;
+        try {
+          exampleTranslation = await generateGeminiResponse(translationPrompt);
+          exampleTranslation = exampleTranslation
+            .replace(/\*\*/g, '')
+            .replace(/\*/g, '')
+            .replace(/`/g, '')
+            .replace(/^["'](.*)["']$/, '$1')
+            .trim();
+        } catch (translationError) {
+          console.error('Error translating example:', translationError);
+          exampleTranslation = `Ví dụ với "${card.front}"`;
+        }
       } catch (aiError) {
         console.error('Error calling AI:', aiError);
-        // Fallback nếu API lỗi
+        // Fallback nếu API lỗi - tạo ví dụ khác
         const newExamples = [
-          `I use the word "${card.front}" in my daily conversation.`,
-          `Let me give you an example with "${card.front}" in context.`,
-          `"${card.front}" is commonly used when talking about this topic.`,
+          `I often use "${card.front}" in my conversations.`,
+          `The word "${card.front}" is very useful in daily life.`,
+          `Can you give me another example with "${card.front}"?`,
+          `"${card.front}" appears frequently in English texts.`,
+          `Let me show you how to use "${card.front}" properly.`,
         ];
         newExample =
           newExamples[Math.floor(Math.random() * newExamples.length)];
+        exampleTranslation = `Ví dụ khác với từ "${card.front}"`;
       }
 
-      // Update the card with a new example
+      // Update the card with new example and translation
       const updatedDecks = decks.map(deck => {
         if (deck.id === selectedDeck.id) {
           const updatedCards = deck.cards.map((c, idx) => {
@@ -283,6 +308,7 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
               return {
                 ...c,
                 example: newExample,
+                exampleTranslation: exampleTranslation,
               };
             }
             return c;
@@ -295,10 +321,28 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
 
       setDecks(updatedDecks);
 
-      // Update selected deck
+      // Update selected deck để re-render ngay lập tức
       const updatedDeck = updatedDecks.find(d => d.id === selectedDeck.id);
       if (updatedDeck) {
         setSelectedDeck(updatedDeck);
+
+        // Lưu vào Firestore nếu có user và deck không phải local
+        if (
+          auth.currentUser &&
+          selectedDeck.id &&
+          !selectedDeck.id.startsWith('local-')
+        ) {
+          try {
+            const deckRef = doc(db, 'flashcard_decks', selectedDeck.id);
+            await updateDoc(deckRef, {
+              cards: updatedDeck.cards,
+              updatedAt: new Date().toISOString(),
+            });
+            console.log('Updated deck in Firestore with new example');
+          } catch (firestoreError) {
+            console.error('Error updating Firestore:', firestoreError);
+          }
+        }
       }
     } catch (error) {
       console.error('Failed to generate new example:', error);
@@ -363,21 +407,39 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
       let frontLanguage = 'tiếng Anh';
       let backLanguage = 'tiếng Việt';
 
-      // Tự động xác định ngôn ngữ dựa vào môn học
-      if (newDeckSubject === 'Tiếng Anh') {
+      // Bộ nhận diện ngôn ngữ từ chủ đề (không phân biệt hoa/thường, có bỏ dấu)
+      const stripAccents = (s: string) =>
+        (s || '')
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase()
+          .trim();
+      const subjNorm = stripAccents(newDeckSubject);
+
+      const isEnglish = /(tieng anh|english|en\b)/.test(subjNorm);
+      const isFrench = /(tieng phap|phap|french|francais|francaise|fr\b)/.test(subjNorm);
+      const isJapanese = /(tieng nhat|nhat|japanese|nihongo|jp\b)/.test(subjNorm);
+      const isChinese = /(tieng trung|trung|hoa|chinese|mandarin|zh\b|han ngu)/.test(subjNorm);
+      const isKorean = /(tieng han|han|korean|hangul|kr\b|han quoc)/.test(subjNorm);
+      const isSpanish = /(tieng tay ban nha|tay ban nha|spanish|espanol|es\b)/.test(subjNorm);
+
+      if (isEnglish) {
         frontLanguage = 'tiếng Anh';
         backLanguage = 'tiếng Việt';
-      } else if (newDeckSubject === 'Tiếng Pháp') {
+      } else if (isFrench) {
         frontLanguage = 'tiếng Pháp';
         backLanguage = 'tiếng Việt';
-      } else if (newDeckSubject === 'Tiếng Nhật') {
+      } else if (isJapanese) {
         frontLanguage = 'tiếng Nhật';
         backLanguage = 'tiếng Việt';
-      } else if (newDeckSubject === 'Tiếng Trung') {
+      } else if (isChinese) {
         frontLanguage = 'tiếng Trung';
         backLanguage = 'tiếng Việt';
-      } else if (newDeckSubject === 'Tiếng Hàn') {
+      } else if (isKorean) {
         frontLanguage = 'tiếng Hàn';
+        backLanguage = 'tiếng Việt';
+      } else if (isSpanish) {
+        frontLanguage = 'tiếng Tây Ban Nha';
         backLanguage = 'tiếng Việt';
       } else {
         // Đối với các môn khác, mặc định sử dụng tiếng Anh - tiếng Việt
@@ -386,14 +448,43 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
       }
 
       // Tạo prompt cho AI để sinh flashcards
-      const prompt = `Tạo flashcards môn ${newDeckSubject}, chủ đề ${newDeckTopic}. Hãy tạo ${cardCount} flashcard có chất lượng cao, mỗi flashcard có front (${frontLanguage}), back (${backLanguage}), example (câu ví dụ bằng ${frontLanguage}) và exampleTranslation (bản dịch của câu ví dụ sang ${backLanguage}).
+      // Xây danh sách loại trừ từ đã có để tránh lặp giữa các lần tạo
+      const normalizeForPrompt = (s: string) =>
+        (s || '')
+          .toLowerCase()
+          .trim()
+          .replace(/[\s\u200B\u200C\u200D\uFEFF]+/g, ' ')
+          .replace(/[^\p{L}\p{N}]+/gu, ' ');
+      const existingFrontsAll = (decks || [])
+        .flatMap(d => (d?.cards || []).map((c: any) => c.front || ''))
+        .filter(Boolean) as string[];
+      const existingFrontsUnique = Array.from(
+        new Set(existingFrontsAll.map(normalizeForPrompt)),
+      );
+      const exclusionSample = existingFrontsUnique
+        .slice(-Math.min(60, existingFrontsUnique.length))
+        .join(', ');
+      const exclusionText = exclusionSample
+        ? `\n      9. KHÔNG được dùng bất kỳ từ/cụm từ nào trong danh sách loại trừ sau (nếu có trùng, thay bằng từ khác cùng chủ đề): ${exclusionSample}`
+        : '';
 
-Lưu ý quan trọng: 
-1. Không sử dụng dấu ** hoặc markdown trong nội dung.
-2. Câu ví dụ phải rõ ràng, ngắn gọn và dễ hiểu.
-3. Bản dịch của câu ví dụ phải chính xác và tự nhiên.
-4. KHÔNG ĐƯỢC sử dụng dấu gạch ngang (---) trong bất kỳ phần nào của bảng.
-5. Trả lời dưới dạng bảng với 4 cột: Front | Back | Example | ExampleTranslation`;
+      const prompt = `Tạo flashcards môn ${newDeckSubject}, chủ đề ${newDeckTopic}. Hãy tạo CHÍNH XÁC ${cardCount} flashcard có chất lượng cao.
+
+      RÀNG BUỘC NGÔN NGỮ (BẮT BUỘC):
+      - Cột Front: viết bằng ${frontLanguage}.
+      - Cột Back: viết bằng ${backLanguage}.
+      - Cột Example: câu ví dụ viết bằng ${frontLanguage}.
+      - Cột ExampleTranslation: bản dịch của câu ví dụ sang ${backLanguage}.
+
+      Lưu ý quan trọng:
+      1. Không sử dụng dấu ** hoặc markdown trong nội dung cell.
+      2. Câu ví dụ phải rõ ràng, ngắn gọn và dễ hiểu.
+      3. Bản dịch của câu ví dụ phải chính xác và tự nhiên.
+      4. KHÔNG sử dụng dòng phân cách bằng dấu gạch ngang (---) trong bất kỳ phần nào.
+      5. Trả lời DƯỚI DẠNG BẢNG với 4 cột (dùng ký tự | để phân tách cột): Front | Back | Example | ExampleTranslation.
+      6. MỖI THẺ PHẢI LÀ MỘT TỪ/CỤM TỪ KHÁC NHAU – tuyệt đối KHÔNG trùng lặp từ vựng giữa các hàng.
+      7. ĐA DẠNG chủ đề con và ngữ cảnh trong phạm vi chủ đề đã cho; không lặp lại cùng một từ dưới nhiều biến thể.
+      8. Không thêm bất kỳ văn bản nào ngoài bảng.${exclusionText}`;
 
       // Gọi API AI
       const aiResponse = await generateGeminiResponse(prompt);
@@ -412,130 +503,142 @@ Lưu ý quan trọng:
 
       // Xử lý phản hồi từ AI để tạo flashcards
       try {
-        // Tìm bảng Markdown trong phản hồi
-        const tableRegex = /\|.*\|.*\|[\s\S]*?\n([\s\S]*?)(\n\n|$)/g;
-        const tableMatch = tableRegex.exec(aiResponse);
+        // Tìm tất cả bảng Markdown trong phản hồi (nếu có nhiều)
+        const tableRegex = /\|.*\|.*\|[\s\S]*?\n([\s\S]*?)(?:\n\n|$)/g;
+        const tableMatches = Array.from(aiResponse.matchAll(tableRegex));
 
-        if (tableMatch && tableMatch[1]) {
-          // Tách các hàng từ bảng
-          const rows = tableMatch[1]
+        const parsedCards: AICard[] = [];
+        const normalize = (s: string) => s.toLowerCase().trim().replace(/[\s\u200B\u200C\u200D\uFEFF]+/g, ' ').replace(/[^\p{L}\p{N}]+/gu, ' ');
+        const seenFronts = new Set<string>();
+
+        for (const match of tableMatches) {
+          const body = match[1] || '';
+          const rows = body
             .split('\n')
-            .filter(row => row.trim() && row.includes('|'));
+            .map(r => r.trim())
+            .filter(r => r && r.includes('|'));
 
-          cards = rows
-            .map((row, index) => {
-              const columns = row.split('|').filter(col => col.trim());
+          rows.forEach((row, index) => {
+            const columns = row.split('|').map(col => col.trim()).filter(Boolean);
 
-              // Đảm bảo có ít nhất 2 cột (front và back)
-              if (columns.length >= 2) {
-                // Loại bỏ dấu ngoặc kép và các ký hiệu markdown
-                const cleanFront = columns[0]
-                  .trim()
-                  .replace(/^"(.*)"$/, '$1') // Loại bỏ dấu ngoặc kép
-                  .replace(/\*\*/g, '') // Loại bỏ dấu **
-                  .replace(/\*/g, '') // Loại bỏ dấu *
-                  .replace(/`/g, '') // Loại bỏ dấu `
-                  .replace(/^-+$/, '') // Loại bỏ dòng chỉ có dấu gạch ngang
-                  .replace(/^-+\s*$/, ''); // Loại bỏ dòng chỉ có dấu gạch ngang và khoảng trắng
+            // Bỏ qua header/tiêu đề nếu có hoặc hàng phân cách
+            const firstCell = (columns[0] || '').toLowerCase();
+            if (
+              firstCell === 'front' ||
+              firstCell === 'từ' ||
+              /^-+$/.test(columns[0] || '') ||
+              /^-+$/.test(columns[1] || '')
+            ) {
+              return;
+            }
 
-                const cleanBack = columns[1]
-                  .trim()
+            if (columns.length >= 2) {
+              const clean = (v: string) =>
+                v
+                  .replace(/^"(.*)"$/, '$1')
                   .replace(/\*\*/g, '')
                   .replace(/\*/g, '')
                   .replace(/`/g, '')
-                  .replace(/^-+$/, '') // Loại bỏ dòng chỉ có dấu gạch ngang
-                  .replace(/^-+\s*$/, ''); // Loại bỏ dòng chỉ có dấu gạch ngang và khoảng trắng
+                  .trim();
 
-                let cleanExample = '';
-                if (columns.length > 2) {
-                  cleanExample = columns[2]
-                    .trim()
-                    .replace(/^"(.*)"$/, '$1')
-                    .replace(/\*\*/g, '')
-                    .replace(/\*/g, '')
-                    .replace(/`/g, '')
-                    .replace(/^-+$/, '') // Loại bỏ dòng chỉ có dấu gạch ngang
-                    .replace(/^-+\s*$/, ''); // Loại bỏ dòng chỉ có dấu gạch ngang và khoảng trắng
-                }
+              const cleanFront = clean(columns[0]);
+              const cleanBack = clean(columns[1]);
+              const cleanExample = columns.length > 2 ? clean(columns[2]) : '';
+              const cleanExampleTranslation = columns.length > 3 ? clean(columns[3]) : '';
 
-                let cleanExampleTranslation = '';
-                if (columns.length > 3) {
-                  cleanExampleTranslation = columns[3]
-                    .trim()
-                    .replace(/^"(.*)"$/, '$1')
-                    .replace(/\*\*/g, '')
-                    .replace(/\*/g, '')
-                    .replace(/`/g, '')
-                    .replace(/^-+$/, '') // Loại bỏ dòng chỉ có dấu gạch ngang
-                    .replace(/^-+\s*$/, ''); // Loại bỏ dòng chỉ có dấu gạch ngang và khoảng trắng
-                }
+              if (!cleanFront || !cleanBack) return;
 
-                // Kiểm tra nếu front hoặc back chỉ chứa dấu gạch ngang hoặc rỗng, bỏ qua card này
-                if (
-                  cleanFront.trim() === '' ||
-                  cleanBack.trim() === '' ||
-                  cleanFront.match(/^-+$/) ||
-                  cleanBack.match(/^-+$/)
-                ) {
-                  return null;
-                }
+              const normFront = normalize(cleanFront);
+              if (seenFronts.has(normFront)) return; // loại trùng theo mặt trước
+              seenFronts.add(normFront);
 
-                return {
-                  id: `ai-card-${Date.now()}-${index}`,
-                  front: cleanFront,
-                  back: cleanBack,
-                  example: cleanExample,
-                  exampleTranslation: cleanExampleTranslation,
-                  learned: false,
-                };
-              }
-              return null;
-            })
-            .filter(card => card !== null);
+              parsedCards.push({
+                id: `ai-card-${Date.now()}-${parsedCards.length}-${index}`,
+                front: cleanFront,
+                back: cleanBack,
+                example: cleanExample,
+                exampleTranslation: cleanExampleTranslation,
+                learned: false,
+              });
+            }
+          });
         }
 
-        // Nếu không tìm thấy bảng hoặc không có cards hợp lệ, tạo một số flashcards mặc định
+        cards = parsedCards;
+
+        // Loại các từ đã từng xuất hiện trong các deck trước để tránh lặp giữa các lần tạo
+        if (existingFrontsUnique.length > 0) {
+          const existingSet = new Set(existingFrontsUnique);
+          const normalize = (s: string) =>
+            (s || '')
+              .toLowerCase()
+              .trim()
+              .replace(/[\s\u200B\u200C\u200D\uFEFF]+/g, ' ')
+              .replace(/[^\p{L}\p{N}]+/gu, ' ');
+          cards = cards.filter(c => !existingSet.has(normalize(c.front)));
+        }
+
+        // Xáo trộn ngẫu nhiên để tăng đa dạng trước khi cắt số lượng
+        if (cards.length > 1) {
+          cards = cards
+            .map(c => ({ c, r: Math.random() }))
+            .sort((a, b) => a.r - b.r)
+            .map(({ c }) => c);
+        }
+
+        // Nếu không tìm thấy bảng hoặc không có cards hợp lệ, fallback: tìm cặp từ-nghĩa dạng "a - b" hoặc "a: b"
         if (cards.length === 0) {
-          // Tìm các cặp từ và nghĩa trong văn bản
           const lines = aiResponse.split('\n');
+          const seen = new Set<string>();
+          const norm = (s: string) => s.toLowerCase().trim().replace(/[\s\u200B\u200C\u200D\uFEFF]+/g, ' ').replace(/[^\p{L}\p{N}]+/gu, ' ');
           for (const line of lines) {
             if (line.includes('-') || line.includes(':')) {
               const parts = line.split(/[-:]/).map(part => part.trim());
               if (parts.length >= 2) {
-                cards.push({
-                  id: `ai-card-${Date.now()}-${cards.length}`,
-                  front: parts[0].replace(/^"(.*)"$/, '$1'),
-                  back: parts[1],
-                  example: '',
-                  exampleTranslation: '',
-                  learned: false,
-                });
+                const front = parts[0].replace(/^"(.*)"$/, '$1');
+                const back = parts[1];
+                const key = norm(front);
+                if (front && back && !seen.has(key)) {
+                  seen.add(key);
+                  cards.push({
+                    id: `ai-card-${Date.now()}-${cards.length}`,
+                    front,
+                    back,
+                    example: '',
+                    exampleTranslation: '',
+                    learned: false,
+                  });
+                }
               }
             }
           }
+        }
+
+        // Đảm bảo duy nhất theo front và giới hạn số lượng theo cardCount
+        if (cards.length > 0) {
+          const unique: AICard[] = [];
+          const seen = new Set<string>();
+          const keyOf = (s: string) => s.toLowerCase().trim().replace(/[\s\u200B\u200C\u200D\uFEFF]+/g, ' ').replace(/[^\p{L}\p{N}]+/gu, ' ');
+          for (const c of cards) {
+            const k = keyOf(c.front);
+            if (!seen.has(k)) {
+              seen.add(k);
+              unique.push(c);
+            }
+          }
+          cards = unique.slice(0, Math.max(1, cardCount));
         }
       } catch (parseError) {
         console.error('Error parsing AI response:', parseError);
       }
 
-      // Nếu vẫn không có cards, tạo một số flashcards mặc định
+      // Nếu vẫn không có cards, báo lỗi cho người dùng
       if (cards.length === 0) {
-        cards = [
-          {
-            id: `ai-card-${Date.now()}-1`,
-            front: 'Example',
-            back: 'Ví dụ',
-            example: 'This is an example.',
-            learned: false,
-          },
-          {
-            id: `ai-card-${Date.now()}-2`,
-            front: 'Flashcard',
-            back: 'Thẻ ghi nhớ',
-            example: 'I use flashcards to study.',
-            learned: false,
-          },
-        ];
+        alert(
+          'AI không thể tạo flashcard cho chủ đề này. Vui lòng thử lại hoặc thay đổi chủ đề!',
+        );
+        setCreatingDeck(false);
+        return;
       }
 
       // Lưu thẻ đã tạo vào state để có thể chỉnh sửa
@@ -558,112 +661,110 @@ Lưu ý quan trọng:
 
   if (currentView === 'player' && selectedDeck) {
     return (
-      <div className="min-h-dvh bg-[var(--bg)] text-[var(--text)] flex flex-col">
+      <div className="min-h-dvh flex flex-col bg-[var(--bg)] text-[var(--text)]">
         {/* Header */}
-        <div className="p-6 pb-4">
+        <div className="flex-shrink-0 p-4 md:p-6 pb-2 md:pb-4">
           <div className="flex items-center justify-between mb-4">
             <Button
               variant="ghost"
               onClick={() => setCurrentView('list')}
-              className="bg-transparent text-[var(--muted)] hover:text-[var(--text)] focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+              className="bg-transparent text-[var(--muted)] hover:text-[var(--text)] focus-visible:ring-2 focus-visible:ring-[var(--ring)] flex-shrink-0"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Quay lại
             </Button>
-            <Badge variant="outline">
+            <Badge variant="outline" className="flex-shrink-0">
               {currentCardIndex + 1}/{selectedDeck.cards?.length || 0}
             </Badge>
           </div>
-          <h2 className="text-[var(--text)]">{selectedDeck?.title}</h2>
+          <h2 className="text-[var(--text)] truncate">{selectedDeck?.title}</h2>
         </div>
 
-        {/* Flashcard */}
-        <div className="flex-1 flex items-center justify-center p-6">
-          {currentCard ? (
-            <SwipeableFlashcard
-              front={currentCard.front}
-              back={currentCard.back}
-              example={currentCard.example}
-              exampleTranslation={currentCard.exampleTranslation}
-              onSwipeLeft={() => markCardAsLearned(false)}
-              onSwipeRight={() => markCardAsLearned(true)}
-            />
-          ) : (
-            <div className="text-center text-[var(--muted)]">
-              <p>Không có thẻ nào trong bộ này</p>
+        {/* Main content area */}
+        <div className="flex-1 overflow-y-auto px-4 pb-20 md:pb-24">
+          {/* Flashcard */}
+          <div className="flex items-center justify-center min-h-full py-6">
+            {currentCard ? (
+              <SwipeableFlashcard
+                front={currentCard.front}
+                back={currentCard.back}
+                example={currentCard.example}
+                exampleTranslation={currentCard.exampleTranslation}
+                onSwipeLeft={() => markCardAsLearned(false)}
+                onSwipeRight={() => markCardAsLearned(true)}
+              />
+            ) : (
+              <div className="text-center text-[var(--muted)]">
+                <p>Không có thẻ nào trong bộ này</p>
+              </div>
+            )}
+          </div>
+
+          {/* Navigation Controls */}
+          {currentCard && (
+            <div className="max-w-[736px] mx-auto px-4 py-4 space-y-4">
+              <div className="flex justify-center space-x-2 md:space-x-4">
+                <Button
+                  variant="outline"
+                  onClick={prevCard}
+                  disabled={currentCardIndex === 0}
+                  className="bg-[var(--surface)] border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] focus-visible:ring-2 focus-visible:ring-[var(--ring)] rounded-xl flex-shrink-0"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+
+                <Button
+                  variant="outline"
+                  onClick={nextCard}
+                  disabled={
+                    currentCardIndex === (selectedDeck.cards?.length || 0) - 1
+                  }
+                  className="bg-[var(--surface)] border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] focus-visible:ring-2 focus-visible:ring-[var(--ring)] rounded-xl flex-shrink-0"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="flex space-x-2 md:space-x-3">
+                <Button
+                  variant="outline"
+                  className="flex-1 bg-[var(--surface)] border-[var(--border)] text-[var(--danger)] hover:bg-[rgb(239_68_68/0.06)] focus-visible:ring-2 focus-visible:ring-[var(--ring)] rounded-xl text-xs md:text-sm min-w-0"
+                  onClick={() => markCardAsLearned(false)}
+                >
+                  <span className="truncate">Chưa nhớ</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1 bg-[var(--surface)] border-[var(--border)] text-[var(--success)] hover:bg-[rgb(34_197_94/0.08)] focus-visible:ring-2 focus-visible:ring-[var(--ring)] rounded-xl text-xs md:text-sm min-w-0"
+                  onClick={() => markCardAsLearned(true)}
+                >
+                  <span className="truncate">Đã nhớ</span>
+                </Button>
+              </div>
             </div>
           )}
         </div>
 
-        {/* Controls */}
+        {/* Sticky Footer CTA */}
         {currentCard && (
-          <div className="p-6 space-y-4">
-            <div className="flex justify-center space-x-4">
-              <Button
-                variant="outline"
-                onClick={prevCard}
-                disabled={currentCardIndex === 0}
-                className="bg-[var(--surface)] border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] focus-visible:ring-2 focus-visible:ring-[var(--ring)] rounded-xl"
+          <footer className="sticky bottom-0 inset-x-0 z-40 border-t border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur supports-[backdrop-filter]:bg-[var(--surface)]/80">
+            <div className="mx-auto max-w-[736px] px-4 py-3 pb-safe">
+              <button
+                className="w-full h-11 rounded-xl bg-amber-500 text-white font-medium hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={generateNewExample}
+                disabled={generatingExample}
               >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-
-              <Button
-                variant="outline"
-                onClick={() => setIsFlipped(!isFlipped)}
-                className="bg-[var(--surface)] border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] focus-visible:ring-2 focus-visible:ring-[var(--ring)] rounded-xl"
-              >
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Lật thẻ
-              </Button>
-
-              <Button
-                variant="outline"
-                onClick={nextCard}
-                disabled={
-                  currentCardIndex === (selectedDeck.cards?.length || 0) - 1
-                }
-                className="bg-[var(--surface)] border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] focus-visible:ring-2 focus-visible:ring-[var(--ring)] rounded-xl"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+                {generatingExample ? (
+                  <>
+                    <Loader2 className="inline h-4 w-4 mr-2 animate-spin" />
+                    Đang tạo...
+                  </>
+                ) : (
+                  <>✨ Tạo câu ví dụ khác với AI</>
+                )}
+              </button>
             </div>
-
-            <Button
-              className="w-full bg-[var(--warning)] hover:bg-[var(--warning)]/90 text-white rounded-xl focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
-              onClick={generateNewExample}
-              disabled={generatingExample}
-            >
-              {generatingExample ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Đang tạo...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Tạo câu ví dụ khác với AI
-                </>
-              )}
-            </Button>
-
-            <div className="flex space-x-3">
-              <Button
-                variant="outline"
-                className="flex-1 bg-[var(--surface)] border-[var(--border)] text-[var(--danger)] hover:bg-[rgb(239_68_68/0.06)] focus-visible:ring-2 focus-visible:ring-[var(--ring)] rounded-xl"
-                onClick={() => markCardAsLearned(false)}
-              >
-                Chưa nhớ
-              </Button>
-              <Button
-                variant="outline"
-                className="flex-1 bg-[var(--surface)] border-[var(--border)] text-[var(--success)] hover:bg-[rgb(34_197_94/0.08)] focus-visible:ring-2 focus-visible:ring-[var(--ring)] rounded-xl"
-                onClick={() => markCardAsLearned(true)}
-              >
-                Đã nhớ
-              </Button>
-            </div>
-          </div>
+          </footer>
         )}
       </div>
     );
@@ -1092,6 +1193,34 @@ Lưu ý quan trọng:
 
             <Button
               onClick={async () => {
+                // Làm sạch và khử trùng lặp trước khi lưu
+                const normalize = (s: string) =>
+                  (s || '')
+                    .toLowerCase()
+                    .trim()
+                    .replace(/[\s\u200B\u200C\u200D\uFEFF]+/g, ' ')
+                    .replace(/[^\p{L}\p{N}]+/gu, ' ');
+                const uniqueCards: typeof generatedCards = [];
+                const seen = new Set<string>();
+                for (const c of generatedCards) {
+                  const front = (c.front || '').trim();
+                  const back = (c.back || '').trim();
+                  if (!front || !back) continue;
+                  const key = normalize(front);
+                  if (!seen.has(key)) {
+                    seen.add(key);
+                    uniqueCards.push({
+                      ...c,
+                      front,
+                      back,
+                      example: (c.example || '').trim(),
+                      exampleTranslation: (c.exampleTranslation || '').trim(),
+                      learned: !!c.learned,
+                    });
+                  }
+                }
+                const finalCards = uniqueCards.slice(0, Math.max(1, cardCount));
+
                 // Tạo deck mới
                 const newDeck = {
                   title: newDeckTitle,
@@ -1099,8 +1228,8 @@ Lưu ý quan trọng:
                   userId: auth.currentUser
                     ? auth.currentUser.uid
                     : 'local-user',
-                  cards: generatedCards,
-                  total: generatedCards.length,
+                  cards: finalCards,
+                  total: finalCards.length,
                   learned: 0,
                   createdAt: new Date(),
                 };

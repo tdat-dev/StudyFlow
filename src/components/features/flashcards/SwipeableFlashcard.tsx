@@ -122,7 +122,7 @@ export function SwipeableFlashcard({
   };
 
   return (
-    <div className="relative w-full max-w-sm aspect-[4/3] perspective-1000 select-none">
+    <div className="relative w-full max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl aspect-[4/3] perspective-1000 select-none mx-auto">
       {/* Enhanced Swipe indicators with glow effects */}
       <div
         className={`absolute left-4 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-gradient-to-br from-red-500/20 to-red-600/30 backdrop-blur-sm border border-red-500/30 flex items-center justify-center transition-all duration-300 z-10 ${
