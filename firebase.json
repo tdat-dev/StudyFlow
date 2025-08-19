@@ -8,7 +8,12 @@
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "**/*.bat",
+      "**/*.sh",
+      "**/*.ps1",
+      "**/*.cmd",
+      "**/*.exe"
     ],
     "rewrites": [
       {

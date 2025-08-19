@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import Logo from '../../ui/Logo';
+import { useTheme } from 'next-themes';
 import {
   LogOut,
-  Settings,
   UserCircle,
   ChevronDown,
   RefreshCw,
@@ -12,6 +12,8 @@ import {
   BookOpen,
   Calendar,
   Clock,
+  Sun,
+  Moon,
 } from 'lucide-react';
 
 // Button component
@@ -74,6 +76,7 @@ export function Header({
 }: HeaderProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { theme, setTheme } = useTheme();
 
   // Debug user object
   console.log('Header user object:', user);
@@ -113,10 +116,9 @@ export function Header({
     }
   };
 
-  const handleSettingsClick = () => {
-    // TODO: Navigate to settings page or show settings modal
+  const handleThemeToggle = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
     setShowDropdown(false);
-    console.log('Navigate to settings');
   };
 
   const handleLogout = () => {
@@ -231,14 +233,16 @@ export function Header({
 
           {/* User Menu */}
           <div className="flex items-center space-x-3">
-            {/* Quick Refresh Button */}
-            <button
-              onClick={handleFullRefresh}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group"
-              title="Làm mới hoàn toàn (xóa cache và state)"
-            >
-              <RefreshCw className="h-5 w-5 text-gray-600 dark:text-gray-300 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors" />
-            </button>
+            {/* Quick Refresh Button - Chỉ hiện trong development */}
+            {process.env.NODE_ENV === 'development' && (
+              <button
+                onClick={handleFullRefresh}
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group"
+                title="Làm mới hoàn toàn (xóa cache và state)"
+              >
+                <RefreshCw className="h-5 w-5 text-gray-600 dark:text-gray-300 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors" />
+              </button>
+            )}
 
             {user ? (
               <div className="relative" ref={dropdownRef}>
@@ -347,20 +351,27 @@ export function Header({
                       </button>
 
                       <button
-                        onClick={handleSettingsClick}
+                        onClick={handleThemeToggle}
                         className="w-full flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                       >
-                        <Settings className="h-4 w-4 mr-3 text-gray-400 dark:text-gray-300" />
-                        Cài đặt
+                        {theme === 'dark' ? (
+                          <Sun className="h-4 w-4 mr-3 text-gray-400 dark:text-gray-300" />
+                        ) : (
+                          <Moon className="h-4 w-4 mr-3 text-gray-400 dark:text-gray-300" />
+                        )}
+                        {theme === 'dark' ? 'Chế độ sáng' : 'Chế độ tối'}
                       </button>
 
-                      <button
-                        onClick={handleFullRefresh}
-                        className="w-full flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-green-50 dark:hover:bg-green-900/50 hover:text-green-600 dark:hover:text-green-400 transition-colors"
-                      >
-                        <RefreshCw className="h-4 w-4 mr-3 text-gray-400 dark:text-gray-300" />
-                        Làm mới hoàn toàn
-                      </button>
+                      {/* Chỉ hiện nút refresh hoàn toàn trong development mode */}
+                      {process.env.NODE_ENV === 'development' && (
+                        <button
+                          onClick={handleFullRefresh}
+                          className="w-full flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-green-50 dark:hover:bg-green-900/50 hover:text-green-600 dark:hover:text-green-400 transition-colors"
+                        >
+                          <RefreshCw className="h-4 w-4 mr-3 text-gray-400 dark:text-gray-300" />
+                          Làm mới hoàn toàn
+                        </button>
+                      )}
 
                       <div className="border-t border-gray-100 dark:border-gray-700 my-1"></div>
 

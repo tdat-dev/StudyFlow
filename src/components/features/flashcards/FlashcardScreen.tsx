@@ -10,10 +10,8 @@ import {
 import { Badge } from '../../../components/ui/badge';
 import {
   ArrowLeft,
-  RotateCcw,
   ChevronLeft,
   ChevronRight,
-  Sparkles,
   Loader2,
   Plus,
   BrainCircuit,
@@ -77,7 +75,6 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
   const [decks, setDecks] = useState<Deck[]>([]);
   const [selectedDeck, setSelectedDeck] = useState<Deck | null>(null);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
-  const [isFlipped, setIsFlipped] = useState(false);
   const [loading, setLoading] = useState(false);
   const [generatingExample, setGeneratingExample] = useState(false);
   const { addUserXP, updateStats, userStats } = useLevel();
@@ -154,20 +151,17 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
     setSelectedDeck(deck);
     setCurrentView('player');
     setCurrentCardIndex(0);
-    setIsFlipped(false);
   };
 
   const nextCard = () => {
     if (currentCardIndex < (selectedDeck?.cards?.length || 0) - 1) {
       setCurrentCardIndex(currentCardIndex + 1);
-      setIsFlipped(false);
     }
   };
 
   const prevCard = () => {
     if (currentCardIndex > 0) {
       setCurrentCardIndex(currentCardIndex - 1);
-      setIsFlipped(false);
     }
   };
 

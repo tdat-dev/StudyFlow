@@ -17,6 +17,7 @@
     "test:coverage": "vitest run --coverage",
     "export": "next build",
     "deploy": "npm run export && firebase deploy --only hosting",
+    "deploy:safe": "npm run export && firebase deploy --only hosting --except functions",
     "deploy:complete": "npm run export && firebase deploy",
     "generate-logos": "node scripts/generate-logo-sizes.js",
     "generate-logos:sharp": "node scripts/generate-logos-sharp.js",

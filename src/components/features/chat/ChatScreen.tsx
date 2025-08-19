@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { X, File, FileText, Image } from 'lucide-react';
 import { Message, ChatSession, User } from '../../../types/chat';
+import { auth } from '../../../services/firebase/config';
 import { studyFlowWelcomeMessage } from './welcome-config';
 import { generateTutorResponse } from '../../../services/ai';
 import {
@@ -112,11 +113,12 @@ export function ChatScreen({ user }: ChatScreenProps) {
   const loadChatSessions = useCallback(async () => {
     setLoadingSessions(true);
     try {
-      if (!user?.accessToken) {
+      const uid = auth.currentUser?.uid;
+      if (!uid) {
         return;
       }
 
-      const sessions = await getChatSessions(user.accessToken);
+      const sessions = await getChatSessions(uid);
       setChatSessions(sessions);
 
       if (sessions.length > 0) {
@@ -128,12 +130,12 @@ export function ChatScreen({ user }: ChatScreenProps) {
     } finally {
       setLoadingSessions(false);
     }
-  }, [user?.accessToken]);
+  }, []);
 
   // Load tin nhắn từ chat hiện tại
   const loadChatHistory = useCallback(
     async (chatId: string) => {
-      if (!chatId || !user?.accessToken) return;
+      if (!chatId) return;
 
       setLoading(true);
       try {
@@ -153,7 +155,7 @@ export function ChatScreen({ user }: ChatScreenProps) {
         setLoading(false);
       }
     },
-    [user?.accessToken],
+    [],
   );
 
   // Về menu chính (không tạo chat session mới)
@@ -172,7 +174,6 @@ export function ChatScreen({ user }: ChatScreenProps) {
 
   // Xóa chat
   const handleDeleteChat = async (chatId: string) => {
-    if (!user?.accessToken) return;
 
     try {
       await deleteChatSession(chatId);
@@ -198,7 +199,7 @@ export function ChatScreen({ user }: ChatScreenProps) {
   // Đổi tên chat
   const handleRenameChat = async (chatId: string, newTitle: string) => {
     const chat = chatSessions.find(session => session.id === chatId);
-    if (!chat || !user?.accessToken || !newTitle.trim()) return;
+    if (!chat || !newTitle.trim()) return;
 
     // Không cần prompt nữa vì đã có newTitle từ inline editing
     if (newTitle.trim() === chat.title) return;
@@ -225,7 +226,7 @@ export function ChatScreen({ user }: ChatScreenProps) {
   const handleSendMessage = async (content: string) => {
     const fileContent = attachedFile; // Sử dụng file đã attach
 
-    if ((!content.trim() && !fileContent) || loading || !user?.accessToken)
+    if ((!content.trim() && !fileContent) || loading)
       return;
 
     setLoading(true);
@@ -235,7 +236,9 @@ export function ChatScreen({ user }: ChatScreenProps) {
 
       // Nếu chưa có chat nào, tạo chat mới
       if (!chatId) {
-        const newSessionId = await createChatSession(user.accessToken);
+        const uid = auth.currentUser?.uid;
+        if (!uid) return;
+        const newSessionId = await createChatSession(uid);
         const newSession: ChatSession = {
           id: newSessionId,
           title: 'Cuộc trò chuyện mới',
