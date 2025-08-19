@@ -27,22 +27,24 @@ export default function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {
           <div className="mx-auto mb-4 flex items-center justify-center">
             <Logo size="large" showText={false} />
           </div>
-          <h1 className="text-3xl font-bold text-blue-900 mb-2">StudyFlow</h1>
-          <p className="text-gray-600 dark:text-gray-300">
+          <h1 className="text-3xl font-bold text-[var(--primary)] mb-2">
+            StudyFlow
+          </h1>
+          <p className="text-[var(--muted)]">
             Học thông minh với AI, Flashcards & Pomodoro
           </p>
         </div>
 
         <div className="space-y-4">
           <Button
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 text-lg"
+            className="w-full bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-[var(--on-primary)] py-6 text-lg"
             onClick={() => onNavigate('login')}
           >
             Đăng nhập
           </Button>
 
           <Button
-            className="w-full bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 py-6 text-lg"
+            className="w-full bg-[var(--surface)] hover:bg-[var(--surface)]/80 text-[var(--text)] border border-[var(--border)] py-6 text-lg"
             variant="outline"
             onClick={() => onNavigate('register')}
           >
@@ -51,17 +53,20 @@ export default function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {
 
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
+              <div
+                className="w-full border-t"
+                style={{ borderColor: 'var(--border)' }}
+              ></div>
             </div>
             <div className="relative flex justify-center">
-              <span className="bg-gradient-to-br from-blue-50 to-yellow-50 px-4 text-sm text-gray-500">
+              <span className="bg-[var(--bg)] px-4 text-sm text-[var(--subtle)]">
                 Hoặc
               </span>
             </div>
           </div>
 
           <Button
-            className="w-full bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600 py-6 text-lg flex items-center justify-center gap-2"
+            className="w-full bg-[var(--surface)] hover:bg-[var(--surface)]/80 text-[var(--text)] border border-[var(--border)] py-6 text-lg flex items-center justify-center gap-2"
             variant="outline"
             onClick={handleGoogleLogin}
           >

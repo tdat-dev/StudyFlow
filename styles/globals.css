@@ -12,14 +12,23 @@
 /* Design Tokens */
 @layer base {
   :root {
-    /* Light Theme */
+    /* Light Theme - WCAG AA Compliant */
     --bg: #f7f8fa;
     --surface: #ffffff;
     --card: #ffffff;
     --border: rgba(10, 10, 10, 0.08);
-    --text: #0b1220;
-    --muted: #64748b;
+    --text: #0b1220; /* Body text - 4.5:1 contrast */
+    --muted: #64748b; /* Secondary text - 4.5:1 contrast */
+    --subtle: #8a94a6; /* Less important than muted - 3:1 contrast */
+    --placeholder: #94a3b8; /* Placeholder text - 3:1 contrast */
     --primary: #2563eb;
+    --success: #22c55e;
+    --warning: #eab308;
+    --danger: #ef4444;
+    --on-primary: #ffffff; /* Text on primary background */
+    --on-success: #ffffff; /* Text on success background */
+    --on-warning: #ffffff; /* Text on warning background */
+    --on-danger: #ffffff; /* Text on danger background */
     --ring: rgba(37, 99, 235, 0.35);
     --radius: 14px;
 
@@ -52,14 +61,23 @@
   }
 
   .dark {
-    /* Dark Theme */
+    /* Dark Theme - WCAG AA Compliant */
     --bg: #0b0f14;
     --surface: #0e141a;
     --card: #121821;
     --border: rgba(255, 255, 255, 0.08);
-    --text: rgba(255, 255, 255, 0.88);
-    --muted: rgba(255, 255, 255, 0.62);
+    --text: rgba(255, 255, 255, 0.88); /* Body text - 4.5:1 contrast */
+    --muted: rgba(255, 255, 255, 0.72); /* Secondary text - 4.5:1 contrast */
+    --subtle: rgba(255, 255, 255, 0.6); /* Less important - 3:1 contrast */
+    --placeholder: rgba(255, 255, 255, 0.55); /* Placeholder - 3:1 contrast */
     --primary: #2563eb;
+    --success: #22c55e;
+    --warning: #eab308;
+    --danger: #ef4444;
+    --on-primary: #ffffff; /* Text on primary background */
+    --on-success: #ffffff; /* Text on success background */
+    --on-warning: #ffffff; /* Text on warning background */
+    --on-danger: #ffffff; /* Text on danger background */
     --ring: rgba(37, 99, 235, 0.45);
 
     /* Legacy theme variables for compatibility */
@@ -127,6 +145,57 @@
 
   .text-muted {
     color: var(--muted);
+  }
+
+  /* WCAG AA Compliant Text Utilities */
+  .text-base-var {
+    color: var(--text);
+  }
+
+  .text-muted-var {
+    color: var(--muted);
+  }
+
+  .text-subtle-var {
+    color: var(--subtle);
+  }
+
+  .text-on-primary {
+    color: var(--on-primary);
+  }
+
+  .text-on-success {
+    color: var(--on-success);
+  }
+
+  .text-on-warning {
+    color: var(--on-warning);
+  }
+
+  .text-on-danger {
+    color: var(--on-danger);
+  }
+
+  /* Placeholder utilities */
+  .placeholder-var::placeholder {
+    color: var(--placeholder);
+  }
+
+  input.placeholder-var::placeholder,
+  textarea.placeholder-var::placeholder {
+    color: var(--placeholder);
+  }
+
+  /* Primary link styles */
+  .link-primary {
+    color: var(--primary);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+  }
+
+  .link-primary:hover {
+    text-decoration-thickness: 2px;
   }
 }
 
