@@ -42,8 +42,6 @@ export function Message({
       className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
       style={{
         backgroundColor: isUser ? 'var(--app-primary)' : 'var(--app-surface)',
-        borderColor: isUser ? 'transparent' : 'var(--app-border)',
-        border: isUser ? 'none' : '1px solid',
       }}
     >
       {isUser ? (
@@ -89,7 +87,6 @@ export function Message({
             } ${groupedWithPrev ? '-mt-1' : ''}`}
             style={{
               backgroundColor: isUser ? 'var(--app-card)' : 'var(--app-card)',
-              border: '1px solid var(--app-border)',
               borderRadius: 'var(--app-radius)',
               maxWidth: 'none',
             }}

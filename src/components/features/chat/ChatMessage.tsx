@@ -35,15 +35,13 @@ export function ChatMessage({ message }: ChatMessageProps) {
       >
         <div
           className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-            message.sender === 'user' ? 'text-white' : 'border'
+            message.sender === 'user' ? 'text-white' : ''
           }`}
           style={{
             backgroundColor:
               message.sender === 'user'
                 ? 'var(--app-primary)'
                 : 'var(--app-surface)',
-            borderColor:
-              message.sender === 'user' ? 'transparent' : 'var(--app-border)',
             borderRadius: 'var(--app-radius)',
           }}
         >

@@ -79,16 +79,14 @@ export function MainApp({ user, onLogout }: MainAppProps) {
         onTabChange={handleTabChange}
       />
       {/* Content area với full width */}
-      <div className="flex-1 flex flex-col bg-white dark:bg-[#0d1117] pb-16 md:pb-0 min-h-0 overflow-hidden">
+      <div className="flex-1 flex flex-col bg-white dark:bg-[#0d1117] pb-16 min-h-0 overflow-hidden">
         <div className="flex-1 w-full min-h-0">{renderScreen()}</div>
       </div>
-      {/* Bottom nav hiển thị trên mobile, ẩn trên desktop */}
-      <div className="md:hidden">
-        <BottomNav
-          activeTab={activeTab as any}
-          onTabChange={t => setActiveTab(t as TabType)}
-        />
-      </div>
+      {/* Bottom nav hiển thị cho cả mobile và desktop */}
+      <BottomNav
+        activeTab={activeTab as any}
+        onTabChange={t => setActiveTab(t as TabType)}
+      />
     </div>
   );
 }

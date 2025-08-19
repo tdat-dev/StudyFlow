@@ -598,7 +598,6 @@
 .chat-bubble-ai {
   background-color: var(--app-card);
   color: var(--app-text);
-  border: 1px solid var(--app-border);
   border-radius: var(--app-radius);
   border-bottom-left-radius: 6px;
 }

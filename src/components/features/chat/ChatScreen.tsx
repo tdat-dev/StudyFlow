@@ -494,7 +494,6 @@ export function ChatScreen({ user }: ChatScreenProps) {
                       className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
                       style={{
                         backgroundColor: 'var(--app-surface)',
-                        border: '1px solid var(--app-border)',
                       }}
                     >
                       <div
@@ -505,10 +504,9 @@ export function ChatScreen({ user }: ChatScreenProps) {
                       </div>
                     </div>
                     <div
-                      className="px-4 py-3 border rounded-lg"
+                      className="px-4 py-3 rounded-lg"
                       style={{
                         backgroundColor: 'var(--app-card)',
-                        borderColor: 'var(--app-border)',
                         borderRadius: 'var(--app-radius)',
                       }}
                     >

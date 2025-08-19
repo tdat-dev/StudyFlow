@@ -358,10 +358,10 @@ export function ChatWidget({ user }: ChatWidgetProps) {
               {isTyping && (
                 <div className="flex justify-start">
                   <div className="flex items-start space-x-2 max-w-[75%] sm:max-w-xs">
-                    <div className="w-8 h-8 bg-gray-200 dark:bg-white/5 border border-gray-300 dark:border-white/8 rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-8 h-8 bg-gray-200 dark:bg-white/5 rounded-full flex items-center justify-center flex-shrink-0">
                       <div className="h-4 w-4 text-gray-500 dark:text-zinc-300" />
                     </div>
-                    <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/8 shadow-sm rounded-2xl px-4 py-2">
+                    <div className="bg-white dark:bg-white/5 shadow-sm rounded-2xl px-4 py-2">
                       <div className="flex space-x-1">
                         <div className="w-2 h-2 bg-gray-400 dark:bg-gray-400 rounded-full animate-bounce"></div>
                         <div
