@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Card, CardContent } from '../../../components/ui/card';
 import { Check, X } from 'lucide-react';
 
 interface SwipeableFlashcardProps {
@@ -124,29 +123,36 @@ export function SwipeableFlashcard({
 
   return (
     <div className="relative w-full max-w-sm aspect-[4/3] perspective-1000 select-none">
-      {/* Swipe indicators */}
+      {/* Enhanced Swipe indicators with glow effects */}
       <div
-        className={`absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-[var(--danger)]/10 flex items-center justify-center transition-opacity z-10 ${
-          swipeIndicator === 'left' ? 'opacity-100' : 'opacity-0'
+        className={`absolute left-4 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-gradient-to-br from-red-500/20 to-red-600/30 backdrop-blur-sm border border-red-500/30 flex items-center justify-center transition-all duration-300 z-10 ${
+          swipeIndicator === 'left'
+            ? 'opacity-100 scale-110 shadow-[0_0_30px_rgba(239,68,68,0.5)]'
+            : 'opacity-0 scale-90'
         }`}
       >
-        <X className="text-[var(--danger)] h-6 w-6" />
+        <X className="text-red-400 h-8 w-8 drop-shadow-lg" />
       </div>
 
       <div
-        className={`absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-[var(--success)]/10 flex items-center justify-center transition-opacity z-10 ${
-          swipeIndicator === 'right' ? 'opacity-100' : 'opacity-0'
+        className={`absolute right-4 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-gradient-to-br from-green-500/20 to-green-600/30 backdrop-blur-sm border border-green-500/30 flex items-center justify-center transition-all duration-300 z-10 ${
+          swipeIndicator === 'right'
+            ? 'opacity-100 scale-110 shadow-[0_0_30px_rgba(34,197,94,0.5)]'
+            : 'opacity-0 scale-90'
         }`}
       >
-        <Check className="text-[var(--success)] h-6 w-6" />
+        <Check className="text-green-400 h-8 w-8 drop-shadow-lg" />
       </div>
 
-      {/* Card */}
+      {/* Card with enhanced drag effects */}
       <div
         ref={cardRef}
-        className="relative w-full h-full transition-all duration-500"
+        className={`relative w-full h-full transition-all duration-500 ${
+          dragOffset !== 0 ? 'z-20' : 'z-10'
+        }`}
         style={{
-          transform: `translateX(${dragOffset}px)`,
+          transform: `translateX(${dragOffset}px) rotateZ(${dragOffset * 0.1}deg)`,
+          filter: `drop-shadow(0 ${Math.abs(dragOffset) * 0.3}px ${Math.abs(dragOffset) * 0.5}px rgba(0,0,0,0.3))`,
         }}
       >
         <div
@@ -164,68 +170,74 @@ export function SwipeableFlashcard({
           onMouseLeave={handleDragEnd}
         >
           {/* Front - English only */}
-          <Card className="absolute inset-0 backface-hidden cursor-pointer hover:shadow-lg transition-shadow overflow-hidden bg-[var(--surface)] border-[var(--border)]">
-            <CardContent className="flex flex-col h-full p-6">
-              <div className="w-full h-full flex flex-col">
-                <div className="mb-4 px-3 py-1 bg-[var(--primary)]/10 text-[var(--primary)] rounded-md inline-block text-sm font-medium">
-                  English
-                </div>
-                <div className="flex-grow flex items-center justify-center">
-                  <h2 className="text-[var(--text)] text-2xl font-bold text-center leading-relaxed">
-                    {front}
-                  </h2>
-                </div>
+          <div className="absolute inset-0 backface-hidden flashcard-enhanced">
+            <div className="flex flex-col h-full min-h-0">
+              <div className="flashcard-label flex-shrink-0">English</div>
+              <div className="flex-grow flex items-center justify-center min-h-0 py-4">
+                <h2 className="flashcard-title text-center">{front}</h2>
+              </div>
 
-                {example && (
-                  <div className="mt-6 p-4 bg-[var(--surface)] rounded-lg border border-[var(--border)] w-full">
-                    <p className="text-[var(--muted)] text-sm italic">
-                      &quot;{example}&quot;
-                    </p>
-                  </div>
-                )}
-
-                <div className="mt-auto pt-4 text-center">
-                  <p className="text-[var(--subtle)] text-sm opacity-80">
-                    Tap to see Vietnamese meaning
+              {example && (
+                <div className="flashcard-example flex-shrink-0">
+                  <p className="text-[var(--text)]/90 text-sm italic leading-relaxed">
+                    &quot;{example}&quot;
                   </p>
                 </div>
+              )}
+
+              <div className="flashcard-hint flex-shrink-0">
+                Tap to see Vietnamese meaning
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Back - Vietnamese only */}
-          <Card className="absolute inset-0 backface-hidden rotate-y-180 cursor-pointer hover:shadow-lg transition-shadow overflow-hidden bg-[var(--surface)] border-[var(--border)]">
-            <CardContent
-              className="flex flex-col h-full p-6"
-              style={{ transform: 'rotateY(180deg)' }}
-            >
-              <div className="w-full h-full flex flex-col">
-                <div className="mb-4 px-3 py-1 bg-[var(--success)]/10 text-[var(--success)] rounded-md inline-block text-sm font-medium">
-                  Vietnamese
-                </div>
-                <div className="flex-grow flex items-center justify-center">
-                  <h2 className="text-[var(--text)] text-2xl font-bold text-center leading-relaxed">
-                    {back}
-                  </h2>
-                </div>
+          <div className="absolute inset-0 backface-hidden flashcard-enhanced rotate-y-180">
+            <div className="flex flex-col h-full min-h-0">
+              <div className="flashcard-label flex-shrink-0">Vietnamese</div>
+              <div className="flex-grow flex items-center justify-center min-h-0 py-4">
+                <h2 className="flashcard-title text-center">{back}</h2>
+              </div>
 
-                {exampleTranslation && (
-                  <div className="mt-6 p-4 bg-[var(--surface)] rounded-lg border border-[var(--border)] w-full">
-                    <p className="text-[var(--muted)] text-sm italic">
-                      &quot;{exampleTranslation}&quot;
-                    </p>
-                  </div>
-                )}
-
-                <div className="mt-auto pt-4 text-center">
-                  <p className="text-[var(--subtle)] text-sm opacity-80">
-                    Tap to see English word
+              {exampleTranslation && (
+                <div className="flashcard-example flex-shrink-0">
+                  <p className="text-[var(--text)]/90 text-sm italic leading-relaxed">
+                    &quot;{exampleTranslation}&quot;
                   </p>
                 </div>
+              )}
+
+              <div className="flashcard-hint flex-shrink-0">
+                Tap to see English word
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
+      </div>
+
+      {/* Control buttons below flashcard */}
+      <div className="flex justify-center gap-4 mt-6">
+        <button
+          onClick={onSwipeLeft}
+          className="flex items-center gap-2 px-6 py-3 bg-red-500/20 hover:bg-red-500/30 
+                     border border-red-500/30 rounded-xl transition-all duration-200
+                     backdrop-blur-sm hover:scale-105 hover:shadow-[0_0_20px_rgba(239,68,68,0.3)]
+                     text-red-300 font-medium"
+        >
+          <span className="text-xl">✖</span>
+          <span>Chưa nhớ</span>
+        </button>
+
+        <button
+          onClick={onSwipeRight}
+          className="flex items-center gap-2 px-6 py-3 bg-green-500/20 hover:bg-green-500/30 
+                     border border-green-500/30 rounded-xl transition-all duration-200
+                     backdrop-blur-sm hover:scale-105 hover:shadow-[0_0_20px_rgba(34,197,94,0.3)]
+                     text-green-300 font-medium"
+        >
+          <span className="text-xl">✓</span>
+          <span>Đã nhớ</span>
+        </button>
       </div>
 
       <style jsx>{`
