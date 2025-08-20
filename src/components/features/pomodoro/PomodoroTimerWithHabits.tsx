@@ -101,9 +101,9 @@ export function PomodoroTimerWithHabits({ user }: PomodoroTimerWithHabitsProps) 
     setAccentColors(timerMode);
   }, [timerMode]);
 
-  // Auto-update time when settings change
+  // Auto-update time when settings/mode change, but do NOT reset while a session exists (e.g., paused)
   useEffect(() => {
-    if (!isActive) {
+    if (!currentSession) {
       const timeMap = {
         pomodoro: pomodoroTime * 60,
         shortBreak: shortBreakTime * 60,
@@ -111,7 +111,7 @@ export function PomodoroTimerWithHabits({ user }: PomodoroTimerWithHabitsProps) 
       };
       setTimeLeft(timeMap[timerMode]);
     }
-  }, [pomodoroTime, shortBreakTime, longBreakTime, timerMode, isActive]);
+  }, [pomodoroTime, shortBreakTime, longBreakTime, timerMode, currentSession]);
 
   // Timer logic
   useEffect(() => {
@@ -403,27 +403,26 @@ export function PomodoroTimerWithHabits({ user }: PomodoroTimerWithHabitsProps) 
                       }}
                     />
                   </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="text-5xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                        {formatTime(timeLeft)}
-                      </div>
-                      {currentTaskInfo && (
-                        <div className="text-sm text-gray-600 dark:text-gray-400 max-w-48">
-                          <div className="font-medium truncate">{currentTaskInfo.text}</div>
-                          {currentTaskInfo.habitTitle && (
-                            <div className="text-xs text-blue-600 dark:text-blue-400">
-                              {currentTaskInfo.habitTitle}
-                            </div>
-                          )}
-                          <div className="text-xs mt-1">
-                            {currentTaskInfo.pomodoroCount} 
-                            {currentTaskInfo.estimatedPomodoros && `/${currentTaskInfo.estimatedPomodoros}`} Pomodoro
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                                     <div className="absolute inset-0 flex items-center justify-center">
+                     <div className="text-center flex flex-col items-center justify-center h-full">
+                       <div className="text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4 leading-none">
+                         {formatTime(timeLeft)}
+                       </div>
+                       {currentTaskInfo ? (
+                         <div className="text-sm text-gray-600 dark:text-gray-400 max-w-[180px] mx-auto space-y-1.5">
+                           <div className="font-medium truncate leading-tight">{currentTaskInfo.text}</div>
+                           {currentTaskInfo.habitTitle && (
+                             <div className="text-xs text-blue-600 dark:text-blue-400 leading-tight">{currentTaskInfo.habitTitle}</div>
+                           )}
+                           <div className="text-xs leading-tight">{currentTaskInfo.pomodoroCount}{currentTaskInfo.estimatedPomodoros && `/${currentTaskInfo.estimatedPomodoros}`} Pomodoro</div>
+                         </div>
+                       ) : (
+                         <div className="text-sm text-gray-500 dark:text-gray-400 max-w-[180px] mx-auto">
+                           <div className="text-xs leading-relaxed">Chọn task để bắt đầu</div>
+                         </div>
+                       )}
+                     </div>
+                   </div>
                 </div>
               </div>
 

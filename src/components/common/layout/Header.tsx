@@ -53,6 +53,9 @@ export function Header({
       document.addEventListener('keydown', handleKeyDown);
       return () => document.removeEventListener('keydown', handleKeyDown);
     }
+    
+    // Return undefined when not adding event listener
+    return undefined;
   }, [isDropdownOpen]);
 
   const handleProfileClick = () => {
