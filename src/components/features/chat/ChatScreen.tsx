@@ -121,10 +121,10 @@ export function ChatScreen({ user }: ChatScreenProps) {
       const sessions = await getChatSessions(uid);
       setChatSessions(sessions);
 
-      if (sessions.length > 0) {
-        setCurrentChatId(sessions[0].id);
-      }
-      // Bỏ tạo chat tự động - chỉ tạo khi người dùng gửi tin nhắn
+      // Không tự động chọn chat đầu tiên - để người dùng tự chọn
+      // Hiển thị giao diện chính (EmptyState) khi vào tab chat
+      setCurrentChatId(null);
+      setMessages([]);
     } catch (error) {
       console.error('Failed to load chat sessions:', error);
     } finally {
@@ -183,13 +183,9 @@ export function ChatScreen({ user }: ChatScreenProps) {
       setChatSessions(updatedSessions);
 
       if (chatId === currentChatId) {
-        if (updatedSessions.length > 0) {
-          setCurrentChatId(updatedSessions[0].id);
-        } else {
-          // Không tự động tạo chat mới, để người dùng tự tạo
-          setCurrentChatId(null);
-          setMessages([]);
-        }
+        // Luôn về giao diện chính sau khi xóa chat hiện tại
+        setCurrentChatId(null);
+        setMessages([]);
       }
     } catch (error) {
       console.error('Failed to delete chat:', error);
@@ -387,6 +383,14 @@ export function ChatScreen({ user }: ChatScreenProps) {
       loadChatSessions();
     }
   }, [user, loadChatSessions]);
+
+  // Reset về giao diện chính khi component mount lại (khi chuyển tab)
+  useEffect(() => {
+    // Đảm bảo luôn bắt đầu với giao diện chính
+    setCurrentChatId(null);
+    setMessages([]);
+    setAttachedFile(null);
+  }, []);
 
   // Load chat history khi chuyển chat
   useEffect(() => {

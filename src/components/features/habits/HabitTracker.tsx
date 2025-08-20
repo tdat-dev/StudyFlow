@@ -21,6 +21,15 @@ import {
   ArrowLeft,
   Trash2,
   AlertTriangle,
+  Dumbbell,
+  Coffee,
+  Moon,
+  Heart,
+  Brain,
+  Clock,
+  Zap,
+  Smile,
+  Star,
 } from 'lucide-react';
 import {
   collection,
@@ -34,6 +43,9 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { HabitStreakChart } from './HabitStreakChart';
+import { CreateHabitForm } from './CreateHabitForm';
+import { HabitPomodoroStats } from './HabitPomodoroStats';
+import { useHabitPomodoroIntegration } from '../../../hooks/useHabitPomodoroIntegration';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -71,72 +83,21 @@ export function HabitTracker({ user }: HabitTrackerProps) {
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [habitToDelete, setHabitToDelete] = useState<Habit | null>(null);
+  const [createFormOpen, setCreateFormOpen] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
 
-  // Tạo dữ liệu giả cho biểu đồ 30 ngày
-  function generateMockMonthData(currentStreak: number) {
-    const today = new Date();
-    const daysInMonth = new Date(
-      today.getFullYear(),
-      today.getMonth() + 1,
-      0,
-    ).getDate();
-    const result = Array(daysInMonth).fill(false);
+  // Pomodoro integration
+  const { habitStats } = useHabitPomodoroIntegration(user);
 
-    // Đánh dấu các ngày đã hoàn thành (giả lập)
-    for (let i = 0; i < daysInMonth; i++) {
-      // Ngày hiện tại và các ngày trước đó trong streak hiện tại
-      if (i < today.getDate() && i >= today.getDate() - currentStreak) {
-        result[i] = true;
-      }
-      // Một số ngày ngẫu nhiên trong tháng
-      else if (i < today.getDate() && Math.random() > 0.6) {
-        result[i] = true;
-      }
-    }
 
-    return result;
-  }
 
-  // Tạo dữ liệu mẫu cho thói quen
-  const loadMockHabits = () => {
-    const mockHabits = [
-      {
-        id: '1',
-        title: 'Học từ vựng mỗi ngày',
-        description: 'Học ít nhất 10 từ mới mỗi ngày',
-        currentStreak: 5,
-        todayCompleted: true,
-        weeklyProgress: [true, true, true, true, true, false, false],
-        monthlyProgress: generateMockMonthData(5),
-        icon: BookOpen,
-        color: 'bg-blue-500',
-        bgColor: 'bg-blue-100 dark:bg-blue-900/50',
-        textColor: 'text-blue-600 dark:text-blue-400',
-        type: 'vocabulary',
-      },
-      {
-        id: '2',
-        title: 'Luyện nghe mỗi ngày',
-        description: 'Nghe ít nhất 10 phút tiếng Anh mỗi ngày',
-        currentStreak: 3,
-        todayCompleted: false,
-        weeklyProgress: [true, true, true, false, false, false, false],
-        monthlyProgress: generateMockMonthData(3),
-        icon: Headphones,
-        color: 'bg-green-500',
-        bgColor: 'bg-green-100 dark:bg-green-900/50',
-        textColor: 'text-green-600 dark:text-green-400',
-        type: 'listening',
-      },
-    ];
-    setHabits(mockHabits);
-  };
+
 
   // Định nghĩa hàm loadHabits
   const loadHabits = async () => {
     if (!user.accessToken || !auth.currentUser) {
-      // Nếu không có người dùng, hiển thị dữ liệu mẫu
-      loadMockHabits();
+      // Nếu không có người dùng, không hiển thị dữ liệu mẫu
+      setHabits([]);
       return;
     }
 
@@ -154,15 +115,33 @@ export function HabitTracker({ user }: HabitTrackerProps) {
         });
       });
 
-      // Nếu không có thói quen nào, tạo dữ liệu mẫu và lưu vào Firestore
-      if (serverHabits.length === 0) {
-        await createDefaultHabits();
-        return;
-      }
-
       // Thêm biểu tượng và màu sắc cho thói quen
       const habitsWithIcons = serverHabits.map(habit => {
-        // Xác định icon dựa trên loại thói quen
+        // Nếu habit đã có đầy đủ thông tin từ form mới
+        if (habit.iconName && habit.color && habit.bgColor && habit.textColor) {
+          // Map icon name to actual icon component
+          const iconMap: { [key: string]: any } = {
+            BookOpen,
+            Headphones,
+            Dumbbell,
+            Coffee,
+            Moon,
+            Heart,
+            Brain,
+            Target,
+            Clock,
+            Zap,
+            Smile,
+            Star,
+          };
+          
+          return {
+            ...habit,
+            icon: iconMap[habit.iconName] || BookOpen,
+          };
+        }
+
+        // Legacy support: xác định icon dựa trên loại thói quen cũ
         let icon = BookOpen;
         let color = 'bg-blue-500';
         let bgColor = 'bg-blue-100 dark:bg-blue-900/50';
@@ -190,57 +169,53 @@ export function HabitTracker({ user }: HabitTrackerProps) {
         console.error('Failed to load habits:', error);
       }
 
-      // Nếu có lỗi, hiển thị dữ liệu mẫu
-      loadMockHabits();
+      // Nếu có lỗi, hiển thị danh sách trống
+      setHabits([]);
     }
   };
 
-  // Tạo thói quen mặc định và lưu vào Firestore
-  const createDefaultHabits = async () => {
+  // Tạo thói quen mới
+  const createHabit = async (habitData: {
+    title: string;
+    description: string;
+    icon: any;
+    color: string;
+    bgColor: string;
+    textColor: string;
+  }) => {
     if (!auth.currentUser) return;
 
+    setCreateLoading(true);
     try {
       const habitsRef = collection(db, 'habits');
 
-      // Thói quen học từ vựng
-      const vocabularyHabit = {
+      const newHabit = {
         userId: auth.currentUser.uid,
-        title: 'Học từ vựng mỗi ngày',
-        description: 'Học ít nhất 10 từ mới mỗi ngày',
+        title: habitData.title,
+        description: habitData.description,
         currentStreak: 0,
         todayCompleted: false,
         weeklyProgress: [false, false, false, false, false, false, false],
         monthlyProgress: Array(30).fill(false),
         createdAt: Timestamp.now(),
-        type: 'vocabulary',
+        // Lưu tên icon thay vì component (để có thể serialize)
+        iconName: habitData.icon.name || 'BookOpen',
+        color: habitData.color,
+        bgColor: habitData.bgColor,
+        textColor: habitData.textColor,
       };
 
-      // Thói quen luyện nghe
-      const listeningHabit = {
-        userId: auth.currentUser.uid,
-        title: 'Luyện nghe mỗi ngày',
-        description: 'Nghe ít nhất 10 phút tiếng Anh mỗi ngày',
-        currentStreak: 0,
-        todayCompleted: false,
-        weeklyProgress: [false, false, false, false, false, false, false],
-        monthlyProgress: Array(30).fill(false),
-        createdAt: Timestamp.now(),
-        type: 'listening',
-      };
+      await addDoc(habitsRef, newHabit);
 
-      // Lưu vào Firestore
-      await Promise.all([
-        addDoc(habitsRef, vocabularyHabit),
-        addDoc(habitsRef, listeningHabit),
-      ]);
-
-      // Tải lại thói quen
+      // Đóng form và tải lại thói quen
+      setCreateFormOpen(false);
       loadHabits();
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to create default habits:', error);
+        console.error('Failed to create habit:', error);
       }
-      loadMockHabits();
+    } finally {
+      setCreateLoading(false);
     }
   };
 
@@ -437,9 +412,9 @@ export function HabitTracker({ user }: HabitTrackerProps) {
 
   if (currentView === 'detail' && selectedHabit) {
     return (
-      <div className="h-full overflow-y-auto p-6 pb-24 relative bg-white dark:bg-black">
+      <div className="h-full overflow-y-auto p-6 pb-32 md:pb-24 relative bg-white dark:bg-black">
         {/* Fixed Add New Habit Button */}
-        <div className="fixed bottom-6 right-6 left-6 z-10">
+        <div className="fixed bottom-24 md:bottom-6 right-6 left-6 z-10">
           <Button
             className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 rounded-xl shadow-lg text-white"
             onClick={() => setCurrentView('list')}
@@ -552,6 +527,18 @@ export function HabitTracker({ user }: HabitTrackerProps) {
           </CardContent>
         </Card>
 
+        {/* Pomodoro Statistics */}
+        <div className="mb-6">
+          <HabitPomodoroStats
+            habitColor={selectedHabit.color}
+            stats={habitStats.find(stat => stat.habitId === selectedHabit.id)}
+            onViewDetails={() => {
+              // TODO: Implement detailed Pomodoro statistics modal
+              console.log('View Pomodoro details for habit:', selectedHabit.id);
+            }}
+          />
+        </div>
+
         {/* Action Button */}
         <Button
           onClick={() => toggleHabitCompletion(selectedHabit.id)}
@@ -578,31 +565,30 @@ export function HabitTracker({ user }: HabitTrackerProps) {
   }
 
   return (
-    <div className="h-full overflow-y-auto p-6 pb-24 relative bg-white dark:bg-black">
-      {/* Fixed Add New Habit Button */}
-      <div className="fixed bottom-6 right-6 left-6 z-10">
+    <div className="h-full overflow-y-auto p-6 pb-32 md:pb-24 relative bg-white dark:bg-black">
+
+      {/* Header */}
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-blue-900 dark:text-blue-100 mb-2">
+            Thói quen học tập
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Xây dựng thói quen học đều đặn mỗi ngày
+          </p>
+        </div>
         <Button
-          className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 rounded-xl shadow-lg text-white"
-          onClick={createDefaultHabits}
+          onClick={() => setCreateFormOpen(true)}
           disabled={loading}
+          className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white shrink-0"
         >
           {loading ? (
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
           ) : (
             <Plus className="h-4 w-4 mr-2" />
           )}
-          Thêm thói quen mới
+          Thêm thói quen
         </Button>
-      </div>
-
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-blue-900 dark:text-blue-100 mb-2">
-          Thói quen học tập
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          Xây dựng thói quen học đều đặn mỗi ngày
-        </p>
       </div>
 
       {/* Today's Progress */}
@@ -690,12 +676,12 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                 bạn
               </p>
               <Button
-                onClick={createDefaultHabits}
+                onClick={() => setCreateFormOpen(true)}
                 className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white"
                 size="sm"
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Thêm thói quen mẫu
+                Tạo thói quen mới
               </Button>
             </div>
           )}
@@ -721,11 +707,11 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                   bạn
                 </p>
                 <Button
-                  onClick={createDefaultHabits}
+                  onClick={() => setCreateFormOpen(true)}
                   className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white"
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Thêm thói quen mẫu
+                  Tạo thói quen mới
                 </Button>
               </div>
             </div>
@@ -900,6 +886,14 @@ export function HabitTracker({ user }: HabitTrackerProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Create Habit Form */}
+      <CreateHabitForm
+        open={createFormOpen}
+        onOpenChange={setCreateFormOpen}
+        onCreateHabit={createHabit}
+        loading={createLoading}
+      />
     </div>
   );
 }

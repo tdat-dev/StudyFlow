@@ -470,10 +470,10 @@ Chỉ trả về MỘT câu ví dụ, không có markdown.`;
       - Cột Example: câu ví dụ viết bằng ${frontLanguage}.
       - Cột ExampleTranslation: bản dịch của câu ví dụ sang ${backLanguage}.
 
-      Lưu ý quan trọng:
+Lưu ý quan trọng: 
       1. Không sử dụng dấu ** hoặc markdown trong nội dung cell.
-      2. Câu ví dụ phải rõ ràng, ngắn gọn và dễ hiểu.
-      3. Bản dịch của câu ví dụ phải chính xác và tự nhiên.
+2. Câu ví dụ phải rõ ràng, ngắn gọn và dễ hiểu.
+3. Bản dịch của câu ví dụ phải chính xác và tự nhiên.
       4. KHÔNG sử dụng dòng phân cách bằng dấu gạch ngang (---) trong bất kỳ phần nào.
       5. Trả lời DƯỚI DẠNG BẢNG với 4 cột (dùng ký tự | để phân tách cột): Front | Back | Example | ExampleTranslation.
       6. MỖI THẺ PHẢI LÀ MỘT TỪ/CỤM TỪ KHÁC NHAU – tuyệt đối KHÔNG trùng lặp từ vựng giữa các hàng.
@@ -529,10 +529,10 @@ Chỉ trả về MỘT câu ví dụ, không có markdown.`;
             if (columns.length >= 2) {
               const clean = (v: string) =>
                 v
-                  .replace(/^"(.*)"$/, '$1')
-                  .replace(/\*\*/g, '')
-                  .replace(/\*/g, '')
-                  .replace(/`/g, '')
+                    .replace(/^"(.*)"$/, '$1')
+                    .replace(/\*\*/g, '')
+                    .replace(/\*/g, '')
+                    .replace(/`/g, '')
                   .trim();
 
               const cleanFront = clean(columns[0]);
@@ -548,11 +548,11 @@ Chỉ trả về MỘT câu ví dụ, không có markdown.`;
 
               parsedCards.push({
                 id: `ai-card-${Date.now()}-${parsedCards.length}-${index}`,
-                front: cleanFront,
-                back: cleanBack,
-                example: cleanExample,
-                exampleTranslation: cleanExampleTranslation,
-                learned: false,
+                  front: cleanFront,
+                  back: cleanBack,
+                  example: cleanExample,
+                  exampleTranslation: cleanExampleTranslation,
+                  learned: false,
               });
             }
           });
@@ -594,17 +594,17 @@ Chỉ trả về MỘT câu ví dụ, không có markdown.`;
                 const key = norm(front);
                 if (front && back && !seen.has(key)) {
                   seen.add(key);
-                  cards.push({
-                    id: `ai-card-${Date.now()}-${cards.length}`,
+                cards.push({
+                  id: `ai-card-${Date.now()}-${cards.length}`,
                     front,
                     back,
-                    example: '',
-                    exampleTranslation: '',
-                    learned: false,
-                  });
-                }
+                  example: '',
+                  exampleTranslation: '',
+                  learned: false,
+                });
               }
             }
+          }
           }
         }
 

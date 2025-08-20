@@ -3,7 +3,7 @@ import { ChatScreen } from './features/chat/ChatScreen';
 import { FlashcardScreen } from './features/flashcards/FlashcardScreen';
 import { HabitTracker } from './features/habits/HabitTracker';
 import { HomeDashboard } from './features/home/HomeDashboard';
-import { PomodoroTimer } from './features/pomodoro/PomodoroTimer';
+import { PomodoroTimerWithHabits } from './features/pomodoro/PomodoroTimerWithHabits';
 import ProfileScreen from './features/profile/ProfileScreen';
 import { User } from '../types/chat';
 import { Header } from './common/layout/Header';
@@ -51,7 +51,7 @@ export function MainApp({ user, onLogout }: MainAppProps) {
       case 'habits':
         return <HabitTracker user={currentUser} />;
       case 'pomodoro':
-        return <PomodoroTimer />;
+        return <PomodoroTimerWithHabits user={currentUser} />;
       case 'profile':
         return <ProfileScreen user={currentUser} onLogout={onLogout} />;
       default:
