@@ -13,7 +13,7 @@ const Logo: React.FC<LogoProps> = ({
   className = '',
 }) => {
   const sizeMap = {
-    small: { width: 32, height: 32, textSize: 'text-lg' },
+    small: { width: 28, height: 28, textSize: 'text-base' },
     medium: { width: 40, height: 40, textSize: 'text-xl' },
     large: { width: 56, height: 56, textSize: 'text-2xl' },
     xlarge: { width: 80, height: 80, textSize: 'text-3xl' },
@@ -21,30 +21,23 @@ const Logo: React.FC<LogoProps> = ({
   };
 
   const { width, height, textSize } = sizeMap[size];
+  const src = '/images/logo.png';
 
   return (
-    <div className={`flex items-center space-x-2 ${className}`}>
+    <div className={`flex items-center space-x-2 ${className}`} aria-label="StudyFlow logo">
       <Image
-        src="/images/logo.png"
+        src={src}
         alt="StudyFlow Logo"
         width={width}
         height={height}
-        className="rounded-none border-0 outline-none ring-0"
-        style={{
-          width: `${width}px`,
-          height: `${height}px`,
-          border: 'none',
-          outline: 'none',
-          boxShadow: 'none',
-        }}
         priority
+        className="rounded-none drop-shadow-sm"
       />
       {showText && (
         <span
-          className={`font-bold ${textSize}`}
-          style={{ color: 'var(--app-text)' }}
+          className={`font-semibold ${textSize} tracking-tight leading-none select-none whitespace-nowrap antialiased text-gray-900 dark:text-white`}
         >
-          StudyFlow
+          tudyFlow
         </span>
       )}
     </div>
