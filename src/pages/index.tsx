@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { MainApp } from '../components/MainApp';
-import { LoginForm, RegisterForm } from '../components/features/auth';
+import { LoginForm, RegisterForm, LandingPage, AuthLayout } from '../components/features/auth';
+import { LoadingScreen } from '../components/ui/LoadingScreen';
 import { User } from '../types/chat';
-import { auth } from '../services/firebase';
+import { auth } from '../services/firebase/config';
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
@@ -42,32 +43,25 @@ export default function Home() {
   };
 
   if (loading) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
+    return <LoadingScreen message="Đang tải StudyFlow..." />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="w-full min-h-svh relative overflow-hidden">
       {user ? (
         <MainApp user={user} onLogout={handleLogout} />
+      ) : showRegister ? (
+        <AuthLayout type="register">
+          <RegisterForm
+            onSuccess={() => setShowRegister(false)}
+            onLogin={() => setShowRegister(false)}
+          />
+        </AuthLayout>
       ) : (
-        <div className="min-h-screen flex items-center justify-center p-4">
-          {showRegister ? (
-            <RegisterForm
-              onSuccess={() => setShowRegister(false)}
-              onLogin={() => setShowRegister(false)}
-            />
-          ) : (
-            <LoginForm
-              onSuccess={() => {}}
-              onRegister={() => setShowRegister(true)}
-              onForgotPassword={() => {}}
-            />
-          )}
-        </div>
+        <LandingPage
+          onShowLogin={() => setShowRegister(false)}
+          onShowRegister={() => setShowRegister(true)}
+        />
       )}
     </div>
   );

@@ -10,12 +10,14 @@ export interface Message {
 export interface ChatSession {
   id: string;
   title: string;
+  userId: string;
   createdAt: string;
   updatedAt: string;
   messageCount: number;
 }
 
 export interface User {
+  uid: string;
   name: string;
   email: string;
   accessToken?: string;

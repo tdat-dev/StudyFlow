@@ -54,19 +54,18 @@ export default function WelcomeScreen({ onNavigate }: WelcomeScreenProps) {
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
               <div
-                className="w-full border-t"
-                style={{ borderColor: 'var(--border)' }}
+                className="w-full border-t border-gray-200 dark:border-gray-700"
               ></div>
             </div>
             <div className="relative flex justify-center">
-              <span className="bg-[var(--bg)] px-4 text-sm text-[var(--subtle)]">
+              <span className="bg-white dark:bg-gray-900 px-4 text-sm text-gray-500 dark:text-gray-400">
                 Hoặc
               </span>
             </div>
           </div>
 
           <Button
-            className="w-full bg-[var(--surface)] hover:bg-[var(--surface)]/80 text-[var(--text)] border border-[var(--border)] py-6 text-lg flex items-center justify-center gap-2"
+            className="w-full bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 py-6 text-lg flex items-center justify-center gap-2"
             variant="outline"
             onClick={handleGoogleLogin}
           >

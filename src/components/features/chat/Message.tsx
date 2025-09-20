@@ -36,42 +36,40 @@ export function Message({
     }
   };
 
-  // Avatar component
+  // Avatar component with improved styling
   const Avatar = () => (
     <div
-      className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
-      style={{
-        backgroundColor: isUser ? 'var(--app-primary)' : 'var(--app-surface)',
-      }}
+      className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm ${
+        isUser 
+          ? 'bg-gradient-to-br from-blue-500 to-blue-600' 
+          : 'bg-gradient-to-br from-purple-500 to-purple-600'
+      }`}
     >
       {isUser ? (
         <User className="h-4 w-4 text-white" />
       ) : (
-        <Bot className="h-4 w-4" style={{ color: 'var(--app-text-muted)' }} />
+        <Bot className="h-4 w-4 text-white" />
       )}
     </div>
   );
 
-  // Message header (name + timestamp)
+  // Message header (name + timestamp) with improved styling
   const MessageHeader = () => (
-    <div className="flex items-center space-x-2 mb-2">
-      <span
-        className="text-sm font-semibold"
-        style={{ color: 'var(--app-text)' }}
-      >
+    <div className="flex items-center space-x-2 mb-3">
+      <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
         {isUser ? 'Bạn' : 'AI Tutor'}
       </span>
-      <span className="text-xs" style={{ color: 'var(--app-text-muted)' }}>
+      <span className="text-xs text-gray-500 dark:text-gray-400">
         {formatTime(message.timestamp)}
       </span>
     </div>
   );
 
   return (
-    <div className="group">
+    <div className="group mb-6">
       <div className="flex items-start space-x-3">
         {/* Avatar - only show for first message in group */}
-        <div className="w-7 h-7 flex justify-center">
+        <div className="w-8 h-8 flex justify-center">
           {!groupedWithPrev ? <Avatar /> : null}
         </div>
 
@@ -80,52 +78,41 @@ export function Message({
           {/* Header - only show for first message in group */}
           {!groupedWithPrev && <MessageHeader />}
 
-          {/* Message bubble */}
+          {/* Message bubble with improved styling */}
           <div
-            className={`relative px-4 py-3 break-words ${
-              groupedWithNext ? 'mb-1' : 'mb-6'
-            } ${groupedWithPrev ? '-mt-1' : ''}`}
-            style={{
-              backgroundColor: isUser ? 'var(--app-card)' : 'var(--app-card)',
-              borderRadius: 'var(--app-radius)',
-              maxWidth: 'none',
-            }}
+            className={`relative break-words ${
+              groupedWithNext ? 'mb-1' : 'mb-0'
+            } ${groupedWithPrev ? '-mt-1' : ''} ${
+              isUser 
+                ? 'bg-blue-600 text-white' 
+                : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
+            } rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200`}
+            style={{ maxWidth: 'none' }}
           >
-            {/* Copy button for AI messages */}
-            {isAssistant && (
-              <button
-                onClick={handleCopyMessage}
-                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-all p-1.5 rounded hover:bg-opacity-80 focus-visible:ring-2"
-                style={{
-                  backgroundColor: 'var(--app-surface)',
-                  borderRadius: 'var(--app-radius)',
-                }}
-                onFocus={e => {
-                  e.currentTarget.style.outline = '2px solid var(--app-ring)';
-                }}
-                onBlur={e => {
-                  e.currentTarget.style.outline = 'none';
-                }}
-                title="Copy tin nhắn"
-              >
-                <Copy
-                  className="h-3.5 w-3.5"
-                  style={{ color: 'var(--app-text-muted)' }}
-                />
-              </button>
-            )}
+            {/* Message content padding */}
+            <div className="px-4 py-3">
+              {/* Copy button for AI messages */}
+              {isAssistant && (
+                <button
+                  onClick={handleCopyMessage}
+                  className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-200 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus-visible:ring-2 focus-visible:ring-blue-500"
+                  title="Copy tin nhắn"
+                >
+                  <Copy className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
+                </button>
+              )}
 
-            {/* Message content - render as Markdown for AI, plain text for user */}
-            {isAssistant ? (
-              <MarkdownRenderer content={message.content} />
-            ) : (
-              <p
-                className="whitespace-pre-line text-[15px] leading-7"
-                style={{ color: 'var(--app-text)' }}
-              >
-                {message.content}
-              </p>
-            )}
+              {/* Message content - render as Markdown for AI, plain text for user */}
+              {isAssistant ? (
+                <div className="pr-8">
+                  <MarkdownRenderer content={message.content} />
+                </div>
+              ) : (
+                <p className="whitespace-pre-line text-[15px] leading-7 pr-8">
+                  {message.content}
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>

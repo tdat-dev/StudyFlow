@@ -48,10 +48,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
           {message.sender === 'user' ? (
             <User className="h-4 w-4" />
           ) : (
-            <Bot
-              className="h-4 w-4"
-              style={{ color: 'var(--app-text-muted)' }}
-            />
+            <Bot className="h-4 w-4 text-gray-500 dark:text-gray-400" />
           )}
         </div>
 
@@ -80,22 +77,11 @@ export function ChatMessage({ message }: ChatMessageProps) {
             {message.sender === 'ai' && (
               <button
                 onClick={handleCopy}
-                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:opacity-80 focus-visible:ring-2"
-                style={{
-                  borderRadius: 'var(--app-radius)',
-                  backgroundColor: 'var(--app-surface)',
-                }}
-                onFocus={e => {
-                  e.currentTarget.style.outline = '2px solid var(--app-ring)';
-                }}
-                onBlur={e => {
-                  e.currentTarget.style.outline = 'none';
-                }}
+                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:opacity-80 focus-visible:ring-2 rounded-lg bg-gray-100 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 title="Copy tin nhắn"
               >
                 <Copy
-                  className="h-3 w-3"
-                  style={{ color: 'var(--app-text-muted)' }}
+                  className="h-3 w-3 text-gray-500 dark:text-gray-400"
                 />
               </button>
             )}

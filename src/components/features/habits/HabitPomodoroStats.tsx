@@ -15,7 +15,7 @@ export function HabitPomodoroStats({
 }: HabitPomodoroStatsProps) {
   if (!stats) {
     return (
-      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+      <div className="bg-gray-50 dark:bg-studyflow-surface rounded-lg p-4">
         <div className="flex items-center gap-3 mb-3">
           <div 
             className="w-3 h-3 rounded-full"
@@ -51,7 +51,7 @@ export function HabitPomodoroStats({
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+    <div className="bg-white dark:bg-studyflow-surface border border-gray-200 dark:border-gray-700 rounded-lg p-4">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <div 

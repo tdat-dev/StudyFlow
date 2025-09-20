@@ -353,7 +353,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
           </p>
         </div>
 
-        <Card className="mb-6 bg-white dark:bg-gray-800">
+        <Card className="mb-6 bg-white dark:bg-studyflow-surface">
           <CardHeader>
             <CardTitle className="text-gray-900 dark:text-gray-900">
               Chế độ hiển thị
@@ -393,7 +393,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
 
             <Button
               variant={theme === 'system' ? 'default' : 'outline'}
-              className="w-full justify-start p-4 h-auto dark:bg-gray-700 dark:hover:bg-gray-600"
+              className="w-full justify-start p-4 h-auto dark:bg-studyflow-surface dark:hover:bg-gray-600"
               onClick={() => setTheme('system')}
             >
               <Smartphone className="h-5 w-5 mr-3 text-gray-600 dark:text-gray-400 dark:text-gray-300" />
@@ -407,7 +407,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-gray-800">
+        <Card className="bg-white dark:bg-studyflow-surface">
           <CardHeader>
             <CardTitle className="text-gray-900 dark:text-gray-100">
               Thông tin hiện tại
@@ -523,7 +523,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
                         ? 'bg-blue-100 border border-blue-300'
                         : isCompleted
                           ? 'bg-green-50'
-                          : 'bg-gray-50 dark:bg-gray-700'
+                          : 'bg-gray-50 dark:bg-studyflow-surface'
                     }`}
                   >
                     <div className="flex items-center">
@@ -823,9 +823,9 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
 
   // Render màn hình chính
   return (
-    <div className="h-full overflow-y-auto p-6 pb-20 bg-white dark:bg-black">
+    <div className="h-full overflow-y-auto p-6 pb-20 bg-white dark:bg-studyflow-bg">
       {/* Profile Header */}
-      <Card className="mb-6 bg-white dark:bg-gray-800 border-blue-200 dark:border-gray-600">
+      <Card className="mb-6 bg-white dark:bg-studyflow-surface border-blue-200 dark:border-gray-600">
         <CardContent className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-900 rounded-lg">
           <div className="flex items-center">
             <div className="relative w-16 h-16 rounded-full mr-4 border-2 border-blue-200 dark:border-blue-600">
@@ -898,7 +898,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
       </Card>
 
       {/* Statistics */}
-      <Card className="mb-6 bg-white dark:bg-gray-800">
+      <Card className="mb-6 bg-white dark:bg-studyflow-surface">
         <CardHeader>
           <CardTitle className="flex items-center text-gray-900 dark:text-gray-900">
             <Trophy className="h-5 w-5 mr-2 text-yellow-600 dark:text-yellow-400" />
@@ -930,7 +930,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
       </Card>
 
       {/* Learning Stats */}
-      <Card className="mb-6 bg-white dark:bg-gray-800">
+      <Card className="mb-6 bg-white dark:bg-studyflow-surface">
         <CardHeader>
           <CardTitle className="text-gray-900 dark:text-gray-900">
             Thống kê học tập
@@ -994,7 +994,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
       </Card>
 
       {/* Settings */}
-      <Card className="mb-6 bg-white dark:bg-gray-800">
+      <Card className="mb-6 bg-white dark:bg-studyflow-surface">
         <CardHeader>
           <CardTitle className="flex items-center text-gray-900 dark:text-gray-900">
             <Settings className="h-5 w-5 mr-2 text-gray-600 dark:text-gray-600 dark:text-gray-300" />
@@ -1031,7 +1031,7 @@ export default function ProfileScreen({ user, onLogout }: ProfileScreenProps) {
       </Card>
 
       {/* Logout */}
-      <Card className="bg-white dark:bg-gray-800">
+      <Card className="bg-white dark:bg-studyflow-surface">
         <CardContent className="p-4">
           <Button
             onClick={onLogout}

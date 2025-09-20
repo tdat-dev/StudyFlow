@@ -49,7 +49,7 @@ export function QuickActions({
   };
 
   return (
-    <div className="p-4 md:p-6 bg-[#0E141A] border-b border-white/8">
+    <div className="p-4 md:p-6 bg-studyflow-bg border-b border-white/8">
       <div className="space-y-4">
         <h3 className="text-sm font-medium text-zinc-300">Chủ đề phổ biến</h3>
 

@@ -133,30 +133,27 @@ export function ChatScreen({ user }: ChatScreenProps) {
   }, []);
 
   // Load tin nhắn từ chat hiện tại
-  const loadChatHistory = useCallback(
-    async (chatId: string) => {
-      if (!chatId) return;
+  const loadChatHistory = useCallback(async (chatId: string) => {
+    if (!chatId) return;
 
-      setLoading(true);
-      try {
-        const loadedMessages = await getChatMessages(chatId);
+    setLoading(true);
+    try {
+      const loadedMessages = await getChatMessages(chatId);
 
-        if (loadedMessages.length === 0) {
-          // Nếu không có tin nhắn, hiển thị welcome message
-          setMessages([welcomeMessage]);
-          await saveMessage(chatId, welcomeMessage);
-        } else {
-          setMessages(loadedMessages);
-        }
-      } catch (error) {
-        console.error('Failed to load chat history:', error);
+      if (loadedMessages.length === 0) {
+        // Nếu không có tin nhắn, hiển thị welcome message
         setMessages([welcomeMessage]);
-      } finally {
-        setLoading(false);
+        await saveMessage(chatId, welcomeMessage);
+      } else {
+        setMessages(loadedMessages);
       }
-    },
-    [],
-  );
+    } catch (error) {
+      console.error('Failed to load chat history:', error);
+      setMessages([welcomeMessage]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   // Về menu chính (không tạo chat session mới)
   const handleCreateNewChat = async () => {
@@ -174,7 +171,6 @@ export function ChatScreen({ user }: ChatScreenProps) {
 
   // Xóa chat
   const handleDeleteChat = async (chatId: string) => {
-
     try {
       await deleteChatSession(chatId);
       const updatedSessions = chatSessions.filter(
@@ -222,8 +218,7 @@ export function ChatScreen({ user }: ChatScreenProps) {
   const handleSendMessage = async (content: string) => {
     const fileContent = attachedFile; // Sử dụng file đã attach
 
-    if ((!content.trim() && !fileContent) || loading)
-      return;
+    if ((!content.trim() && !fileContent) || loading) return;
 
     setLoading(true);
 
@@ -400,20 +395,11 @@ export function ChatScreen({ user }: ChatScreenProps) {
   }, [currentChatId, loadChatHistory]);
 
   return (
-    <div
-      className="flex h-full w-full overflow-hidden"
-      style={{ backgroundColor: 'var(--app-bg)' }}
-    >
+    <div className="flex h-full w-full overflow-hidden bg-white dark:bg-studyflow-bg">
       {/* Mobile Sidebar Overlay */}
       {showSidebar && (
         <div className="lg:hidden fixed inset-0 z-50 bg-black/50">
-          <div
-            className="absolute left-0 top-0 bottom-0 w-80 shadow-xl border-r"
-            style={{
-              backgroundColor: 'var(--app-surface)',
-              borderColor: 'var(--app-border)',
-            }}
-          >
+          <div className="absolute left-0 top-0 bottom-0 w-80 shadow-xl border-r bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <ChatList
               sessions={chatSessions}
               currentChatId={currentChatId}
@@ -436,13 +422,7 @@ export function ChatScreen({ user }: ChatScreenProps) {
 
       {/* Desktop Sidebar - Edge to edge */}
       {showDesktopSidebar && (
-        <div
-          className="hidden lg:flex w-80 flex-shrink-0 border-r"
-          style={{
-            backgroundColor: 'var(--app-surface)',
-            borderColor: 'var(--app-border)',
-          }}
-        >
+        <div className="hidden lg:flex w-80 flex-shrink-0 border-r bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <div className="flex-1 overflow-y-auto">
             <ChatList
               sessions={chatSessions}
@@ -458,15 +438,9 @@ export function ChatScreen({ user }: ChatScreenProps) {
       )}
 
       {/* Main Chat Area */}
-      <div
-        className="flex-1 flex flex-col justify-start items-stretch min-w-0"
-        style={{ backgroundColor: 'var(--app-bg)' }}
-      >
+      <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-studyflow-bg h-full">
         {/* Header with glass effect */}
-        <div
-          className="flex-shrink-0 px-4 lg:px-6 py-4 border-b glass-surface"
-          style={{ borderColor: 'var(--app-border)' }}
-        >
+        <div className="flex-shrink-0 px-4 lg:px-6 py-4 border-b glass-surface border-gray-200 dark:border-gray-700">
           <ChatHeader
             onToggleSidebar={handleToggleSidebar}
             messages={messages}
@@ -474,76 +448,53 @@ export function ChatScreen({ user }: ChatScreenProps) {
         </div>
 
         {/* Messages Container */}
-        <div className="flex-1 overflow-y-auto py-6 min-h-0">
-          {!currentChatId || (messages.length === 0 && !loading) ? (
-            <EmptyState
-              onPromptClick={handleSendMessage}
-              chatHistory={messages.map(msg => ({
-                role:
-                  msg.sender === 'user'
-                    ? ('user' as const)
-                    : ('model' as const),
-                content: msg.content,
-              }))}
-            />
-          ) : (
-            <>
-              <MessageList messages={messages} />
+        <div className="flex-1 overflow-y-auto min-h-0 flex flex-col">
+          <div className="flex-1 py-6">
+            {!currentChatId || (messages.length === 0 && !loading) ? (
+              <EmptyState
+                onPromptClick={handleSendMessage}
+                chatHistory={messages.map(msg => ({
+                  role:
+                    msg.sender === 'user'
+                      ? ('user' as const)
+                      : ('model' as const),
+                  content: msg.content,
+                }))}
+              />
+            ) : (
+              <>
+                <MessageList messages={messages} />
 
-              {/* Typing Indicator */}
-              {isTyping && (
-                <div className="content-column">
-                  <div className="flex items-start space-x-3">
-                    <div
-                      className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
-                      style={{
-                        backgroundColor: 'var(--app-surface)',
-                      }}
-                    >
-                      <div
-                        className="text-xs font-medium"
-                        style={{ color: 'var(--app-text-muted)' }}
-                      >
-                        AI
+                {/* Typing Indicator */}
+                {isTyping && (
+                  <div className="content-column">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 bg-gray-100 dark:bg-gray-800">
+                        <div className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                          AI
+                        </div>
                       </div>
-                    </div>
-                    <div
-                      className="px-4 py-3 rounded-lg"
-                      style={{
-                        backgroundColor: 'var(--app-card)',
-                        borderRadius: 'var(--app-radius)',
-                      }}
-                    >
-                      <div className="flex space-x-1">
-                        <div
-                          className="w-2 h-2 rounded-full animate-bounce"
-                          style={{
-                            backgroundColor: 'var(--app-text-muted)',
-                          }}
-                        ></div>
-                        <div
-                          className="w-2 h-2 rounded-full animate-bounce"
-                          style={{
-                            backgroundColor: 'var(--app-text-muted)',
-                            animationDelay: '0.1s',
-                          }}
-                        ></div>
+                      <div className="px-4 py-3 rounded-lg bg-white dark:bg-gray-800">
+                        <div className="flex space-x-1">
+                          <div className="w-2 h-2 rounded-full animate-bounce bg-gray-500 dark:bg-gray-400"></div>
+                          <div
+                            className="w-2 h-2 rounded-full animate-bounce bg-gray-500 dark:bg-gray-400"
+                            style={{ animationDelay: '0.1s' }}
+                          ></div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              <div ref={messagesEndRef} />
-            </>
-          )}
+                <div ref={messagesEndRef} />
+              </>
+            )}
+          </div>
         </div>
 
         {/* Input Area with glass effect */}
-        <div
-          className="flex-shrink-0 py-4 border-t glass-surface"
-          style={{ borderColor: 'var(--app-border)' }}
-        >
+        <div className="flex-shrink-0 py-4 border-t glass-surface border-gray-200 dark:border-gray-700">
           {/* File Preview - Show right above input */}
           {attachedFile && (
             <div className="px-4 lg:px-6 mb-3">

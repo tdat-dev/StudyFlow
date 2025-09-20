@@ -8,17 +8,21 @@ import {
   updateProfile
 } from 'firebase/auth';
 import { auth } from './config';
+import { saveUsernameMapping, getEmailFromUsername } from './userMapping';
 
 // Đăng ký tài khoản mới bằng email và mật khẩu
-export async function registerWithEmail(email: string, password: string, name: string): Promise<any> {
+export async function registerWithEmail(email: string, password: string, username: string): Promise<any> {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     
-    // Cập nhật tên hiển thị
+    // Cập nhật tên hiển thị với username
     if (userCredential.user) {
       await updateProfile(userCredential.user, {
-        displayName: name
+        displayName: username
       });
+      
+      // Lưu mapping username -> email
+      await saveUsernameMapping(username, email);
     }
     
     return userCredential.user;
@@ -28,13 +32,30 @@ export async function registerWithEmail(email: string, password: string, name: s
   }
 }
 
-// Đăng nhập bằng email và mật khẩu
-export async function loginWithEmail(email: string, password: string): Promise<any> {
+// Đăng nhập bằng email/username và mật khẩu
+export async function loginWithEmail(loginInput: string, password: string): Promise<any> {
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    return userCredential.user;
+    // Kiểm tra xem input có phải là email không (chứa @)
+    const isEmail = loginInput.includes('@');
+    
+    if (isEmail) {
+      // Nếu là email, đăng nhập trực tiếp
+      const userCredential = await signInWithEmailAndPassword(auth, loginInput, password);
+      return userCredential.user;
+    } else {
+      // Nếu là username, tìm email tương ứng
+      const email = await getEmailFromUsername(loginInput);
+      
+      if (!email) {
+        throw new Error('auth/user-not-found');
+      }
+      
+      // Đăng nhập bằng email tìm được
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      return userCredential.user;
+    }
   } catch (error) {
-    console.error('Error logging in with email:', error);
+    console.error('Error logging in with email/username:', error);
     throw error;
   }
 }

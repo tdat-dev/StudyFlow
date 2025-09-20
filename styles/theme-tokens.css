@@ -47,7 +47,7 @@
 
 .dark {
   /* Dark Theme Design Tokens */
-  --app-bg: #0b0f14;
+  --app-bg: #101215;
   --app-surface: #0e141a;
   --app-card: #121821;
   --app-border: rgba(255, 255, 255, 0.08);
@@ -967,14 +967,24 @@
 
 .composer-input-container:focus-within {
   border-color: var(--app-primary);
-  box-shadow: 0 0 0 2px var(--app-ring);
+  /* Remove extra ring to avoid double outline */
+  box-shadow: none;
+}
+
+/* Ensure inner input never shows its own border/outline */
+.composer-input-container .chatgpt-input,
+.composer-input-container .chatgpt-input:focus,
+.composer-input-container .chatgpt-input:focus-visible {
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .chatgpt-input {
   flex: 1;
   background: transparent;
-  border: none;
-  outline: none;
+  border: none !important;
+  outline: none !important;
   padding: 10px 8px;
   color: var(--app-text);
   font-size: 15px;

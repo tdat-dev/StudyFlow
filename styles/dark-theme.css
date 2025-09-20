@@ -2,31 +2,31 @@
 
 /* GitHub Dark Theme Colors */
 .dark-bg-primary {
-  @apply bg-white dark:bg-[#0d1117];
+  @apply bg-white dark:bg-studyflow-bg;
 }
 
 .dark-bg-card {
-  @apply bg-white dark:bg-[#161b22];
+  @apply bg-white dark:bg-studyflow-surface;
 }
 
 .dark-bg-secondary {
-  @apply bg-gray-50 dark:bg-[#21262d];
+  @apply bg-gray-50 dark:bg-studyflow-card;
 }
 
 .dark-text-primary {
-  @apply text-gray-900 dark:text-[#f0f6fc];
+  @apply text-gray-900 dark:text-gray-100;
 }
 
 .dark-text-secondary {
-  @apply text-gray-600 dark:text-[#8b949e];
+  @apply text-gray-600 dark:text-gray-400;
 }
 
 .dark-border-primary {
-  @apply border-gray-200 dark:border-[#30363d];
+  @apply border-gray-200 dark:border-gray-700;
 }
 
 .dark-border-accent {
-  @apply border-gray-300 dark:border-[#21262d];
+  @apply border-gray-300 dark:border-gray-600;
 }
 
 /* Component-specific classes */
@@ -59,7 +59,7 @@
 }
 
 .action-button {
-  @apply w-full justify-start rounded-xl dark-bg-card dark-text-primary dark-border-primary hover:bg-gray-50 dark:hover:bg-[#21262d] border;
+  @apply w-full justify-start rounded-xl dark-bg-card dark-text-primary dark-border-primary hover:bg-gray-50 dark:hover:bg-gray-800 border;
 }
 
 .progress-card {

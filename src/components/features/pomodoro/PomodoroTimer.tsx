@@ -331,8 +331,7 @@ export function PomodoroTimer() {
             {/* Progress Bar */}
             <div className="w-full max-w-md mx-auto mb-6">
               <div
-                className="w-full h-1 rounded-full overflow-hidden"
-                style={{ backgroundColor: 'var(--timer-track-light)' }}
+                className="w-full h-1 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700"
               >
                 <div
                   className="h-full rounded-full transition-all duration-1000 ease-linear"
@@ -353,7 +352,7 @@ export function PomodoroTimer() {
             {currentTaskId && (
               <div
                 className="text-center mb-4"
-                style={{ color: 'var(--app-text-muted)' }}
+                className="text-gray-500 dark:text-gray-400"
               >
                 #{pomodoroCount + 1} -{' '}
                 {tasks.find(t => t.id === currentTaskId)?.text}
@@ -366,8 +365,7 @@ export function PomodoroTimer() {
             <div className="tasks-card">
               <div className="flex items-center justify-between mb-6">
                 <h2
-                  className="text-xl font-bold"
-                  style={{ color: 'var(--app-text)' }}
+                  className="text-xl font-bold text-gray-900 dark:text-gray-100"
                 >
                   Tasks
                 </h2>
@@ -388,12 +386,7 @@ export function PomodoroTimer() {
                   value={newTaskText}
                   onChange={e => setNewTaskText(e.target.value)}
                   onKeyPress={e => e.key === 'Enter' && addTask()}
-                  className="flex-1 px-3 py-2 rounded-lg border"
-                  style={{
-                    backgroundColor: 'var(--app-surface)',
-                    borderColor: 'var(--app-border)',
-                    color: 'var(--app-text)',
-                  }}
+                  className="flex-1 px-3 py-2 rounded-lg border bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
                 />
                 <button
                   className="control-primary !px-3"
@@ -413,11 +406,11 @@ export function PomodoroTimer() {
                       onClick={() => toggleTask(task.id)}
                       style={{
                         backgroundColor: task.completed
-                          ? 'var(--accent-work)'
+                          ? '#ef4444'
                           : 'transparent',
                         borderColor: task.completed
-                          ? 'var(--accent-work)'
-                          : 'var(--app-border)',
+                          ? '#ef4444'
+                          : '#e5e7eb',
                       }}
                     >
                       {task.completed && (
@@ -442,7 +435,7 @@ export function PomodoroTimer() {
                 {tasks.length === 0 && (
                   <div
                     className="text-center py-8"
-                    style={{ color: 'var(--app-text-muted)' }}
+                    className="text-gray-500 dark:text-gray-400"
                   >
                     <Clock className="h-12 w-12 mx-auto mb-3 opacity-50" />
                     <p>Chưa có task nào</p>
@@ -455,7 +448,7 @@ export function PomodoroTimer() {
                 <div>
                   <h3
                     className="text-sm font-medium mb-2"
-                    style={{ color: 'var(--app-text-muted)' }}
+                    className="text-gray-500 dark:text-gray-400"
                   >
                     Chọn task để tập trung:
                   </h3>
@@ -478,8 +471,8 @@ export function PomodoroTimer() {
                                 : 'transparent',
                             color:
                               currentTaskId === task.id
-                                ? 'var(--accent-work)'
-                                : 'var(--app-text)',
+                                ? '#ef4444'
+                                : '#374151',
                           }}
                         >
                           {task.text}
@@ -498,7 +491,7 @@ export function PomodoroTimer() {
             className="control-ghost shadow-lg"
             onClick={() => setShowTasks(!showTasks)}
             title={showTasks ? 'Ẩn tasks' : 'Hiện tasks'}
-            style={{ backgroundColor: 'var(--app-card)' }}
+            className="bg-white dark:bg-studyflow-surface"
           >
             <List className="h-5 w-5" />
           </button>
@@ -507,7 +500,7 @@ export function PomodoroTimer() {
             className="control-ghost shadow-lg"
             onClick={() => setShowHistory(!showHistory)}
             title="Lịch sử"
-            style={{ backgroundColor: 'var(--app-card)' }}
+            className="bg-white dark:bg-studyflow-surface"
           >
             <BarChart3 className="h-5 w-5" />
           </button>
@@ -516,7 +509,7 @@ export function PomodoroTimer() {
             className="control-ghost shadow-lg"
             onClick={() => setShowSettings(true)}
             title="Cài đặt"
-            style={{ backgroundColor: 'var(--app-card)' }}
+            className="bg-white dark:bg-studyflow-surface"
           >
             <Settings className="h-5 w-5" />
           </button>

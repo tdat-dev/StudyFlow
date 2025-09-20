@@ -1,16 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   User, 
-  Settings, 
   LogOut, 
   Sun, 
   Moon, 
-  RefreshCw,
-  ChevronDown 
+  RefreshCw
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { hardRefresh } from '../../../utils/refresh';
-import Logo from '../../ui/Logo';
 
 interface HeaderProps {
   user: any;
@@ -95,95 +92,113 @@ export function Header({
   };
 
   return (
-    <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 h-14 px-4">
-      <div className="flex items-center justify-between">
-        {/* Logo and Title using public image */}
+    <header className="bg-white dark:bg-studyflow-bg border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center justify-between relative z-50">
+      <div className="flex items-center flex-shrink-0">
         <div className="flex items-center space-x-2">
-          <Logo size="large" showText={false} className="scale-110" />
+          <img 
+            alt="StudyFlow Logo" 
+            fetchPriority="high" 
+            width="40" 
+            height="40" 
+            decoding="async" 
+            className="rounded-none border-0 outline-none ring-0" 
+            src="/images/logo.png" 
+            style={{ color: 'transparent', width: '40px', height: '40px', border: 'none', outline: 'none', boxShadow: 'none' }}
+          />
+          <span className="font-bold text-lg text-gray-900 dark:text-gray-100">
+            StudyFlow
+          </span>
         </div>
-
-        {/* Right side - User menu */}
-        <div className="flex items-center space-x-2">
-          {/* Theme toggle */}
+      </div>
+      
+      <div className="flex items-center flex-shrink-0">
+        <div className="relative" ref={dropdownRef}>
           <button
-            onClick={handleThemeToggle}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            title={theme === 'dark' ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối'}
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="flex items-center space-x-2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
           >
-            {theme === 'dark' ? (
-              <Sun className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+            {user?.photoURL ? (
+              <img
+                alt="Profile"
+                loading="lazy"
+                width="48"
+                height="48"
+                decoding="async"
+                className="rounded-full ring-2 ring-transparent hover:ring-gray-300 dark:hover:ring-gray-600 transition-all"
+                src={user.photoURL}
+                style={{ color: 'transparent' }}
+              />
             ) : (
-              <Moon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-            )}
-          </button>
-
-          {/* Refresh button */}
-          <button
-            onClick={handleFullRefresh}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            title="Làm mới ứng dụng"
-          >
-            <RefreshCw className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-          </button>
-
-          {/* User dropdown */}
-          <div className="relative" ref={dropdownRef}>
-            <button
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center space-x-2 p-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            >
-              {/* User avatar */}
-              {user?.photoURL ? (
-                <img
-                  src={user.photoURL}
-                  alt="User avatar"
-                  className="w-10 h-10 rounded-full object-cover ring-1 ring-gray-200 dark:ring-gray-700"
-                />
-              ) : (
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center ring-1 ring-gray-200 dark:ring-gray-700">
-                  <span className="text-white text-base font-semibold">
-                    {getUserInitials()}
-                  </span>
-                </div>
-              )}
-              
-              {/* Chevron only on md+ for cleaner look */}
-              <ChevronDown className={`hidden md:block w-4 h-4 text-gray-500 transition-transform ${
-                isDropdownOpen ? 'rotate-180' : ''
-              }`} />
-            </button>
-
-            {/* Dropdown menu */}
-            {isDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
-                <button
-                  onClick={handleProfileClick}
-                  className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                >
-                  <User className="w-4 h-4" />
-                  <span>Hồ sơ cá nhân</span>
-                </button>
-                
-                <button
-                  onClick={handleProfileClick}
-                  className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                >
-                  <Settings className="w-4 h-4" />
-                  <span>Cài đặt</span>
-                </button>
-                
-                <hr className="my-1 border-gray-200 dark:border-gray-700" />
-                
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>Đăng xuất</span>
-                </button>
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center ring-2 ring-transparent hover:ring-gray-300 dark:hover:ring-gray-600 transition-all">
+                <span className="text-white text-lg font-semibold">
+                  {getUserInitials()}
+                </span>
               </div>
             )}
-          </div>
+          </button>
+
+          {/* Dropdown menu - Compact */}
+          {isDropdownOpen && (
+            <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-studyflow-surface rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
+              {/* User info header - Compact */}
+              <div className="flex items-center gap-2 px-3 py-2">
+                {user?.photoURL ? (
+                  <img
+                    src={user.photoURL}
+                    alt="User avatar"
+                    className="w-8 h-8 rounded-full object-cover ring-1 ring-gray-200 dark:ring-gray-700"
+                  />
+                ) : (
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center ring-1 ring-gray-200 dark:ring-gray-700">
+                    <span className="text-white text-sm font-semibold">{getUserInitials()}</span>
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{getDisplayName()}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user?.email || ''}</p>
+                </div>
+              </div>
+              <hr className="my-1 border-gray-200 dark:border-gray-700" />
+
+              <button
+                onClick={handleProfileClick}
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                <User className="w-4 h-4" />
+                <span>Hồ sơ của bạn</span>
+              </button>
+
+              <button
+                onClick={handleThemeToggle}
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                {theme === 'dark' ? (
+                  <Sun className="w-4 h-4" />
+                ) : (
+                  <Moon className="w-4 h-4" />
+                )}
+                <span>Chế độ tối</span>
+              </button>
+
+              <button
+                onClick={handleFullRefresh}
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                <RefreshCw className="w-4 h-4" />
+                <span>Làm mới ứng dụng</span>
+              </button>
+
+              <hr className="my-1 border-gray-200 dark:border-gray-700" />
+
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Đăng xuất</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>

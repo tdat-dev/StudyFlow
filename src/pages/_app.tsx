@@ -2,6 +2,7 @@ import type { AppProps } from 'next/app';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from 'sonner';
 import '../styles/globals.css';
+import '../styles/chat-input.css';
 import { useEffect } from 'react';
 import { ErrorBoundary } from '../components/ui/error-boundary';
 import { AuthProvider } from '../contexts/AuthContext';

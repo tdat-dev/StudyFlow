@@ -1,0 +1,126 @@
+---
+alwaysApply: true
+---
+# Project Rules - StudyFlow (Next.js + Firebase)
+
+## 🏗️ Tech Stack (Fixed)
+- **Frontend**: Next.js 14 + React 18 + TypeScript
+- **Styling**: TailwindCSS + Custom Design Tokens
+- **Database**: Firebase Firestore
+- **Authentication**: Firebase Auth (Email/Password + Google OAuth)
+- **Deployment**: Firebase Hosting
+- **State Management**: React Context + Custom Hooks
+
+## 📁 Project Structure# Project Rules - StudyFlow (Next.js + Firebase)
+
+## 🏗️ Tech Stack (Fixed)
+- **Frontend**: Next.js 14 + React 18 + TypeScript
+- **Styling**: TailwindCSS + Custom Design Tokens
+- **Database**: Firebase Firestore
+- **Authentication**: Firebase Auth (Email/Password + Google OAuth)
+- **Deployment**: Firebase Hosting
+- **State Management**: React Context + Custom Hooks
+
+## 📁 Project Structure
+src/
+├── components/
+│ ├── ui/ # Reusable UI components
+│ ├── features/ # Feature-specific components
+│ │ ├── auth/ # Login/Register forms
+│ │ ├── chat/ # Chat functionality
+│ │ ├── flashcards/ # Flashcard system
+│ │ ├── habits/ # Habit tracking
+│ │ ├── pomodoro/ # Pomodoro timer
+│ │ └── profile/ # User profile
+│ └── common/ # Shared components
+├── contexts/ # React Context providers
+├── hooks/ # Custom React hooks
+├── services/ # External services (Firebase, AI)
+├── types/ # TypeScript type definitions
+├── utils/ # Helper functions
+└── pages/ # Next.js pages
+
+
+## 🔧 Coding Rules
+
+### Frontend (Next.js + React)
+- **Components**: Functional components + hooks only
+- **Styling**: TailwindCSS + custom utility classes
+- **Design Tokens**: Use predefined classes (.auth-card, .auth-input, .btn-primary, .btn-ghost)
+- **State Management**: React Context cho global state, useState cho local state
+- **Form Handling**: Controlled components với real-time validation
+
+### TypeScript Standards
+- **Strict Mode**: Enabled
+- **No `any` types**: Use proper interfaces
+- **Interface Naming**: PascalCase (UserProfile, AuthContext)
+- **Type Exports**: From centralized types/ directory
+
+## 🔐 Authentication Rules
+- **Firebase Auth**: Email/Password + Google OAuth
+- **Context Provider**: AuthContext cho global auth state
+- **Protected Routes**: Redirect to login if not authenticated
+- **User Profile**: Store in Firestore với proper validation
+- **Error Handling**: User-friendly error messages
+
+## 🎨 UI/UX Guidelines
+- **Design System**: Dark theme với glassmorphism effects
+- **Primary Button**: `btn-primary` (gradient from-indigo-500 to-violet-500)
+- **Ghost Button**: `btn-ghost` (white background)
+- **Cards**: `auth-card` (dark glassmorphism)
+- **Inputs**: `auth-input` (dark with focus states)
+- **Loading States**: LoadingButton component với aria-busy
+- **Form Validation**: Real-time với error display
+- **Responsive**: Mobile-first approach
+
+## 🛡️ Security Requirements
+- **Firebase Rules**: Proper Firestore security rules
+- **Environment Variables**: Sensitive data trong .env.local
+- **Input Validation**: Client-side + Firestore rules
+- **Error Boundaries**: Catch và handle errors gracefully
+- **HTTPS**: Required in production
+
+## 🗄️ Database Rules (Firestore)
+- **Collections**: 
+  - `profiles` - User profiles
+  - `flashcard_decks` - Flashcard collections
+  - `habits` - User habits
+  - `progress` - Daily progress tracking
+- **Document Structure**: Consistent naming và validation
+- **Indexes**: Proper composite indexes cho queries
+- **Security Rules**: Role-based access control
+
+## 🧪 Testing Requirements
+- **Unit Tests**: Vitest cho utility functions
+- **Component Tests**: React Testing Library
+- **Test Files**: *.test.tsx trong __tests__ directory
+- **Coverage**: Focus on critical business logic
+
+## 📱 Features Implementation
+- **Auth Screens**: LoginForm, RegisterForm với design tokens
+- **Chat**: AI-powered chat với Gemini integration
+- **Flashcards**: Swipeable cards với progress tracking
+- **Habits**: CRUD operations với streak tracking
+- **Pomodoro**: Timer với habit integration
+- **Profile**: User stats và settings
+
+## ❌ Banned Practices
+- **No inline styles**: Use Tailwind classes only
+- **No class components**: Functional components only
+- **No console.log**: Use proper error handling
+- **No hardcoded values**: Use environment variables
+- **No any types**: Use proper TypeScript interfaces
+- **No CSS files**: TailwindCSS only
+
+## �� Code Quality
+- **ESLint**: Configured với Next.js rules
+- **Prettier**: Consistent code formatting
+- **Import Order**: Absolute imports từ src/
+- **Component Props**: TypeScript interfaces
+- **Error Handling**: Try-catch với proper error messages
+
+## 📚 Documentation
+- **README**: Setup instructions và features overview
+- **CHANGELOG**: Track changes và new features
+- **Component Props**: JSDoc comments
+- **API Integration**: Document Firebase service calls

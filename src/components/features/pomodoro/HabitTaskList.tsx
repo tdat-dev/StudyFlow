@@ -193,7 +193,7 @@ function TaskItem({
               {isTaskComplete && <CheckCircle2 className="w-3 h-3" />}
             </button>
             
-            <span className="text-xs px-2 py-1 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600">
+            <span className="text-xs px-2 py-1 rounded-full bg-white dark:bg-studyflow-surface border border-gray-200 dark:border-gray-600">
               {getPriorityIcon(task.priority || 'medium')} {task.habitTitle}
             </span>
           </div>

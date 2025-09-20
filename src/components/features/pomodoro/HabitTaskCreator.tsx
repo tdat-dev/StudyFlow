@@ -81,7 +81,7 @@ export function HabitTaskCreator({
   }
 
   return (
-    <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800">
+    <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-studyflow-surface">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-medium text-gray-900 dark:text-gray-100">
           Tạo task từ thói quen
@@ -103,7 +103,7 @@ export function HabitTaskCreator({
           <select
             value={selectedHabitId}
             onChange={(e) => setSelectedHabitId(e.target.value)}
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-studyflow-surface text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
           >
             <option value="">Chọn thói quen...</option>
@@ -125,7 +125,7 @@ export function HabitTaskCreator({
             value={taskText}
             onChange={(e) => setTaskText(e.target.value)}
             placeholder="Ví dụ: Đọc 20 trang sách..."
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-studyflow-surface text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
           />
         </div>
@@ -142,7 +142,7 @@ export function HabitTaskCreator({
             max="10"
             value={estimatedPomodoros}
             onChange={(e) => setEstimatedPomodoros(parseInt(e.target.value) || 1)}
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-studyflow-surface text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
 

@@ -100,7 +100,7 @@ const COLOR_THEMES = {
   },
   gray: {
     color: 'bg-gray-500',
-    bgColor: 'bg-gray-100 dark:bg-gray-900/50',
+    bgColor: 'bg-gray-100 dark:bg-studyflow-bg/50',
     textColor: 'text-gray-600 dark:text-gray-400',
   },
   yellow: {
@@ -223,7 +223,7 @@ Icon: [loại icon]`;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 shadow-2xl">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto bg-white dark:bg-studyflow-bg border-2 border-gray-200 dark:border-gray-700 shadow-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center">
             <Target className="h-5 w-5 mr-2 text-blue-600" />
@@ -274,7 +274,7 @@ Icon: [loại icon]`;
                   value={aiPrompt}
                   onChange={(e) => setAiPrompt(e.target.value)}
                   placeholder="Ví dụ: Tôi muốn cải thiện kỹ năng nghe tiếng Anh..."
-                  className="mt-1 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400"
+                  className="mt-1 bg-white dark:bg-studyflow-surface border-2 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400"
                 />
               </div>
               <Button
@@ -309,7 +309,7 @@ Icon: [loại icon]`;
                 placeholder="Ví dụ: Học từ vựng mỗi ngày"
                 required
                 maxLength={50}
-                className="mt-1 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400"
+                className="mt-1 bg-white dark:bg-studyflow-surface border-2 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400"
               />
               <p className="text-xs text-gray-500 mt-1">
                 {title.length}/50 ký tự
@@ -326,7 +326,7 @@ Icon: [loại icon]`;
                 placeholder="Ví dụ: Học ít nhất 10 từ mới mỗi ngày"
                 required
                 maxLength={100}
-                className="mt-1 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400"
+                className="mt-1 bg-white dark:bg-studyflow-surface border-2 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400"
               />
               <p className="text-xs text-gray-500 mt-1">
                 {description.length}/100 ký tự
@@ -350,7 +350,7 @@ Icon: [loại icon]`;
                       className={`p-3 rounded-lg border-2 transition-all duration-200 ${
                         isSelected
                           ? `${colorTheme.bgColor} border-current ${colorTheme.textColor} shadow-md`
-                          : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500'
+                          : 'bg-white dark:bg-studyflow-surface border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500'
                       }`}
                     >
                       <Icon className={`h-6 w-6 mx-auto ${
@@ -369,7 +369,7 @@ Icon: [loại icon]`;
 
             {/* Preview */}
             {title && description && (
-              <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-600">
+              <div className="p-4 bg-gray-100 dark:bg-studyflow-surface rounded-lg border-2 border-gray-200 dark:border-gray-600">
                 <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Xem trước:
                 </Label>

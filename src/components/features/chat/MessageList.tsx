@@ -24,8 +24,8 @@ function shouldGroupMessages(
 
 export function MessageList({ messages }: MessageListProps) {
   return (
-    <div className="content-column">
-      <div className="space-y-0">
+    <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="space-y-4">
         {messages.map((message, index) => {
           const previousMessage = index > 0 ? messages[index - 1] : undefined;
           const nextMessage =

@@ -1,6 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import Button from '../../ui/button';
+import { DailyTipCard } from '../../ui/DailyTipCard';
+import { AchievementPreview } from '../../ui/AchievementPreview';
+import { useDashboardData, useQuickActions, useCTAActions } from '../../../hooks/useDashboardData';
 import {
   Card,
   CardContent,
@@ -17,15 +20,9 @@ import {
   Zap,
   BookOpen,
   Target,
-  Loader2,
   Clock,
+  Check,
 } from 'lucide-react';
-import { auth } from '../../../services/firebase/config';
-import {
-  getUserProfile,
-  updateUserProfile,
-  updateUserProgress,
-} from '../../../services/firebase/firestore';
 
 // Types definition
 interface User {
@@ -50,228 +47,145 @@ interface HomeDashboardProps {
 
 export function HomeDashboard({
   user,
-  onUpdateUser,
   onTabChange,
 }: HomeDashboardProps) {
-  const [loading, setLoading] = useState(false);
+  // Use real dashboard data
+  const {
+    userProgress,
+    dailyMissions: realDailyMissions,
+    upcomingAchievements,
+    completeMission: completeMissionAction
+  } = useDashboardData(user);
+
+  const { handleQuickAction } = useQuickActions(user);
+  const { handleStartLearning } = useCTAActions(user);
+
+  // Local state for UI
   const [profile, setProfile] = useState(user);
+  
+  // Use real daily missions or fallback to mock data
+  const dailyMissions = realDailyMissions?.missions || [
+    { id: 1, text: "Ôn tập 5 từ vựng đã học", completed: false, xp: 10 },
+    { id: 2, text: "Làm quiz kiểm tra nhanh", completed: false, xp: 15 },
+    { id: 3, text: "Thử thách 5 phút", completed: false, xp: 8 },
+    { id: 4, text: "Hoàn thành 1 Pomodoro", completed: false, xp: 20 },
+    { id: 5, text: "Cập nhật thói quen học tập", completed: false, xp: 12 }
+  ];
+  
+  const completedMissions = realDailyMissions?.completedCount || 0;
+  const [showMissionComplete, setShowMissionComplete] = useState(false);
 
-  const loadProfile = useCallback(async () => {
-    if (!user.accessToken) {
-      loadMockProfile();
-      return;
-    }
-
-    try {
-      const currentUser = auth.currentUser;
-      if (!currentUser) {
-        loadMockProfile();
-        return;
-      }
-
-      const userProfile = await getUserProfile(currentUser.uid);
-
-      if (userProfile) {
-        setProfile(userProfile);
-        onUpdateUser({ ...user, ...userProfile });
-      } else {
-        await createDefaultProfile();
-      }
-    } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error loading profile:', error);
-      }
-      loadMockProfile();
-    }
-  }, [user.accessToken, onUpdateUser]);
-
+  // Update profile with real data
   useEffect(() => {
-    loadProfile();
-  }, [loadProfile]);
-
-  const loadMockProfile = () => {
-    const mockProfile = {
-      ...user,
-      streak: 3,
-      level: 2,
-      experience: 150,
-      totalWordsLearned: 45,
-      todayProgress: 12,
-      dailyGoal: 20,
-      totalStudyTime: 25,
-      isPremium: false,
-    };
-    setProfile(mockProfile);
-    onUpdateUser(mockProfile);
-  };
-
-  const createDefaultProfile = async () => {
-    try {
-      const defaultProfile = {
-        uid: auth.currentUser?.uid || '',
-        name: user.name || 'Người dùng',
-        email: user.email,
-        streak: 1,
-        level: 1,
-        experience: 0,
-        totalWordsLearned: 0,
-        todayProgress: 0,
-        dailyGoal: 20,
-        totalStudyTime: 0,
-        isPremium: false,
-        createdAt: new Date().toISOString(),
+    if (userProgress) {
+      const updatedProfile = {
+        ...user,
+        streak: userProgress.streak,
+        todayProgress: userProgress.todayProgress,
+        dailyGoal: userProgress.dailyGoal,
+        totalWordsLearned: userProgress.totalWordsLearned,
+        level: userProgress.level,
+        xp: userProgress.xp,
       };
-
-      if (!auth.currentUser) {
-        loadMockProfile();
-        return;
-      }
-
-      await updateUserProfile(auth.currentUser.uid, defaultProfile);
-
-      const updatedProfile = await getUserProfile(auth.currentUser.uid);
-
-      if (updatedProfile) {
-        setProfile(updatedProfile);
-        onUpdateUser({ ...user, ...updatedProfile });
-      } else {
-        if (process.env.NODE_ENV === 'development') {
-          console.error('Failed to create default profile');
-        }
-        loadMockProfile();
-      }
-    } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error creating default profile:', error);
-      }
-      loadMockProfile();
+      setProfile(updatedProfile);
     }
-  };
-
-  const updateProgress = async (
-    wordsLearned: number,
-    studyTime: number = 5,
-  ) => {
-    if (!user.accessToken) {
-      updateLocalProgress(wordsLearned, studyTime);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const currentUser = auth.currentUser;
-      if (!currentUser) {
-        updateLocalProgress(wordsLearned, studyTime);
-        return;
-      }
-
-      await updateUserProgress(currentUser.uid, { wordsLearned, studyTime });
-
-      const updatedProfile = await getUserProfile(currentUser.uid);
-
-      if (updatedProfile) {
-        setProfile(updatedProfile);
-        onUpdateUser({ ...user, ...updatedProfile });
-      }
-    } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error updating progress:', error);
-      }
-      updateLocalProgress(wordsLearned, studyTime);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateLocalProgress = (wordsLearned: number, studyTime: number = 5) => {
-    const updatedProfile = {
-      ...profile,
-      todayProgress: (profile.todayProgress || 0) + wordsLearned,
-      totalWordsLearned: (profile.totalWordsLearned || 0) + wordsLearned,
-      totalStudyTime: (profile.totalStudyTime || 0) + studyTime,
-      streak:
-        profile.todayProgress === 0
-          ? (profile.streak || 0) + 1
-          : profile.streak || 0,
-    };
-
-    const totalWords = updatedProfile.totalWordsLearned;
-    if (totalWords >= 500) updatedProfile.level = 5;
-    else if (totalWords >= 300) updatedProfile.level = 4;
-    else if (totalWords >= 150) updatedProfile.level = 3;
-    else if (totalWords >= 50) updatedProfile.level = 2;
-    else updatedProfile.level = 1;
-
-    setProfile(updatedProfile);
-    onUpdateUser({ ...user, ...updatedProfile });
-  };
+  }, [userProgress, user]);
 
   const progressPercentage = Math.min(
     ((profile.todayProgress || 0) / (profile.dailyGoal || 20)) * 100,
     100,
   );
 
+  // Mission completion logic
+  const toggleMission = async (missionId: string) => {
+    try {
+      const result = await completeMissionAction(missionId);
+      if (result.xpEarned > 0) {
+        setShowMissionComplete(true);
+        setTimeout(() => setShowMissionComplete(false), 2000);
+      }
+    } catch (error) {
+      console.error('Error completing mission:', error);
+    }
+  };
+
+  // CTA button handler
+  const handleStartLearningAction = async () => {
+    try {
+      await handleStartLearning();
+      onTabChange && onTabChange('chat');
+    } catch (error) {
+      console.error('Error in start learning:', error);
+    }
+  };
+
+
   return (
-    <div className="w-full h-screen p-1 pb-16 xl:p-2 xl:pb-0 flex flex-col">
+    <div className="h-full w-full bg-gradient-to-b from-slate-950 to-slate-900 p-1 xl:p-2 flex flex-col">
       {/* Header - Compact */}
       <div className="mb-2 xl:mb-3 flex-shrink-0">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-lg xl:text-xl font-bold text-gray-900 dark:text-[#f0f6fc] mb-1">
+            <h1 className="text-lg xl:text-xl font-bold text-white mb-1 max-w-xl">
               Chào {profile.name}! 👋
             </h1>
-            <p className="text-xs xl:text-sm text-gray-600 dark:text-[#f0f6fc]">
+            <p className="text-xs xl:text-sm text-white/70 max-w-xl">
               Hôm nay bạn muốn học gì?
             </p>
           </div>
           <div className="mt-1 sm:mt-0">
-            <Badge
-              variant="secondary"
-              className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 text-xs"
-            >
-              <Zap
-                className="text-yellow-500 dark:text-yellow-400"
-                style={{ width: '10px', height: '10px', marginRight: '2px' }}
-              />
-              {profile.streak || 0} ngày
-            </Badge>
+            <div className="flex items-center gap-2">
+              {(profile.streak || 0) > 0 && (
+                <div className="flex items-center gap-1 text-yellow-400" title={`${profile.streak} ngày liên tiếp`}>
+                  <span className="text-lg">🔥</span>
+                  <span className="text-xs font-medium">{profile.streak}</span>
+                </div>
+              )}
+              <Badge
+                variant="secondary"
+                className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 text-xs"
+              >
+                <Zap
+                  className="text-yellow-500 dark:text-yellow-400"
+                  style={{ width: '10px', height: '10px', marginRight: '2px' }}
+                />
+                {profile.streak || 0} ngày
+              </Badge>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Main Content - Single Column Layout */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1">
         {/* Main Content */}
-        <div className="space-y-3 xl:space-y-4">
+        <div className="space-y-3 xl:space-y-4 max-w-full pb-6">
           {/* Progress Today - Full width */}
-          <Card className="bg-white dark:bg-[#161b22] border border-gray-200 dark:border-gray-700">
+          <Card className="card-glass overflow-hidden">
             <CardHeader className="pb-2 p-4">
-              <CardTitle className="text-base xl:text-lg text-gray-900 dark:text-[#f0f6fc] flex items-center">
+              <CardTitle className="text-base xl:text-lg text-gray-900 dark:text-gray-100 flex items-center">
                 <Target
                   className="text-blue-500 mr-2"
                   style={{ width: '16px', height: '16px' }}
                 />
                 Progress hôm nay
               </CardTitle>
-              <CardDescription className="text-xs xl:text-sm text-gray-600 dark:text-[#f0f6fc]">
+              <CardDescription className="text-xs xl:text-sm text-gray-600 dark:text-gray-400">
                 Bạn đã học {profile.todayProgress || 0}/
                 {profile.dailyGoal || 20} từ vựng
               </CardDescription>
             </CardHeader>
             <CardContent className="p-4 pt-0">
-              <Progress value={progressPercentage} className="mb-3 h-2" />
-              <div className="flex justify-between text-xs">
-                <span className="text-gray-900 dark:text-[#f0f6fc]">
-                  {Math.round(progressPercentage)}% hoàn thành
-                </span>
-                <span className="text-gray-900 dark:text-[#f0f6fc]">
-                  Còn{' '}
-                  {Math.max(
-                    0,
-                    (profile.dailyGoal || 20) - (profile.todayProgress || 0),
-                  )}{' '}
-                  từ
-                </span>
+              <div className="mb-3">
+                <Progress value={progressPercentage} className="h-2 mb-2" />
+                <div className="flex justify-between text-xs">
+                  <span className="text-white/70">
+                    {Math.round(progressPercentage)}% hoàn thành
+                  </span>
+                  <span className="text-white/70">
+                    Còn {Math.max(0, (profile.dailyGoal || 20) - (profile.todayProgress || 0))} từ
+                  </span>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -280,7 +194,7 @@ export function HomeDashboard({
           <div className="w-full grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-3 xl:gap-4">
             {/* Row 1: Ngày liên tiếp + Từ đã học */}
             {/* Card 1: Ngày liên tiếp */}
-            <Card className="bg-white dark:bg-[#161b22] border border-gray-200 dark:border-gray-700 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+            <Card className="card-glass hover-scale overflow-hidden">
               <CardContent className="p-3 xl:p-4 text-center flex flex-col items-center justify-center h-full">
                 <div className="w-10 h-10 xl:w-12 xl:h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center mb-2">
                   <Calendar
@@ -288,17 +202,17 @@ export function HomeDashboard({
                     size={18}
                   />
                 </div>
-                <p className="text-xl xl:text-2xl font-bold text-gray-900 dark:text-[#f0f6fc] mb-1">
+                <p className="text-xl xl:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
                   {profile.streak || 0}
                 </p>
-                <p className="text-xs xl:text-sm text-gray-600 dark:text-[#f0f6fc] leading-tight font-medium">
+                <p className="text-xs xl:text-sm text-gray-600 dark:text-gray-100 leading-tight font-medium">
                   Ngày liên tiếp
                 </p>
               </CardContent>
             </Card>
 
             {/* Card 2: Từ đã học */}
-            <Card className="bg-white dark:bg-[#161b22] border border-gray-200 dark:border-gray-700 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+            <Card className="card-glass hover-scale overflow-hidden">
               <CardContent className="p-3 xl:p-4 text-center flex flex-col items-center justify-center h-full">
                 <div className="w-10 h-10 xl:w-12 xl:h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center mb-2">
                   <Trophy
@@ -306,10 +220,10 @@ export function HomeDashboard({
                     size={18}
                   />
                 </div>
-                <p className="text-xl xl:text-2xl font-bold text-gray-900 dark:text-[#f0f6fc] mb-1">
+                <p className="text-xl xl:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
                   {profile.totalWordsLearned || 0}
                 </p>
-                <p className="text-xs xl:text-sm text-gray-600 dark:text-[#f0f6fc] leading-tight font-medium">
+                <p className="text-xs xl:text-sm text-gray-600 dark:text-gray-100 leading-tight font-medium">
                   Từ đã học
                 </p>
               </CardContent>
@@ -317,7 +231,7 @@ export function HomeDashboard({
 
             {/* Row 2: Level + Giờ học tập */}
             {/* Card 3: Level */}
-            <Card className="bg-white dark:bg-[#161b22] border border-gray-200 dark:border-gray-700 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+            <Card className="card-glass hover-scale overflow-hidden">
               <CardContent className="p-3 xl:p-4 text-center flex flex-col items-center justify-center h-full">
                 <div className="w-10 h-10 xl:w-12 xl:h-12 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center mb-2">
                   <BookOpen
@@ -325,17 +239,17 @@ export function HomeDashboard({
                     size={18}
                   />
                 </div>
-                <p className="text-xl xl:text-2xl font-bold text-gray-900 dark:text-[#f0f6fc] mb-1">
+                <p className="text-xl xl:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
                   Level {profile.level || 1}
                 </p>
-                <p className="text-xs xl:text-sm text-gray-600 dark:text-[#f0f6fc] leading-tight font-medium">
+                <p className="text-xs xl:text-sm text-gray-600 dark:text-gray-100 leading-tight font-medium">
                   Cấp độ
                 </p>
               </CardContent>
             </Card>
 
             {/* Card 4: Giờ học tập */}
-            <Card className="bg-white dark:bg-[#161b22] border border-gray-200 dark:border-gray-700 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+            <Card className="card-glass hover-scale overflow-hidden">
               <CardContent className="p-3 xl:p-4 text-center flex flex-col items-center justify-center h-full">
                 <div className="w-10 h-10 xl:w-12 xl:h-12 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg flex items-center justify-center mb-2">
                   <Clock
@@ -343,10 +257,10 @@ export function HomeDashboard({
                     size={18}
                   />
                 </div>
-                <p className="text-xl xl:text-2xl font-bold text-gray-900 dark:text-[#f0f6fc] mb-1">
+                <p className="text-xl xl:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
                   {profile.totalStudyTime || 0}
                 </p>
-                <p className="text-xs xl:text-sm text-gray-600 dark:text-[#f0f6fc] leading-tight font-medium">
+                <p className="text-xs xl:text-sm text-gray-600 dark:text-gray-100 leading-tight font-medium">
                   Giờ học tập
                 </p>
               </CardContent>
@@ -354,36 +268,26 @@ export function HomeDashboard({
           </div>
 
           {/* Continue Learning CTA - Compact */}
-          <Card className="bg-white dark:bg-[#161b22] border border-gray-200 dark:border-gray-700">
+          <Card className="card-glass overflow-hidden">
             <CardContent className="p-4">
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
                 <div className="flex-1">
-                  <h3 className="text-base xl:text-lg font-semibold text-gray-900 dark:text-[#f0f6fc] mb-1">
+                  <h3 className="text-base xl:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
                     Tiếp tục học nào! 🚀
                   </h3>
-                  <p className="text-xs xl:text-sm text-gray-600 dark:text-[#f0f6fc]">
+                  <p className="text-xs xl:text-sm text-gray-600 dark:text-gray-100">
                     Hoàn thành mục tiêu hôm nay để duy trì streak
                   </p>
                 </div>
                 <Button
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm shrink-0"
-                  onClick={() => {
-                    updateProgress(5);
-                    onTabChange && onTabChange('chat');
-                  }}
-                  disabled={loading}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 py-2 text-sm shrink-0 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  onClick={handleStartLearningAction}
+                  disabled={false}
                 >
-                  {loading ? (
-                    <Loader2
-                      className="text-yellow-400 animate-spin mr-2"
-                      style={{ width: '14px', height: '14px' }}
-                    />
-                  ) : (
-                    <Play
-                      className="text-yellow-400 mr-2"
-                      style={{ width: '14px', height: '14px' }}
-                    />
-                  )}
+                  <Play
+                    className="text-yellow-400 mr-2"
+                    style={{ width: '14px', height: '14px' }}
+                  />
                   Học ngay
                 </Button>
               </div>
@@ -391,18 +295,18 @@ export function HomeDashboard({
           </Card>
 
           {/* Quick Actions - Compact */}
-          <Card className="bg-white dark:bg-[#161b22] border border-gray-200 dark:border-gray-700">
+          <Card className="card-glass overflow-hidden">
             <CardHeader className="pb-2 p-4">
-              <CardTitle className="text-base xl:text-lg text-gray-900 dark:text-[#f0f6fc]">
+              <CardTitle className="text-base xl:text-lg text-gray-900 dark:text-gray-100">
                 Hoạt động nhanh
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 p-4 pt-0">
               <Button
                 variant="outline"
-                className="w-full justify-start h-auto py-3 px-4 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm"
-                onClick={() => updateProgress(3)}
-                disabled={loading}
+                className="w-full justify-start h-auto py-3 px-4 border-white/20 hover:bg-white/10 text-white hover:text-white text-sm transition-all duration-200 hover:scale-[1.01]"
+                onClick={() => handleQuickAction('review', 3)}
+                disabled={false}
               >
                 <BookOpen
                   className="text-blue-500 mr-3"
@@ -413,9 +317,9 @@ export function HomeDashboard({
 
               <Button
                 variant="outline"
-                className="w-full justify-start h-auto py-3 px-4 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm"
-                onClick={() => updateProgress(5)}
-                disabled={loading}
+                className="w-full justify-start h-auto py-3 px-4 border-white/20 hover:bg-white/10 text-white hover:text-white text-sm transition-all duration-200 hover:scale-[1.01]"
+                onClick={() => handleQuickAction('quiz', 5)}
+                disabled={false}
               >
                 <Target
                   className="text-green-500 mr-3"
@@ -426,9 +330,9 @@ export function HomeDashboard({
 
               <Button
                 variant="outline"
-                className="w-full justify-start h-auto py-3 px-4 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm"
-                onClick={() => updateProgress(2)}
-                disabled={loading}
+                className="w-full justify-start h-auto py-3 px-4 border-white/20 hover:bg-white/10 text-white hover:text-white text-sm transition-all duration-200 hover:scale-[1.01]"
+                onClick={() => handleQuickAction('challenge', 2)}
+                disabled={false}
               >
                 <Zap
                   className="text-yellow-500 mr-3"
@@ -438,6 +342,89 @@ export function HomeDashboard({
               </Button>
             </CardContent>
           </Card>
+
+          {/* Daily Missions Card */}
+          <Card className="card-glass overflow-hidden">
+            <CardHeader className="pb-2 p-4">
+              <CardTitle className="text-base xl:text-lg text-white flex items-center">
+                <Target
+                  className="text-blue-400 mr-2"
+                  style={{ width: '16px', height: '16px' }}
+                />
+                Nhiệm vụ hôm nay
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 pt-0 pb-6">
+              {/* Mission Progress */}
+              <div className="mb-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-white/70">Tiến trình nhiệm vụ</span>
+                  <span className="text-sm text-white/70">{completedMissions}/5 hoàn thành</span>
+                </div>
+                <div className="w-full bg-white/10 rounded-full h-2">
+                  <div 
+                    className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500"
+                    style={{ width: `${(completedMissions / 5) * 100}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Mission List */}
+              <div className="space-y-3">
+                {dailyMissions.map((mission) => (
+                  <div 
+                    key={mission.id} 
+                    className={`flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-all duration-200 ${
+                      mission.completed ? 'bg-green-500/10 border border-green-500/20' : ''
+                    }`}
+                  >
+                    <button 
+                      onClick={() => toggleMission(mission.id.toString())}
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 hover:scale-110 flex-shrink-0 ${
+                        mission.completed 
+                          ? 'border-green-400 bg-green-400' 
+                          : 'border-white/30 hover:border-blue-400'
+                      }`}
+                    >
+                      {mission.completed && <Check className="h-3 w-3 text-white" />}
+                    </button>
+                    <span className={`text-sm transition-all duration-200 break-words ${
+                      mission.completed ? 'text-green-300 line-through' : 'text-white/80'
+                    }`}>
+                      {mission.text}
+                    </span>
+                    {mission.completed && (
+                      <span className="text-xs text-green-400 font-medium">+{mission.xp} XP</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Completion Messages */}
+              {showMissionComplete && (
+                <div className="mt-3 p-2 bg-green-500/20 border border-green-500/30 rounded-lg text-center animate-pulse">
+                  <span className="text-sm text-green-300">🎉 Nhiệm vụ hoàn thành! +XP</span>
+                </div>
+              )}
+              
+              {completedMissions === 5 && (
+                <div className="mt-3 p-3 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-lg text-center">
+                  <span className="text-sm text-yellow-300 font-medium">🏆 Tuyệt vời! Bạn đã hoàn thành tất cả nhiệm vụ hôm nay!</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Divider */}
+          <div className="h-px bg-white/10 my-6" />
+
+          {/* Daily Tip Card */}
+          <DailyTipCard />
+
+          {/* Achievement Preview */}
+          <div className="mb-6">
+            <AchievementPreview achievements={upcomingAchievements} />
+          </div>
         </div>
       </div>
     </div>

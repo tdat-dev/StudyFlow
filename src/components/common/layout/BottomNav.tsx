@@ -32,7 +32,7 @@ function BottomNav({ activeTab, onTabChange, className = '' }: BottomNavProps) {
   return (
     <nav
       className={
-        'fixed bottom-0 inset-x-0 z-40 border-t bg-white/95 dark:bg-gray-900/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:supports-[backdrop-filter]:bg-gray-900/80 shadow-lg ' +
+        'fixed bottom-0 inset-x-0 z-50 border-t bg-white/95 dark:bg-studyflow-bg/95 dark:header-elevated backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:supports-[backdrop-filter]:bg-studyflow-bg/80 shadow-lg h-[var(--tabbar-h)] ' +
         className
       }
       aria-label="Bottom navigation"

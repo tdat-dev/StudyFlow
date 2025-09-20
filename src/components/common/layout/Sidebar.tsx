@@ -65,7 +65,7 @@ export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   ];
 
   return (
-    <div className="w-64 bg-white dark:bg-gray-800 border-r h-full flex flex-col">
+    <div className="w-64 bg-white dark:bg-studyflow-surface dark:surface-elevated border-r h-full flex flex-col">
       <div className="p-4 border-b" />
 
       <div className="flex-1 overflow-y-auto p-2">

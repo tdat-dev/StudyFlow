@@ -263,7 +263,7 @@ export function ChatWidget({ user }: ChatWidgetProps) {
   if (widgetState === 'minimized') {
     return (
       <div className="fixed bottom-6 right-6 z-50">
-        <div className="bg-white dark:bg-[#0B0F14] border border-gray-200 dark:border-white/10 rounded-lg shadow-xl w-80 h-16">
+        <div className="bg-white dark:bg-studyflow-surface border border-gray-200 dark:border-white/10 rounded-lg shadow-xl w-80 h-16">
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
@@ -305,7 +305,7 @@ export function ChatWidget({ user }: ChatWidgetProps) {
         isFullscreen ? 'inset-0' : 'bottom-6 right-6 w-96 h-[600px]'
       }`}
     >
-      <div className="bg-white dark:bg-[#0B0F14] border border-gray-200 dark:border-white/10 rounded-lg shadow-2xl h-full flex flex-col">
+      <div className="bg-white dark:bg-studyflow-surface border border-gray-200 dark:border-white/10 rounded-lg shadow-2xl h-full flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-white/10">
           <div className="flex items-center space-x-2">
@@ -344,7 +344,7 @@ export function ChatWidget({ user }: ChatWidgetProps) {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-[#0B0F14]">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-studyflow-bg">
           {messages.length === 0 ? (
             <EmptyState onPromptClick={handleSendMessage} />
           ) : (

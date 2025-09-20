@@ -37,7 +37,7 @@ const Logo: React.FC<LogoProps> = ({
         <span
           className={`font-semibold ${textSize} tracking-tight leading-none select-none whitespace-nowrap antialiased text-gray-900 dark:text-white`}
         >
-          tudyFlow
+          StudyFlow
         </span>
       )}
     </div>

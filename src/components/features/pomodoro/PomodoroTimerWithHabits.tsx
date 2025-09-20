@@ -333,15 +333,15 @@ export function PomodoroTimerWithHabits({ user }: PomodoroTimerWithHabitsProps) 
   const activeTasks = getActiveTasks();
 
   return (
-    <div className="pomodoro-page min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="pomodoro-page min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-studyflow-bg dark:to-studyflow-surface">
       <div className="pomodoro-container max-w-7xl mx-auto p-4">
         <div className="pomodoro-grid grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Timer Section */}
           <div className="lg:col-span-2">
-            <div className="timer-card bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
+            <div className="timer-card bg-white dark:bg-studyflow-surface dark:card-elevated rounded-2xl shadow-lg p-8">
               {/* Timer Tabs */}
               <div className="timer-tabs flex justify-center mb-8">
-                <div className="flex bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
+                <div className="flex bg-gray-100 dark:bg-studyflow-surface rounded-xl p-1">
                   <button
                     onClick={switchToPomodoro}
                     className={`timer-tab px-6 py-3 rounded-lg font-medium transition-all ${
@@ -463,7 +463,7 @@ export function PomodoroTimerWithHabits({ user }: PomodoroTimerWithHabitsProps) 
           </div>
 
           {/* Tasks Section */}
-          <div className="tasks-card bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+          <div className="tasks-card bg-white dark:bg-studyflow-surface rounded-2xl shadow-lg p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                 Tasks & Thói quen
@@ -495,12 +495,12 @@ export function PomodoroTimerWithHabits({ user }: PomodoroTimerWithHabitsProps) 
             {showTasks && (
               <div className="space-y-6">
                 {/* Tab Navigation */}
-                <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                <div className="flex bg-gray-100 dark:bg-studyflow-surface rounded-lg p-1">
                   <button
                     onClick={() => setActiveTab('habit-tasks')}
                     className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                       activeTab === 'habit-tasks'
-                        ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm'
+                        ? 'bg-white dark:bg-studyflow-surface text-gray-900 dark:text-gray-100 shadow-sm'
                         : 'text-gray-600 dark:text-gray-400'
                     }`}
                   >
@@ -511,7 +511,7 @@ export function PomodoroTimerWithHabits({ user }: PomodoroTimerWithHabitsProps) 
                     onClick={() => setActiveTab('regular-tasks')}
                     className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                       activeTab === 'regular-tasks'
-                        ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm'
+                        ? 'bg-white dark:bg-studyflow-surface text-gray-900 dark:text-gray-100 shadow-sm'
                         : 'text-gray-600 dark:text-gray-400'
                     }`}
                   >
@@ -522,7 +522,7 @@ export function PomodoroTimerWithHabits({ user }: PomodoroTimerWithHabitsProps) 
                     onClick={() => setActiveTab('stats')}
                     className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                       activeTab === 'stats'
-                        ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm'
+                        ? 'bg-white dark:bg-studyflow-surface text-gray-900 dark:text-gray-100 shadow-sm'
                         : 'text-gray-600 dark:text-gray-400'
                     }`}
                   >
@@ -561,7 +561,7 @@ export function PomodoroTimerWithHabits({ user }: PomodoroTimerWithHabitsProps) 
                         value={newTaskText}
                         onChange={(e) => setNewTaskText(e.target.value)}
                         placeholder="Thêm task mới..."
-                        className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-studyflow-surface text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         onKeyPress={(e) => e.key === 'Enter' && addTask()}
                       />
                       <button
@@ -656,7 +656,7 @@ export function PomodoroTimerWithHabits({ user }: PomodoroTimerWithHabitsProps) 
                       {habitStats.map((stat) => (
                         <div
                           key={stat.habitId}
-                          className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+                          className="flex items-center justify-between p-3 bg-gray-50 dark:bg-studyflow-surface rounded-lg"
                         >
                           <div>
                             <div className="font-medium text-gray-900 dark:text-gray-100">

@@ -513,7 +513,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                     className={`w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-1 ${
                       completed
                         ? selectedHabit.color + ' text-white'
-                        : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-300'
+                        : 'bg-gray-200 dark:bg-studyflow-surface text-gray-400 dark:text-gray-300'
                     } cursor-pointer transition-all duration-200 hover:opacity-80 active:scale-95`}
                   >
                     {completed && <Check className="h-5 w-5" />}
@@ -546,7 +546,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
           className={`w-full rounded-xl transition-all duration-300 ${
             selectedHabit.todayCompleted
               ? 'bg-green-600 hover:bg-green-700 text-white scale-100'
-              : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300'
+              : 'bg-gray-100 dark:bg-studyflow-surface hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300'
           }`}
         >
           {loading ? (
@@ -624,7 +624,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                       className={`flex items-center justify-between p-3 rounded-lg border ${
                         habit.todayCompleted
                           ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
-                          : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+                          : 'bg-white dark:bg-studyflow-surface border-gray-200 dark:border-gray-700'
                       } transition-all duration-200`}
                     >
                       <div
@@ -655,7 +655,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                         className={`rounded-full w-8 h-8 p-0 ${
                           habit.todayCompleted
                             ? 'bg-green-500 text-white hover:bg-green-600'
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                            : 'bg-gray-100 dark:bg-studyflow-surface text-gray-500 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                         }`}
                         onClick={() => toggleHabitCompletion(habit.id)}
                       >
@@ -692,7 +692,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
 
       {/* Habit list or empty state */}
       {habits.length === 0 ? (
-        <Card className="mb-6 border-dashed border-2 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
+        <Card className="mb-6 border-dashed border-2 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-studyflow-surface">
           <CardContent className="p-8 text-center">
             <div className="flex flex-col items-center justify-center space-y-4">
               <div className="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
@@ -728,7 +728,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
               <Card
                 id={`habit-card-${habit.id}`}
                 key={habit.id}
-                className="hover:shadow-lg transition-all duration-200 cursor-pointer habit-card border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus-within:ring-2 focus-within:ring-blue-500 dark:focus-within:ring-blue-400 focus-within:outline-none"
+                className="hover:shadow-lg transition-all duration-200 cursor-pointer habit-card border border-gray-200 dark:border-gray-700 bg-white dark:bg-studyflow-surface focus-within:ring-2 focus-within:ring-blue-500 dark:focus-within:ring-blue-400 focus-within:outline-none"
                 onClick={() => viewHabitDetail(habit)}
                 tabIndex={0}
                 role="button"
@@ -840,7 +840,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                     className={`w-full rounded-xl transition-all duration-300 ${
                       habit.todayCompleted
                         ? 'bg-green-600 hover:bg-green-700 text-white scale-100'
-                        : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300'
+                        : 'bg-gray-100 dark:bg-studyflow-surface hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300'
                     }`}
                   >
                     {loading ? (

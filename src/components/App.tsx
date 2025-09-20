@@ -3,7 +3,7 @@ import Head from 'next/head';
 import { Loader2 } from 'lucide-react';
 import { useAuth, useErrorHandler } from '../hooks';
 import { MainApp } from './MainApp';
-import { LoginForm, RegisterForm } from './features/auth';
+import { LoginForm, RegisterForm, AuthLayout } from './features/auth';
 
 // Loading component
 const LoadingScreen = () => (
@@ -96,11 +96,11 @@ export default function App() {
         <meta property="og:image" content="/images/logo.png" />
         <meta property="og:type" content="website" />
       </Head>
-      <div className="h-screen bg-gray-100 dark:bg-gray-900">
+      <div className="w-full min-h-svh relative overflow-hidden">
         {user ? (
           <MainApp user={user} onLogout={() => {}} />
         ) : (
-          <div className="min-h-screen flex items-center justify-center p-4">
+          <AuthLayout type={showRegister ? "register" : "login"}>
             {showRegister ? (
               <RegisterForm
                 onSuccess={() => setShowRegister(false)}
@@ -113,7 +113,7 @@ export default function App() {
                 onForgotPassword={() => {}}
               />
             )}
-          </div>
+          </AuthLayout>
         )}
       </div>
     </>

@@ -1,0 +1,138 @@
+/* Chat Input ProseMirror Styles */
+:root {
+  --spacing: .25rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.5;
+  --text-primary: #fff;
+  --scrollbar-color: #ffffff1a;
+  --top-fade: 20px;
+  --bottom-fade: 20px;
+}
+
+._prosemirror-parent_ebv8s_2 {
+  color: var(--text-primary);
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-color) transparent;
+  cursor: text;
+  --tw-contain-size: inline-size;
+  border: 0 solid;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border-color: var(--border-light, currentColor);
+  scroll-timeline: --scroll-fade y;
+  mask: linear-gradient(to bottom in oklch, oklch(.6 0 0/0), oklch(.85 0 0/1) var(--top-fade) calc(100% - var(--bottom-fade)), oklch(.6 0 0/0));
+  animation-timeline: --scroll-fade;
+  animation-fill-mode: both;
+  animation-name: edge-fade;
+  animation-timing-function: linear;
+  max-height: max(35svh, 5rem);
+  flex: 1;
+  overflow: auto;
+  font-size: var(--text-base);
+  line-height: var(--text-base--line-height);
+}
+
+._fallbackTextarea_ebv8s_2 {
+  display: none;
+}
+
+.ProseMirror {
+  min-height: 44px;
+  max-height: 200px;
+  overflow: hidden;
+  resize: none;
+  outline: none;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: var(--text-base);
+  line-height: var(--text-base--line-height);
+  font-family: ui-sans-serif, -apple-system, system-ui, Segoe UI, Helvetica, Apple Color Emoji, Arial, sans-serif, Segoe UI Emoji, Segoe UI Symbol;
+  cursor: text;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-color) transparent;
+  mask: linear-gradient(to bottom in oklch, oklch(.6 0 0/0), oklch(.85 0 0/1) var(--top-fade) calc(100% - var(--bottom-fade)), oklch(.6 0 0/0));
+  animation-timeline: --scroll-fade;
+  animation-fill-mode: both;
+  animation-name: edge-fade;
+  animation-timing-function: linear;
+  -webkit-text-size-adjust: 100%;
+  font-feature-settings: normal;
+  -webkit-tap-highlight-color: transparent;
+  font-variation-settings: normal;
+  tab-size: 4;
+}
+
+.ProseMirror p {
+  margin: 0;
+  padding: 0;
+}
+
+.ProseMirror .placeholder {
+  color: rgba(255, 255, 255, 0.6);
+  pointer-events: none;
+  user-select: none;
+}
+
+.ProseMirror .placeholder:not(:empty) {
+  color: var(--text-primary);
+}
+
+.ProseMirror-trailingBreak {
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+/* Scroll fade animation */
+@keyframes edge-fade {
+  0% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Custom scrollbar */
+._prosemirror-parent_ebv8s_2::-webkit-scrollbar {
+  width: 6px;
+}
+
+._prosemirror-parent_ebv8s_2::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+._prosemirror-parent_ebv8s_2::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-color);
+  border-radius: 3px;
+}
+
+._prosemirror-parent_ebv8s_2::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Focus states */
+.ProseMirror:focus {
+  outline: none;
+}
+
+.ProseMirror:focus .placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* Auto-resize functionality */
+.ProseMirror {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Selection styling */
+.ProseMirror::selection {
+  background: var(--selection, #007aff);
+}
+
+.ProseMirror::-moz-selection {
+  background: var(--selection, #007aff);
+}

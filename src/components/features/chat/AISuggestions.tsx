@@ -116,13 +116,17 @@ export function AISuggestions({
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        <div className="suggestions-tags">
+      <div className="space-y-6">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4">
+            Đang tải gợi ý...
+          </h3>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[...Array(6)].map((_, i) => (
             <div
               key={i}
-              className="suggestion-tag animate-pulse"
-              style={{ opacity: 0.6, minWidth: '80px', height: '36px' }}
+              className="h-20 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse border border-gray-200 dark:border-gray-700"
             />
           ))}
         </div>
@@ -131,30 +135,47 @@ export function AISuggestions({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {error && (
-        <div
-          className="text-xs p-2 rounded text-center"
-          style={{
-            color: 'rgb(var(--app-yellow-rgb))',
-            backgroundColor: 'rgb(var(--app-yellow-rgb) / 0.1)',
-            borderRadius: 'var(--app-radius)',
-          }}
-        >
-          {error}
+        <div className="text-center">
+          <div className="inline-flex items-center px-4 py-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+            <span className="text-sm text-yellow-700 dark:text-yellow-300">
+              ⚠️ {error}
+            </span>
+          </div>
         </div>
       )}
 
-      <div className="suggestions-tags">
+      <div className="text-center mb-6">
+        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          Chọn chủ đề để bắt đầu
+        </h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          Hoặc bạn có thể đặt câu hỏi bất kỳ ở ô nhập bên dưới
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {suggestions.map(suggestion => (
           <button
             key={suggestion.id}
             onClick={() => onPromptClick(suggestion.prompt)}
             disabled={disabled}
-            className="suggestion-tag"
+            className="group p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-lg transition-all duration-200 text-left disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <span>{suggestion.icon}</span>
-            <span>{suggestion.title}</span>
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400">
+                <span className="text-lg">{suggestion.icon}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  {suggestion.title}
+                </h4>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 capitalize">
+                  {suggestion.category}
+                </p>
+              </div>
+            </div>
           </button>
         ))}
       </div>

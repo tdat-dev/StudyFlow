@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../services/firebase';
+import { auth } from '../services/firebase/config';
 import { User } from '../types/chat';
 import { getUserProfile, updateUserProfile } from '../services/firebase/firestore';
 
