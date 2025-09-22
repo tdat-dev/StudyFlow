@@ -156,6 +156,7 @@ export function useHabits(user: User) {
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.accessToken]);
 
   // Định nghĩa hàm createDefaultHabits

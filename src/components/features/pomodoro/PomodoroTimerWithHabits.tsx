@@ -40,7 +40,9 @@ interface PomodoroTimerWithHabitsProps {
   user: User;
 }
 
-export function PomodoroTimerWithHabits({ user }: PomodoroTimerWithHabitsProps) {
+export function PomodoroTimerWithHabits({
+  user,
+}: PomodoroTimerWithHabitsProps) {
   // Habit integration
   const {
     habitTasks,
@@ -58,7 +60,9 @@ export function PomodoroTimerWithHabits({ user }: PomodoroTimerWithHabitsProps) 
   const [timerMode, setTimerMode] = useState<TimerMode>('pomodoro');
   const [timeLeft, setTimeLeft] = useState(25 * 60); // 25 minutes in seconds
   const [isActive, setIsActive] = useState(false);
-  const [currentSession, setCurrentSession] = useState<PomodoroSession | null>(null);
+  const [currentSession, setCurrentSession] = useState<PomodoroSession | null>(
+    null,
+  );
 
   // Settings (read-only for now)
   const pomodoroTime = 25;
@@ -73,7 +77,9 @@ export function PomodoroTimerWithHabits({ user }: PomodoroTimerWithHabitsProps) 
   // UI state
   const [showTasks, setShowTasks] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
-  const [activeTab, setActiveTab] = useState<'habit-tasks' | 'regular-tasks' | 'stats'>('habit-tasks');
+  const [activeTab, setActiveTab] = useState<
+    'habit-tasks' | 'regular-tasks' | 'stats'
+  >('habit-tasks');
 
   // Statistics
   const [pomodoroCount, setPomodoroCount] = useState(0);
@@ -128,6 +134,7 @@ export function PomodoroTimerWithHabits({ user }: PomodoroTimerWithHabitsProps) 
     return () => {
       if (interval) clearInterval(interval);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isActive, timeLeft]);
 
   // Helper functions
@@ -154,7 +161,8 @@ export function PomodoroTimerWithHabits({ user }: PomodoroTimerWithHabitsProps) 
   // Timer controls
   const startSession = () => {
     setIsActive(true);
-    const sessionTitle = timerMode === 'pomodoro' ? 'Focus Session' : 'Break Session';
+    const sessionTitle =
+      timerMode === 'pomodoro' ? 'Focus Session' : 'Break Session';
     setCurrentSession({
       id: Date.now().toString(),
       title: sessionTitle,
@@ -307,7 +315,7 @@ export function PomodoroTimerWithHabits({ user }: PomodoroTimerWithHabitsProps) 
   // Get current task info for display
   const getCurrentTaskInfo = () => {
     if (!currentTaskId) return null;
-    
+
     const habitTask = habitTasks.find(t => t.id === currentTaskId);
     if (habitTask) {
       return {
@@ -378,7 +386,10 @@ export function PomodoroTimerWithHabits({ user }: PomodoroTimerWithHabitsProps) 
               {/* Timer Display */}
               <div className="timer-display text-center mb-8">
                 <div className="relative inline-block">
-                  <svg className="progress-ring w-64 h-64 transform -rotate-90" viewBox="0 0 120 120">
+                  <svg
+                    className="progress-ring w-64 h-64 transform -rotate-90"
+                    viewBox="0 0 120 120"
+                  >
                     <circle
                       className="progress-track"
                       cx="60"
@@ -410,15 +421,19 @@ export function PomodoroTimerWithHabits({ user }: PomodoroTimerWithHabitsProps) 
                       </div>
                       {currentTaskInfo && (
                         <div className="text-sm text-gray-600 dark:text-gray-400 max-w-48">
-                          <div className="font-medium truncate">{currentTaskInfo.text}</div>
+                          <div className="font-medium truncate">
+                            {currentTaskInfo.text}
+                          </div>
                           {currentTaskInfo.habitTitle && (
                             <div className="text-xs text-blue-600 dark:text-blue-400">
                               {currentTaskInfo.habitTitle}
                             </div>
                           )}
                           <div className="text-xs mt-1">
-                            {currentTaskInfo.pomodoroCount} 
-                            {currentTaskInfo.estimatedPomodoros && `/${currentTaskInfo.estimatedPomodoros}`} Pomodoro
+                            {currentTaskInfo.pomodoroCount}
+                            {currentTaskInfo.estimatedPomodoros &&
+                              `/${currentTaskInfo.estimatedPomodoros}`}{' '}
+                            Pomodoro
                           </div>
                         </div>
                       )}
@@ -430,15 +445,29 @@ export function PomodoroTimerWithHabits({ user }: PomodoroTimerWithHabitsProps) 
               {/* Timer Controls */}
               <div className="timer-controls flex justify-center gap-4">
                 <Button
-                  onClick={isActive ? pauseSession : (currentSession ? resumeSession : startSession)}
-                  variant={isActive ? "warning" : "default"}
+                  onClick={
+                    isActive
+                      ? pauseSession
+                      : currentSession
+                        ? resumeSession
+                        : startSession
+                  }
+                  variant={isActive ? 'warning' : 'default'}
                   size="lg"
                   className="gap-2 min-w-[140px]"
                 >
-                  {isActive ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-                  {isActive ? 'Tạm dừng' : (currentSession ? 'Tiếp tục' : 'Bắt đầu')}
+                  {isActive ? (
+                    <Pause className="w-5 h-5" />
+                  ) : (
+                    <Play className="w-5 h-5" />
+                  )}
+                  {isActive
+                    ? 'Tạm dừng'
+                    : currentSession
+                      ? 'Tiếp tục'
+                      : 'Bắt đầu'}
                 </Button>
-                
+
                 <Button
                   onClick={resetSession}
                   variant="outline"
@@ -448,7 +477,7 @@ export function PomodoroTimerWithHabits({ user }: PomodoroTimerWithHabitsProps) 
                   <RotateCcw className="w-5 h-5" />
                   Reset
                 </Button>
-                
+
                 <Button
                   onClick={skipSession}
                   variant="ghost"
@@ -539,7 +568,7 @@ export function PomodoroTimerWithHabits({ user }: PomodoroTimerWithHabitsProps) 
                       onCreateTask={createHabitTask}
                       loading={habitLoading}
                     />
-                    
+
                     <HabitTaskList
                       tasks={habitTasks}
                       currentTaskId={currentTaskId}
@@ -559,10 +588,10 @@ export function PomodoroTimerWithHabits({ user }: PomodoroTimerWithHabitsProps) 
                       <input
                         type="text"
                         value={newTaskText}
-                        onChange={(e) => setNewTaskText(e.target.value)}
+                        onChange={e => setNewTaskText(e.target.value)}
                         placeholder="Thêm task mới..."
                         className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-studyflow-surface text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        onKeyPress={(e) => e.key === 'Enter' && addTask()}
+                        onKeyPress={e => e.key === 'Enter' && addTask()}
                       />
                       <button
                         onClick={addTask}
@@ -574,7 +603,7 @@ export function PomodoroTimerWithHabits({ user }: PomodoroTimerWithHabitsProps) 
 
                     {/* Traditional Tasks List */}
                     <div className="space-y-2 max-h-96 overflow-y-auto">
-                      {tasks.map((task) => (
+                      {tasks.map(task => (
                         <div
                           key={task.id}
                           className={`task-item flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer ${
@@ -585,7 +614,7 @@ export function PomodoroTimerWithHabits({ user }: PomodoroTimerWithHabitsProps) 
                           onClick={() => setCurrentTaskId(task.id)}
                         >
                           <button
-                            onClick={(e) => {
+                            onClick={e => {
                               e.stopPropagation();
                               toggleTask(task.id);
                             }}
@@ -595,15 +624,19 @@ export function PomodoroTimerWithHabits({ user }: PomodoroTimerWithHabitsProps) 
                                 : 'border-gray-300 dark:border-gray-600 hover:border-green-500'
                             }`}
                           >
-                            {task.completed && <CheckCircle2 className="w-3 h-3" />}
+                            {task.completed && (
+                              <CheckCircle2 className="w-3 h-3" />
+                            )}
                           </button>
-                          
+
                           <div className="flex-1 min-w-0">
-                            <p className={`task-text text-sm font-medium ${
-                              task.completed
-                                ? 'completed line-through text-gray-500 dark:text-gray-400'
-                                : 'text-gray-900 dark:text-gray-100'
-                            }`}>
+                            <p
+                              className={`task-text text-sm font-medium ${
+                                task.completed
+                                  ? 'completed line-through text-gray-500 dark:text-gray-400'
+                                  : 'text-gray-900 dark:text-gray-100'
+                              }`}
+                            >
                               {task.text}
                             </p>
                             <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -611,9 +644,9 @@ export function PomodoroTimerWithHabits({ user }: PomodoroTimerWithHabitsProps) 
                               <span>{task.pomodoroCount} Pomodoro</span>
                             </div>
                           </div>
-                          
+
                           <button
-                            onClick={(e) => {
+                            onClick={e => {
                               e.stopPropagation();
                               deleteTraditionalTask(task.id);
                             }}
@@ -653,7 +686,7 @@ export function PomodoroTimerWithHabits({ user }: PomodoroTimerWithHabitsProps) 
                       <h4 className="font-medium text-gray-900 dark:text-gray-100">
                         Thống kê theo thói quen
                       </h4>
-                      {habitStats.map((stat) => (
+                      {habitStats.map(stat => (
                         <div
                           key={stat.habitId}
                           className="flex items-center justify-between p-3 bg-gray-50 dark:bg-studyflow-surface rounded-lg"

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { generateContextualSuggestions } from '../../../utils/languageDetection';
 
@@ -27,7 +27,7 @@ export function AISuggestions({
   const { userLanguage, detectedLanguage, updateDetectedLanguageFromChat } =
     useLanguage();
 
-  const loadSuggestions = async () => {
+  const loadSuggestions = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -94,11 +94,16 @@ export function AISuggestions({
     } finally {
       setLoading(false);
     }
-  };
+  }, [
+    chatHistory,
+    userLanguage,
+    detectedLanguage,
+    updateDetectedLanguageFromChat,
+  ]);
 
   useEffect(() => {
     loadSuggestions();
-  }, []);
+  }, [loadSuggestions]);
 
   // Refresh suggestions when chat history changes (có tin nhắn mới)
   useEffect(() => {
@@ -112,7 +117,7 @@ export function AISuggestions({
     }
     // Return undefined khi không có cleanup function
     return undefined;
-  }, [chatHistory.length]);
+  }, [chatHistory.length, loadSuggestions]);
 
   if (loading) {
     return (

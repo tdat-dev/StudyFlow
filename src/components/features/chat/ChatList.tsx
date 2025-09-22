@@ -174,6 +174,8 @@ export function ChatList({
                       );
                     }}
                     className="chat-actions-btn"
+                    title="Tùy chọn"
+                    aria-label="Hiện thị menu tùy chọn"
                   >
                     <MoreVertical size={14} />
                   </button>

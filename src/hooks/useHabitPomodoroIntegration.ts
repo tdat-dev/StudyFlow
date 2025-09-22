@@ -1,21 +1,21 @@
 import { useState, useEffect, useCallback } from 'react';
-import { 
-  HabitBasedTask, 
-  HabitPomodoroStats, 
+import {
+  HabitBasedTask,
+  HabitPomodoroStats,
   CreateHabitTaskData,
-  HabitOption 
+  HabitOption,
 } from '../types/pomodoro-habits';
 import { User } from '../types/chat';
-import { 
-  collection, 
-  query, 
-  where, 
-  getDocs, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
   doc,
-  Timestamp 
+  Timestamp,
 } from 'firebase/firestore';
 import { db, auth } from '../services/firebase/config';
 
@@ -75,14 +75,19 @@ export function useHabitPomodoroIntegration(user: User) {
           habitColor: data.habitColor,
           estimatedPomodoros: data.estimatedPomodoros,
           priority: data.priority || 'medium',
-          createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+          createdAt:
+            data.createdAt?.toDate?.()?.toISOString() ||
+            new Date().toISOString(),
           completedAt: data.completedAt?.toDate?.()?.toISOString(),
         };
       });
 
-      setHabitTasks(tasks.sort((a, b) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      ));
+      setHabitTasks(
+        tasks.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        ),
+      );
     } catch (error) {
       console.error('Failed to load habit tasks:', error);
       // Fallback to empty array
@@ -93,7 +98,9 @@ export function useHabitPomodoroIntegration(user: User) {
   }, []);
 
   // Create a new habit-based task
-  const createHabitTask = async (taskData: CreateHabitTaskData): Promise<string | null> => {
+  const createHabitTask = async (
+    taskData: CreateHabitTaskData,
+  ): Promise<string | null> => {
     if (!auth.currentUser?.uid) return null;
 
     try {
@@ -116,10 +123,10 @@ export function useHabitPomodoroIntegration(user: User) {
       };
 
       const docRef = await addDoc(tasksRef, newTask);
-      
+
       // Reload tasks
       await loadHabitTasks();
-      
+
       return docRef.id;
     } catch (error) {
       console.error('Failed to create habit task:', error);
@@ -128,11 +135,14 @@ export function useHabitPomodoroIntegration(user: User) {
   };
 
   // Update task pomodoro count
-  const updateTaskPomodoroCount = async (taskId: string, increment: number = 1) => {
+  const updateTaskPomodoroCount = async (
+    taskId: string,
+    increment: number = 1,
+  ) => {
     try {
       const taskRef = doc(db, 'pomodoro_habit_tasks', taskId);
       const task = habitTasks.find(t => t.id === taskId);
-      
+
       if (task) {
         const newCount = task.pomodoroCount + increment;
         await updateDoc(taskRef, {
@@ -141,11 +151,11 @@ export function useHabitPomodoroIntegration(user: User) {
         });
 
         // Update local state
-        setHabitTasks(prev => prev.map(t => 
-          t.id === taskId 
-            ? { ...t, pomodoroCount: newCount }
-            : t
-        ));
+        setHabitTasks(prev =>
+          prev.map(t =>
+            t.id === taskId ? { ...t, pomodoroCount: newCount } : t,
+          ),
+        );
 
         // Check if task should be auto-completed
         if (task.estimatedPomodoros && newCount >= task.estimatedPomodoros) {
@@ -167,11 +177,13 @@ export function useHabitPomodoroIntegration(user: User) {
       });
 
       // Update local state
-      setHabitTasks(prev => prev.map(t => 
-        t.id === taskId 
-          ? { ...t, completed: true, completedAt: new Date().toISOString() }
-          : t
-      ));
+      setHabitTasks(prev =>
+        prev.map(t =>
+          t.id === taskId
+            ? { ...t, completed: true, completedAt: new Date().toISOString() }
+            : t,
+        ),
+      );
 
       // Update habit completion if this was the last task for today
       const task = habitTasks.find(t => t.id === taskId);
@@ -188,15 +200,19 @@ export function useHabitPomodoroIntegration(user: User) {
     try {
       // Check if all tasks for this habit today are completed
       const today = new Date().toDateString();
-      const todayTasks = habitTasks.filter(t => 
-        t.habitId === habitId && 
-        new Date(t.createdAt).toDateString() === today
+      const todayTasks = habitTasks.filter(
+        t =>
+          t.habitId === habitId &&
+          new Date(t.createdAt).toDateString() === today,
       );
-      
+
       const completedTodayTasks = todayTasks.filter(t => t.completed);
-      
+
       // If all tasks are completed, mark habit as completed for today
-      if (todayTasks.length > 0 && completedTodayTasks.length === todayTasks.length) {
+      if (
+        todayTasks.length > 0 &&
+        completedTodayTasks.length === todayTasks.length
+      ) {
         const habitRef = doc(db, 'habits', habitId);
         await updateDoc(habitRef, {
           todayCompleted: true,
@@ -230,7 +246,9 @@ export function useHabitPomodoroIntegration(user: User) {
 
   // Get tasks by priority
   const getTasksByPriority = (priority: 'low' | 'medium' | 'high') => {
-    return habitTasks.filter(task => task.priority === priority && !task.completed);
+    return habitTasks.filter(
+      task => task.priority === priority && !task.completed,
+    );
   };
 
   // Calculate habit statistics
@@ -238,26 +256,32 @@ export function useHabitPomodoroIntegration(user: User) {
     const stats: HabitPomodoroStats[] = habitOptions.map(habit => {
       const habitTasks = getTasksForHabit(habit.id);
       const completedTasks = habitTasks.filter(t => t.completed);
-      const totalPomodoros = habitTasks.reduce((sum, t) => sum + t.pomodoroCount, 0);
-      
+      const totalPomodoros = habitTasks.reduce(
+        (sum, t) => sum + t.pomodoroCount,
+        0,
+      );
+
       return {
         habitId: habit.id,
         habitTitle: habit.title,
         totalPomodoros,
         completedTasks: completedTasks.length,
         totalTasks: habitTasks.length,
-        averageTaskDuration: habitTasks.length > 0 
-          ? totalPomodoros / habitTasks.length 
-          : 0,
+        averageTaskDuration:
+          habitTasks.length > 0 ? totalPomodoros / habitTasks.length : 0,
         lastPomodoroDate: habitTasks
           .filter(t => t.pomodoroCount > 0)
-          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]?.createdAt,
+          .sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+          )[0]?.createdAt,
         weeklyPomodoros: [], // TODO: Calculate weekly data
         monthlyPomodoros: [], // TODO: Calculate monthly data
       };
     });
 
     setHabitStats(stats);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [habitOptions, habitTasks]);
 
   // Load data on mount and when user changes
@@ -280,19 +304,19 @@ export function useHabitPomodoroIntegration(user: User) {
     habitStats,
     loading,
     currentHabitId,
-    
+
     // Actions
     createHabitTask,
     updateTaskPomodoroCount,
     completeTask,
     deleteTask,
     setCurrentHabitId,
-    
+
     // Getters
     getTasksForHabit,
     getActiveTasks,
     getTasksByPriority,
-    
+
     // Refresh
     loadHabitTasks,
     loadHabitOptions,

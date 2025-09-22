@@ -1,12 +1,37 @@
 /* Chat Input ProseMirror Styles */
 :root {
-  --spacing: .25rem;
+  --spacing: 0.25rem;
   --text-base: 1rem;
   --text-base--line-height: 1.5;
   --text-primary: #fff;
   --scrollbar-color: #ffffff1a;
   --top-fade: 20px;
   --bottom-fade: 20px;
+}
+
+/* Borderless textarea with hidden scrollbar */
+.textarea-borderless {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.textarea-borderless::-webkit-scrollbar {
+  display: none !important;
+}
+
+.textarea-borderless:focus,
+.textarea-borderless:focus-visible,
+.textarea-borderless:active {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  -moz-box-shadow: none !important;
 }
 
 ._prosemirror-parent_ebv8s_2 {
@@ -21,7 +46,12 @@
   padding: 0;
   border-color: var(--border-light, currentColor);
   scroll-timeline: --scroll-fade y;
-  mask: linear-gradient(to bottom in oklch, oklch(.6 0 0/0), oklch(.85 0 0/1) var(--top-fade) calc(100% - var(--bottom-fade)), oklch(.6 0 0/0));
+  mask: linear-gradient(
+    to bottom in oklch,
+    oklch(0.6 0 0/0),
+    oklch(0.85 0 0/1) var(--top-fade) calc(100% - var(--bottom-fade)),
+    oklch(0.6 0 0/0)
+  );
   animation-timeline: --scroll-fade;
   animation-fill-mode: both;
   animation-name: edge-fade;
@@ -48,11 +78,26 @@
   color: var(--text-primary);
   font-size: var(--text-base);
   line-height: var(--text-base--line-height);
-  font-family: ui-sans-serif, -apple-system, system-ui, Segoe UI, Helvetica, Apple Color Emoji, Arial, sans-serif, Segoe UI Emoji, Segoe UI Symbol;
+  font-family:
+    ui-sans-serif,
+    -apple-system,
+    system-ui,
+    Segoe UI,
+    Helvetica,
+    Apple Color Emoji,
+    Arial,
+    sans-serif,
+    Segoe UI Emoji,
+    Segoe UI Symbol;
   cursor: text;
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-color) transparent;
-  mask: linear-gradient(to bottom in oklch, oklch(.6 0 0/0), oklch(.85 0 0/1) var(--top-fade) calc(100% - var(--bottom-fade)), oklch(.6 0 0/0));
+  mask: linear-gradient(
+    to bottom in oklch,
+    oklch(0.6 0 0/0),
+    oklch(0.85 0 0/1) var(--top-fade) calc(100% - var(--bottom-fade)),
+    oklch(0.6 0 0/0)
+  );
   animation-timeline: --scroll-fade;
   animation-fill-mode: both;
   animation-name: edge-fade;

@@ -75,6 +75,7 @@ export function useChat(user: User) {
     } finally {
       setLoadingSessions(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.accessToken]);
 
   // Định nghĩa hàm loadChatHistory với useCallback

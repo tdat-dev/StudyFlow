@@ -79,8 +79,10 @@ export function MainApp({ user, onLogout }: MainAppProps) {
         onTabChange={handleTabChange}
       />
       {/* Content area với full width */}
-      <main className="flex-1 flex flex-col bg-white dark:bg-studyflow-bg pb-[calc(var(--tabbar-h)+var(--safe-bottom))] min-h-0 overflow-hidden">
-        <div className="flex-1 w-full h-full">{renderScreen()}</div>
+      <main className="flex-1 flex flex-col bg-white dark:bg-studyflow-bg pb-[calc(var(--tabbar-h)+var(--safe-bottom))] min-h-0 overflow-y-auto scrollbar-modern">
+        <div className="flex-1 w-full h-full overflow-y-auto scrollbar-modern">
+          {renderScreen()}
+        </div>
       </main>
       {/* Bottom nav hiển thị cho cả mobile và desktop */}
       <BottomNav

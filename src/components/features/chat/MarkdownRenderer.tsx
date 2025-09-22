@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
@@ -27,9 +28,7 @@ function CodeBlock({ children, className }: CodeBlockProps) {
 
   return (
     <div className="relative group">
-      <div
-        className="flex items-center justify-between px-4 py-2 text-xs font-mono border-b bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400"
-      >
+      <div className="flex items-center justify-between px-4 py-2 text-xs font-mono border-b bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400">
         <span>{language}</span>
         <button
           onClick={handleCopy}
@@ -105,23 +104,17 @@ export function MarkdownRenderer({
 
           // Headings
           h1: ({ children }) => (
-            <h1
-              className="text-2xl font-bold mb-4 mt-6 text-gray-900 dark:text-gray-100"
-            >
+            <h1 className="text-2xl font-bold mb-4 mt-6 text-gray-900 dark:text-gray-100">
               {children}
             </h1>
           ),
           h2: ({ children }) => (
-            <h2
-              className="text-xl font-semibold mb-3 mt-5 text-gray-900 dark:text-gray-100"
-            >
+            <h2 className="text-xl font-semibold mb-3 mt-5 text-gray-900 dark:text-gray-100">
               {children}
             </h2>
           ),
           h3: ({ children }) => (
-            <h3
-              className="text-lg font-medium mb-2 mt-4 text-gray-900 dark:text-gray-100"
-            >
+            <h3 className="text-lg font-medium mb-2 mt-4 text-gray-900 dark:text-gray-100">
               {children}
             </h3>
           ),
@@ -135,16 +128,12 @@ export function MarkdownRenderer({
 
           // Lists
           ul: ({ children }) => (
-            <ul
-              className="list-disc list-inside mb-4 space-y-1 text-gray-900 dark:text-gray-100"
-            >
+            <ul className="list-disc list-inside mb-4 space-y-1 text-gray-900 dark:text-gray-100">
               {children}
             </ul>
           ),
           ol: ({ children }) => (
-            <ol
-              className="list-decimal list-inside mb-4 space-y-1 text-gray-900 dark:text-gray-100"
-            >
+            <ol className="list-decimal list-inside mb-4 space-y-1 text-gray-900 dark:text-gray-100">
               {children}
             </ol>
           ),
@@ -178,9 +167,7 @@ export function MarkdownRenderer({
           // Tables
           table: ({ children }) => (
             <div className="overflow-x-auto my-4">
-              <table
-                className="min-w-full border-collapse border-gray-200 dark:border-gray-700"
-              >
+              <table className="min-w-full border-collapse border-gray-200 dark:border-gray-700">
                 {children}
               </table>
             </div>
@@ -211,18 +198,18 @@ export function MarkdownRenderer({
 
           // Images
           img: ({ src, alt }) => (
-            <img
-              src={src}
-              alt={alt}
+            <Image
+              src={src || ''}
+              alt={alt || ''}
+              width={500}
+              height={300}
               className="max-w-full h-auto rounded-lg my-4 max-h-96 object-contain"
             />
           ),
 
           // Horizontal rule
           hr: () => (
-            <hr
-              className="my-6 border-0 h-px bg-gray-200 dark:bg-gray-700"
-            />
+            <hr className="my-6 border-0 h-px bg-gray-200 dark:bg-gray-700" />
           ),
         }}
       >

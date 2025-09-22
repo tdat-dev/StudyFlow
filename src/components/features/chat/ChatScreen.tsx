@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import NextImage from 'next/image';
 import { X, File, FileText, Image } from 'lucide-react';
 import { Message, ChatSession, User } from '../../../types/chat';
 import { auth } from '../../../services/firebase/config';
@@ -95,6 +96,7 @@ export function ChatScreen({ user }: ChatScreenProps) {
   // Lấy icon và class phù hợp cho file
   const getFileIcon = (file: FileContent) => {
     if (file.type.startsWith('image/')) {
+      // eslint-disable-next-line jsx-a11y/alt-text
       return { icon: <Image className="h-4 w-4" />, className: 'image' };
     }
     if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
@@ -233,6 +235,7 @@ export function ChatScreen({ user }: ChatScreenProps) {
         const newSession: ChatSession = {
           id: newSessionId,
           title: 'Cuộc trò chuyện mới',
+          userId: user.uid,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           messageCount: 0,
@@ -449,8 +452,8 @@ export function ChatScreen({ user }: ChatScreenProps) {
 
         {/* Messages Container */}
         <div className="flex-1 overflow-y-auto min-h-0 flex flex-col">
-          <div className="flex-1 py-6">
-            {!currentChatId || (messages.length === 0 && !loading) ? (
+          {!currentChatId || (messages.length === 0 && !loading) ? (
+            <div className="flex-1 flex items-center justify-center">
               <EmptyState
                 onPromptClick={handleSendMessage}
                 chatHistory={messages.map(msg => ({
@@ -461,36 +464,36 @@ export function ChatScreen({ user }: ChatScreenProps) {
                   content: msg.content,
                 }))}
               />
-            ) : (
-              <>
-                <MessageList messages={messages} />
+            </div>
+          ) : (
+            <div className="flex-1 py-6">
+              <MessageList messages={messages} />
 
-                {/* Typing Indicator */}
-                {isTyping && (
-                  <div className="content-column">
-                    <div className="flex items-start space-x-3">
-                      <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 bg-gray-100 dark:bg-gray-800">
-                        <div className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                          AI
-                        </div>
+              {/* Typing Indicator */}
+              {isTyping && (
+                <div className="content-column">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 bg-gray-100 dark:bg-gray-800">
+                      <div className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                        AI
                       </div>
-                      <div className="px-4 py-3 rounded-lg bg-white dark:bg-gray-800">
-                        <div className="flex space-x-1">
-                          <div className="w-2 h-2 rounded-full animate-bounce bg-gray-500 dark:bg-gray-400"></div>
-                          <div
-                            className="w-2 h-2 rounded-full animate-bounce bg-gray-500 dark:bg-gray-400"
-                            style={{ animationDelay: '0.1s' }}
-                          ></div>
-                        </div>
+                    </div>
+                    <div className="px-4 py-3 rounded-lg bg-white dark:bg-gray-800">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 rounded-full animate-bounce bg-gray-500 dark:bg-gray-400"></div>
+                        <div
+                          className="w-2 h-2 rounded-full animate-bounce bg-gray-500 dark:bg-gray-400"
+                          style={{ animationDelay: '0.1s' }}
+                        ></div>
                       </div>
                     </div>
                   </div>
-                )}
+                </div>
+              )}
 
-                <div ref={messagesEndRef} />
-              </>
-            )}
-          </div>
+              <div ref={messagesEndRef} />
+            </div>
+          )}
         </div>
 
         {/* Input Area with glass effect */}
@@ -502,9 +505,11 @@ export function ChatScreen({ user }: ChatScreenProps) {
                 <div className="attached-file-preview">
                   <div className="attached-file-content">
                     {attachedFile.preview ? (
-                      <img
+                      <NextImage
                         src={attachedFile.preview}
                         alt={attachedFile.name}
+                        width={100}
+                        height={100}
                         className="attached-file-image"
                       />
                     ) : (

@@ -10,7 +10,7 @@ export interface Message {
 export interface ChatSession {
   id: string;
   title: string;
-  userId: string;
+  userId?: string; // Make optional to avoid compilation issues
   createdAt: string;
   updatedAt: string;
   messageCount: number;

@@ -112,6 +112,7 @@ export function PomodoroTimer() {
     return () => {
       if (interval) clearInterval(interval);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isActive, timeLeft]);
 
   // Helper functions
@@ -330,9 +331,7 @@ export function PomodoroTimer() {
 
             {/* Progress Bar */}
             <div className="w-full max-w-md mx-auto mb-6">
-              <div
-                className="w-full h-1 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700"
-              >
+              <div className="w-full h-1 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
                 <div
                   className="h-full rounded-full transition-all duration-1000 ease-linear"
                   style={{
@@ -350,10 +349,7 @@ export function PomodoroTimer() {
 
             {/* Session Info */}
             {currentTaskId && (
-              <div
-                className="text-center mb-4"
-                className="text-gray-500 dark:text-gray-400"
-              >
+              <div className="text-center mb-4 text-gray-500 dark:text-gray-400">
                 #{pomodoroCount + 1} -{' '}
                 {tasks.find(t => t.id === currentTaskId)?.text}
               </div>
@@ -364,9 +360,7 @@ export function PomodoroTimer() {
           {showTasks && (
             <div className="tasks-card">
               <div className="flex items-center justify-between mb-6">
-                <h2
-                  className="text-xl font-bold text-gray-900 dark:text-gray-100"
-                >
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                   Tasks
                 </h2>
                 <button
@@ -408,9 +402,7 @@ export function PomodoroTimer() {
                         backgroundColor: task.completed
                           ? '#ef4444'
                           : 'transparent',
-                        borderColor: task.completed
-                          ? '#ef4444'
-                          : '#e5e7eb',
+                        borderColor: task.completed ? '#ef4444' : '#e5e7eb',
                       }}
                     >
                       {task.completed && (
@@ -433,10 +425,7 @@ export function PomodoroTimer() {
                 ))}
 
                 {tasks.length === 0 && (
-                  <div
-                    className="text-center py-8"
-                    className="text-gray-500 dark:text-gray-400"
-                  >
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                     <Clock className="h-12 w-12 mx-auto mb-3 opacity-50" />
                     <p>Chưa có task nào</p>
                   </div>
@@ -446,10 +435,7 @@ export function PomodoroTimer() {
               {/* Task Selection for Timer */}
               {tasks.filter(t => !t.completed).length > 0 && (
                 <div>
-                  <h3
-                    className="text-sm font-medium mb-2"
-                    className="text-gray-500 dark:text-gray-400"
-                  >
+                  <h3 className="text-sm font-medium mb-2 text-gray-500 dark:text-gray-400">
                     Chọn task để tập trung:
                   </h3>
                   <div className="space-y-1">
@@ -470,9 +456,7 @@ export function PomodoroTimer() {
                                 ? 'var(--accent-tint-12)'
                                 : 'transparent',
                             color:
-                              currentTaskId === task.id
-                                ? '#ef4444'
-                                : '#374151',
+                              currentTaskId === task.id ? '#ef4444' : '#374151',
                           }}
                         >
                           {task.text}
@@ -488,28 +472,25 @@ export function PomodoroTimer() {
         {/* Fixed Bottom Controls */}
         <div className="fixed bottom-6 right-6 flex items-center space-x-2">
           <button
-            className="control-ghost shadow-lg"
+            className="control-ghost shadow-lg bg-white dark:bg-studyflow-surface"
             onClick={() => setShowTasks(!showTasks)}
             title={showTasks ? 'Ẩn tasks' : 'Hiện tasks'}
-            className="bg-white dark:bg-studyflow-surface"
           >
             <List className="h-5 w-5" />
           </button>
 
           <button
-            className="control-ghost shadow-lg"
+            className="control-ghost shadow-lg bg-white dark:bg-studyflow-surface"
             onClick={() => setShowHistory(!showHistory)}
             title="Lịch sử"
-            className="bg-white dark:bg-studyflow-surface"
           >
             <BarChart3 className="h-5 w-5" />
           </button>
 
           <button
-            className="control-ghost shadow-lg"
+            className="control-ghost shadow-lg bg-white dark:bg-studyflow-surface"
             onClick={() => setShowSettings(true)}
             title="Cài đặt"
-            className="bg-white dark:bg-studyflow-surface"
           >
             <Settings className="h-5 w-5" />
           </button>

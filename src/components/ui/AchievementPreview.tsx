@@ -1,15 +1,4 @@
 import React from 'react';
-import { Trophy, Star, Target, Zap } from 'lucide-react';
-
-interface Achievement {
-  id: string;
-  title: string;
-  description: string;
-  icon: React.ComponentType<any>;
-  progress: number;
-  total: number;
-  color: string;
-}
 
 interface AchievementPreviewProps {
   achievements?: Array<{
@@ -24,8 +13,8 @@ interface AchievementPreviewProps {
   }>;
 }
 
-export function AchievementPreview({ 
-  achievements = []
+export function AchievementPreview({
+  achievements = [],
 }: AchievementPreviewProps) {
   // Fallback data if no achievements provided
   const fallbackAchievements = [
@@ -37,7 +26,7 @@ export function AchievementPreview({
       progress: 45,
       requirement: 50,
       xpReward: 100,
-      rarity: 'common'
+      rarity: 'common',
     },
     {
       id: 'streak-7',
@@ -47,7 +36,7 @@ export function AchievementPreview({
       progress: 5,
       requirement: 7,
       xpReward: 100,
-      rarity: 'rare'
+      rarity: 'rare',
     },
     {
       id: 'pomodoro-10',
@@ -57,7 +46,7 @@ export function AchievementPreview({
       progress: 8,
       requirement: 10,
       xpReward: 100,
-      rarity: 'rare'
+      rarity: 'rare',
     },
     {
       id: 'level-3',
@@ -67,21 +56,24 @@ export function AchievementPreview({
       progress: 2,
       requirement: 3,
       xpReward: 100,
-      rarity: 'common'
-    }
+      rarity: 'common',
+    },
   ];
 
-  const displayAchievements = achievements.length > 0 ? achievements : fallbackAchievements;
+  const displayAchievements =
+    achievements.length > 0 ? achievements : fallbackAchievements;
   return (
     <div className="space-y-4">
-      <h3 className="text-white font-medium text-sm">Huy hiệu sắp mở khoá 🏆</h3>
+      <h3 className="text-white font-medium text-sm">
+        Huy hiệu sắp mở khoá 🏆
+      </h3>
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        {displayAchievements.map((achievement) => {
+        {displayAchievements.map(achievement => {
           const remaining = achievement.requirement - achievement.progress;
           const isClose = remaining <= 5;
-          
+
           return (
-            <div 
+            <div
               key={achievement.id}
               className={`bg-white/5 backdrop-blur-md rounded-xl p-3 text-center transition-all duration-200 hover:bg-white/10 ${
                 isClose ? 'ring-1 ring-yellow-400/30' : ''
@@ -96,15 +88,21 @@ export function AchievementPreview({
                     {achievement.title}
                   </h4>
                   <p className="text-white/60 text-xs leading-tight">
-                    {isClose ? `Còn ${remaining} nữa` : `${achievement.progress}/${achievement.requirement}`}
+                    {isClose
+                      ? `Còn ${remaining} nữa`
+                      : `${achievement.progress}/${achievement.requirement}`}
                   </p>
                 </div>
                 <div className="w-full bg-white/10 rounded-full h-1">
-                  <div 
+                  <div
                     className={`h-1 rounded-full transition-all duration-500 ${
-                      isClose ? 'bg-gradient-to-r from-yellow-400 to-orange-400' : 'bg-white/20'
+                      isClose
+                        ? 'bg-gradient-to-r from-yellow-400 to-orange-400'
+                        : 'bg-white/20'
                     }`}
-                    style={{ width: `${(achievement.progress / achievement.requirement) * 100}%` }}
+                    style={{
+                      width: `${(achievement.progress / achievement.requirement) * 100}%`,
+                    }}
                   />
                 </div>
               </div>

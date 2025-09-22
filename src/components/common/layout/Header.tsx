@@ -1,11 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  User, 
-  LogOut, 
-  Sun, 
-  Moon, 
-  RefreshCw
-} from 'lucide-react';
+import Image from 'next/image';
+import { User, LogOut, Sun, Moon, RefreshCw } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { hardRefresh } from '../../../utils/refresh';
 
@@ -17,11 +12,7 @@ interface HeaderProps {
   onTabChange?: (tab: string) => void;
 }
 
-export function Header({
-  user,
-  onLogout,
-  onNavigateToProfile,
-}: HeaderProps) {
+export function Header({ user, onLogout, onNavigateToProfile }: HeaderProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -29,7 +20,10 @@ export function Header({
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsDropdownOpen(false);
       }
     }
@@ -50,6 +44,9 @@ export function Header({
       document.addEventListener('keydown', handleKeyDown);
       return () => document.removeEventListener('keydown', handleKeyDown);
     }
+
+    // Return undefined for the else case to satisfy TypeScript
+    return undefined;
   }, [isDropdownOpen]);
 
   const handleProfileClick = () => {
@@ -95,22 +92,20 @@ export function Header({
     <header className="bg-white dark:bg-studyflow-bg border-b border-gray-200 dark:border-gray-800 px-4 py-3 flex items-center justify-between relative z-50">
       <div className="flex items-center flex-shrink-0">
         <div className="flex items-center space-x-2">
-          <img 
-            alt="StudyFlow Logo" 
-            fetchPriority="high" 
-            width="40" 
-            height="40" 
-            decoding="async" 
-            className="rounded-none border-0 outline-none ring-0" 
-            src="/images/logo.png" 
-            style={{ color: 'transparent', width: '40px', height: '40px', border: 'none', outline: 'none', boxShadow: 'none' }}
+          <Image
+            alt="StudyFlow Logo"
+            priority
+            width={40}
+            height={40}
+            className="rounded-none border-0 outline-none ring-0"
+            src="/images/logo.png"
           />
           <span className="font-bold text-lg text-gray-900 dark:text-gray-100">
             StudyFlow
           </span>
         </div>
       </div>
-      
+
       <div className="flex items-center flex-shrink-0">
         <div className="relative" ref={dropdownRef}>
           <button
@@ -118,15 +113,12 @@ export function Header({
             className="flex items-center space-x-2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
           >
             {user?.photoURL ? (
-              <img
+              <Image
                 alt="Profile"
-                loading="lazy"
-                width="48"
-                height="48"
-                decoding="async"
+                width={48}
+                height={48}
                 className="rounded-full ring-2 ring-transparent hover:ring-gray-300 dark:hover:ring-gray-600 transition-all"
                 src={user.photoURL}
-                style={{ color: 'transparent' }}
               />
             ) : (
               <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center ring-2 ring-transparent hover:ring-gray-300 dark:hover:ring-gray-600 transition-all">
@@ -143,19 +135,27 @@ export function Header({
               {/* User info header - Compact */}
               <div className="flex items-center gap-2 px-3 py-2">
                 {user?.photoURL ? (
-                  <img
+                  <Image
                     src={user.photoURL}
                     alt="User avatar"
+                    width={32}
+                    height={32}
                     className="w-8 h-8 rounded-full object-cover ring-1 ring-gray-200 dark:ring-gray-700"
                   />
                 ) : (
                   <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center ring-1 ring-gray-200 dark:ring-gray-700">
-                    <span className="text-white text-sm font-semibold">{getUserInitials()}</span>
+                    <span className="text-white text-sm font-semibold">
+                      {getUserInitials()}
+                    </span>
                   </div>
                 )}
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{getDisplayName()}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user?.email || ''}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                    {getDisplayName()}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    {user?.email || ''}
+                  </p>
                 </div>
               </div>
               <hr className="my-1 border-gray-200 dark:border-gray-700" />

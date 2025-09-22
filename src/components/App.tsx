@@ -96,11 +96,11 @@ export default function App() {
         <meta property="og:image" content="/images/logo.png" />
         <meta property="og:type" content="website" />
       </Head>
-      <div className="w-full min-h-svh relative overflow-hidden">
+      <div className="w-full min-h-svh relative">
         {user ? (
           <MainApp user={user} onLogout={() => {}} />
         ) : (
-          <AuthLayout type={showRegister ? "register" : "login"}>
+          <AuthLayout type={showRegister ? 'register' : 'login'}>
             {showRegister ? (
               <RegisterForm
                 onSuccess={() => setShowRegister(false)}

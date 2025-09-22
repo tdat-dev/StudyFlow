@@ -91,6 +91,40 @@ firebase emulators:start # Local Firebase development
 - Graceful fallback when API key missing or API fails
 - Chat history passed as `ChatTurn[]` with roles 'user'|'model'
 
+## Chat Feature Architecture
+
+### Layout System
+
+- **ChatScreen** main component with adaptive layout:
+  - EmptyState centered when no messages
+  - Input area positioned contextually (center for new chat, bottom for existing)
+  - Sidebar toggle with desktop/mobile responsive behavior
+- **Smart sidebar toggle**: `handleToggleSidebar()` detects screen size (1024px breakpoint)
+- **File attachment support**: Preview above input with drag-drop interface
+
+### Chat State Management
+
+- Session management via `currentChatId` and `chatSessions[]`
+- Auto-scroll to bottom with `messagesEndRef` and `scrollToBottom()`
+- Loading states for typing indicator and session operations
+- File attachment state with preview and removal
+
+### CSS Architecture
+
+Use predefined design tokens from `styles/theme-tokens.css`:
+
+- `.glass-surface` for headers/footers with backdrop blur
+- `.chat-bubble-user` / `.chat-bubble-ai` for message styling
+- `.chat-container` for main layout with proper scrolling
+- `.tint-[color]` classes for icon accents
+
+### Input Component Pattern
+
+- Simple textarea instead of contentEditable for reliability
+- Auto-resize with `autoResize()` function
+- `dir="ltr"` to prevent text direction issues
+- Proper padding/alignment: `py-3 px-2 leading-relaxed`
+
 ## Fast Refresh Best Practices
 
 - Use `useCallback` for async functions in `useEffect` dependencies

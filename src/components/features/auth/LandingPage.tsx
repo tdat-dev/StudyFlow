@@ -1,13 +1,12 @@
 import React from 'react';
-import { 
-  BookOpen, 
-  MessageCircle, 
-  Target, 
-  Clock, 
-  Brain, 
+import {
+  BookOpen,
+  MessageCircle,
+  Target,
+  Clock,
+  Brain,
   Zap,
   ArrowRight,
-  CheckCircle
 } from 'lucide-react';
 
 interface LandingPageProps {
@@ -19,41 +18,41 @@ export function LandingPage({ onShowLogin, onShowRegister }: LandingPageProps) {
   const features = [
     {
       icon: BookOpen,
-      title: "Flashcards Thông Minh",
-      description: "Học từ vựng hiệu quả với AI-powered flashcards"
+      title: 'Flashcards Thông Minh',
+      description: 'Học từ vựng hiệu quả với AI-powered flashcards',
     },
     {
       icon: MessageCircle,
-      title: "AI Tutor",
-      description: "Chat với AI để giải đáp mọi thắc mắc học tập"
+      title: 'AI Tutor',
+      description: 'Chat với AI để giải đáp mọi thắc mắc học tập',
     },
     {
       icon: Target,
-      title: "Theo Dõi Thói Quen",
-      description: "Xây dựng thói quen học tập bền vững"
+      title: 'Theo Dõi Thói Quen',
+      description: 'Xây dựng thói quen học tập bền vững',
     },
     {
       icon: Clock,
-      title: "Pomodoro Timer",
-      description: "Tập trung học tập với kỹ thuật Pomodoro"
+      title: 'Pomodoro Timer',
+      description: 'Tập trung học tập với kỹ thuật Pomodoro',
     },
     {
       icon: Brain,
-      title: "Học Tập Thông Minh",
-      description: "Phân tích tiến độ và đề xuất lộ trình học"
+      title: 'Học Tập Thông Minh',
+      description: 'Phân tích tiến độ và đề xuất lộ trình học',
     },
     {
       icon: Zap,
-      title: "Gamification",
-      description: "Kiếm XP, lên level và duy trì streak"
-    }
+      title: 'Gamification',
+      description: 'Kiếm XP, lên level và duy trì streak',
+    },
   ];
 
   const stats = [
-    { number: "10K+", label: "Học sinh" },
-    { number: "50K+", label: "Flashcards" },
-    { number: "95%", label: "Hài lòng" },
-    { number: "24/7", label: "Hỗ trợ" }
+    { number: '10K+', label: 'Học sinh' },
+    { number: '50K+', label: 'Flashcards' },
+    { number: '95%', label: 'Hài lòng' },
+    { number: '24/7', label: 'Hỗ trợ' },
   ];
 
   return (
@@ -98,14 +97,15 @@ export function LandingPage({ onShowLogin, onShowRegister }: LandingPageProps) {
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
               Học tập
               <span className="bg-gradient-to-r from-yellow-400 to-pink-400 bg-clip-text text-transparent">
-                {" "}thông minh
+                {' '}
+                thông minh
               </span>
               <br />
               cùng AI
             </h1>
             <p className="text-xl text-white/80 mb-8 max-w-3xl mx-auto leading-relaxed">
-              StudyFlow giúp bạn học tập hiệu quả hơn với flashcards AI, 
-              chatbot tutor và theo dõi thói quen học tập thông minh.
+              StudyFlow giúp bạn học tập hiệu quả hơn với flashcards AI, chatbot
+              tutor và theo dõi thói quen học tập thông minh.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
@@ -131,9 +131,7 @@ export function LandingPage({ onShowLogin, onShowRegister }: LandingPageProps) {
                 <div className="text-3xl md:text-4xl font-bold text-white mb-2">
                   {stat.number}
                 </div>
-                <div className="text-white/60">
-                  {stat.label}
-                </div>
+                <div className="text-white/60">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -153,9 +151,7 @@ export function LandingPage({ onShowLogin, onShowRegister }: LandingPageProps) {
                   <h3 className="text-xl font-semibold text-white mb-2">
                     {feature.title}
                   </h3>
-                  <p className="text-white/70">
-                    {feature.description}
-                  </p>
+                  <p className="text-white/70">{feature.description}</p>
                 </div>
               );
             })}
@@ -171,7 +167,8 @@ export function LandingPage({ onShowLogin, onShowRegister }: LandingPageProps) {
               Sẵn sàng bắt đầu hành trình học tập?
             </h2>
             <p className="text-white/80 mb-8 text-lg">
-              Tham gia cùng hàng nghìn học sinh đang sử dụng StudyFlow để học tập hiệu quả hơn.
+              Tham gia cùng hàng nghìn học sinh đang sử dụng StudyFlow để học
+              tập hiệu quả hơn.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button

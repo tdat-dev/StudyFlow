@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { MessageSquare, Copy, Download } from 'lucide-react';
-import Logo from '../../ui/Logo';
 import { Message } from '../../../types/chat';
 import { copyTranscript } from '../../../utils/transcript';
 import { LanguageSelector } from './LanguageSelector';

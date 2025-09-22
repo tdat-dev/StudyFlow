@@ -1,17 +1,14 @@
 import { db } from '../firebase/config';
-import { 
-  doc, 
-  getDoc, 
-  setDoc, 
-  updateDoc, 
-  increment, 
-  serverTimestamp,
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  increment,
   collection,
   query,
   where,
   getDocs,
-  orderBy,
-  limit
 } from 'firebase/firestore';
 
 export interface UserProgress {
@@ -67,7 +64,7 @@ export async function getUserProgress(userId: string): Promise<UserProgress> {
         xp: 0,
         lastActiveDate: new Date().toISOString().split('T')[0],
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
       await setDoc(progressRef, newProgress);
@@ -81,40 +78,41 @@ export async function getUserProgress(userId: string): Promise<UserProgress> {
 
 // Cập nhật progress hôm nay
 export async function updateTodayProgress(
-  userId: string, 
-  wordsLearned: number, 
-  studyTimeMinutes: number = 0
+  userId: string,
+  wordsLearned: number,
+  studyTimeMinutes: number = 0,
 ): Promise<UserProgress> {
   try {
     const progressRef = doc(db, 'user_progress', userId);
     const today = new Date().toISOString().split('T')[0];
-    
+
     // Lấy progress hiện tại
     const currentProgress = await getUserProgress(userId);
-    
+
     // Kiểm tra nếu là ngày mới
     const isNewDay = currentProgress.lastActiveDate !== today;
-    
+
     if (isNewDay) {
       // Reset progress hôm nay và cập nhật streak
-      const newStreak = currentProgress.lastActiveDate === 
-        new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0] 
-        ? currentProgress.streak + 1 
-        : 1;
+      const newStreak =
+        currentProgress.lastActiveDate ===
+        new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+          ? currentProgress.streak + 1
+          : 1;
 
       await updateDoc(progressRef, {
         todayProgress: wordsLearned,
         totalWordsLearned: increment(wordsLearned),
         streak: newStreak,
         lastActiveDate: today,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       });
     } else {
       // Cập nhật progress hiện tại
       await updateDoc(progressRef, {
         todayProgress: increment(wordsLearned),
         totalWordsLearned: increment(wordsLearned),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       });
     }
 
@@ -130,10 +128,10 @@ export async function updateTodayProgress(
 
 // Lưu daily stats
 async function saveDailyStats(
-  userId: string, 
-  date: string, 
-  wordsLearned: number, 
-  studyTimeMinutes: number
+  userId: string,
+  date: string,
+  wordsLearned: number,
+  studyTimeMinutes: number,
 ): Promise<void> {
   try {
     const statsRef = doc(db, 'daily_stats', `${userId}_${date}`);
@@ -143,7 +141,7 @@ async function saveDailyStats(
       await updateDoc(statsRef, {
         wordsLearned: increment(wordsLearned),
         studyTime: increment(studyTimeMinutes),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       });
     } else {
       await setDoc(statsRef, {
@@ -154,7 +152,7 @@ async function saveDailyStats(
         missionsCompleted: 0,
         xpEarned: 0,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       });
     }
   } catch (error) {
@@ -164,18 +162,21 @@ async function saveDailyStats(
 }
 
 // Cập nhật XP và level
-export async function updateXP(userId: string, xpEarned: number): Promise<UserProgress> {
+export async function updateXP(
+  userId: string,
+  xpEarned: number,
+): Promise<UserProgress> {
   try {
     const progressRef = doc(db, 'user_progress', userId);
     const currentProgress = await getUserProgress(userId);
-    
+
     const newXP = currentProgress.xp + xpEarned;
     const newLevel = Math.floor(newXP / 100) + 1; // Mỗi 100 XP = 1 level
 
     await updateDoc(progressRef, {
       xp: newXP,
       level: newLevel,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     });
 
     return await getUserProgress(userId);
@@ -197,11 +198,11 @@ export async function getWeeklyStats(userId: string): Promise<WeeklyStats> {
       collection(db, 'daily_stats'),
       where('userId', '==', userId),
       where('date', '>=', weekStart.toISOString().split('T')[0]),
-      where('date', '<=', weekEnd.toISOString().split('T')[0])
+      where('date', '<=', weekEnd.toISOString().split('T')[0]),
     );
 
     const statsSnap = await getDocs(statsQuery);
-    
+
     let totalWords = 0;
     let totalStudyTime = 0;
     let totalMissions = 0;
@@ -224,7 +225,7 @@ export async function getWeeklyStats(userId: string): Promise<WeeklyStats> {
       totalStudyTime,
       totalMissions,
       totalXP,
-      averageDailyWords: dayCount > 0 ? Math.round(totalWords / dayCount) : 0
+      averageDailyWords: dayCount > 0 ? Math.round(totalWords / dayCount) : 0,
     };
   } catch (error) {
     console.error('Error getting weekly stats:', error);
@@ -233,13 +234,16 @@ export async function getWeeklyStats(userId: string): Promise<WeeklyStats> {
 }
 
 // Cập nhật daily goal
-export async function updateDailyGoal(userId: string, newGoal: number): Promise<UserProgress> {
+export async function updateDailyGoal(
+  userId: string,
+  newGoal: number,
+): Promise<UserProgress> {
   try {
     const progressRef = doc(db, 'user_progress', userId);
-    
+
     await updateDoc(progressRef, {
       dailyGoal: newGoal,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     });
 
     return await getUserProgress(userId);

@@ -1,15 +1,15 @@
 import React from 'react';
 import { Message } from '../../types/chat';
-import { 
-  Bot, 
-  Clock, 
-  MessageSquare, 
-  Zap, 
-  BookOpen, 
+import {
+  Bot,
+  Clock,
+  MessageSquare,
+  Zap,
+  BookOpen,
   Target,
   TrendingUp,
   Star,
-  Lightbulb
+  Lightbulb,
 } from 'lucide-react';
 
 interface ChatInfoPanelProps {
@@ -18,43 +18,46 @@ interface ChatInfoPanelProps {
   className?: string;
 }
 
-export function ChatInfoPanel({ 
-  messages, 
+export function ChatInfoPanel({
+  messages,
   currentSessionTitle = 'Cuộc trò chuyện mới',
-  className = '' 
+  className = '',
 }: ChatInfoPanelProps) {
   const userMessages = messages.filter(m => m.sender === 'user');
-  const aiMessages = messages.filter(m => m.sender === 'ai');
   const totalMessages = messages.length;
-  const sessionDuration = messages.length > 0 
-    ? Math.round((new Date().getTime() - new Date(messages[0].timestamp).getTime()) / (1000 * 60))
-    : 0;
+  const sessionDuration =
+    messages.length > 0
+      ? Math.round(
+          (new Date().getTime() - new Date(messages[0].timestamp).getTime()) /
+            (1000 * 60),
+        )
+      : 0;
 
   const quickActions = [
     {
       icon: BookOpen,
       title: 'Học từ vựng',
       description: 'Hỏi về nghĩa và cách sử dụng từ',
-      prompt: 'Giải thích nghĩa của từ "serendipity" và cách sử dụng trong câu'
+      prompt: 'Giải thích nghĩa của từ "serendipity" và cách sử dụng trong câu',
     },
     {
       icon: Target,
       title: 'Luyện tập',
       description: 'Làm bài tập và quiz',
-      prompt: 'Tạo cho tôi một bài quiz về thì hiện tại hoàn thành'
+      prompt: 'Tạo cho tôi một bài quiz về thì hiện tại hoàn thành',
     },
     {
       icon: Zap,
       title: 'Thử thách',
       description: 'Thử thách nhanh 5 phút',
-      prompt: 'Tạo thử thách 5 phút về từ vựng tiếng Anh'
+      prompt: 'Tạo thử thách 5 phút về từ vựng tiếng Anh',
     },
     {
       icon: Lightbulb,
       title: 'Mẹo học',
       description: 'Mẹo và kỹ thuật học tập',
-      prompt: 'Chia sẻ mẹo ghi nhớ từ vựng hiệu quả'
-    }
+      prompt: 'Chia sẻ mẹo ghi nhớ từ vựng hiệu quả',
+    },
   ];
 
   const stats = [
@@ -62,24 +65,26 @@ export function ChatInfoPanel({
       icon: MessageSquare,
       label: 'Tin nhắn',
       value: totalMessages,
-      color: 'text-blue-400'
+      color: 'text-blue-400',
     },
     {
       icon: Clock,
       label: 'Thời gian',
       value: `${sessionDuration}m`,
-      color: 'text-green-400'
+      color: 'text-green-400',
     },
     {
       icon: TrendingUp,
       label: 'Tương tác',
       value: userMessages.length,
-      color: 'text-purple-400'
-    }
+      color: 'text-purple-400',
+    },
   ];
 
   return (
-    <div className={`bg-white/5 backdrop-blur-md border-l border-white/10 h-full flex flex-col chat-info-panel ${className}`}>
+    <div
+      className={`bg-white/5 backdrop-blur-md border-l border-white/10 h-full flex flex-col chat-info-panel ${className}`}
+    >
       {/* Header */}
       <div className="p-4 border-b border-white/10">
         <div className="flex items-center gap-3">
@@ -99,10 +104,14 @@ export function ChatInfoPanel({
         <div className="grid grid-cols-3 gap-3">
           {stats.map((stat, index) => (
             <div key={index} className="text-center">
-              <div className={`w-8 h-8 mx-auto mb-2 rounded-lg bg-white/10 flex items-center justify-center ${stat.color}`}>
+              <div
+                className={`w-8 h-8 mx-auto mb-2 rounded-lg bg-white/10 flex items-center justify-center ${stat.color}`}
+              >
                 <stat.icon className="w-4 h-4" />
               </div>
-              <div className="text-lg font-semibold text-white">{stat.value}</div>
+              <div className="text-lg font-semibold text-white">
+                {stat.value}
+              </div>
               <div className="text-xs text-white/60">{stat.label}</div>
             </div>
           ))}
@@ -112,7 +121,9 @@ export function ChatInfoPanel({
       {/* Quick Actions */}
       <div className="flex-1 overflow-y-auto scrollbar-custom">
         <div className="p-4">
-          <h4 className="text-sm font-medium text-white mb-3">Hành động nhanh</h4>
+          <h4 className="text-sm font-medium text-white mb-3">
+            Hành động nhanh
+          </h4>
           <div className="space-y-2">
             {quickActions.map((action, index) => (
               <div
@@ -144,10 +155,12 @@ export function ChatInfoPanel({
           <div className="flex items-start gap-2">
             <Star className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />
             <div>
-              <h5 className="text-sm font-medium text-white mb-1">Mẹo sử dụng</h5>
+              <h5 className="text-sm font-medium text-white mb-1">
+                Mẹo sử dụng
+              </h5>
               <p className="text-xs text-white/80 leading-relaxed">
-                Sử dụng Shift + Enter để xuống dòng, Enter để gửi tin nhắn. 
-                Đính kèm file để AI phân tích nội dung.
+                Sử dụng Shift + Enter để xuống dòng, Enter để gửi tin nhắn. Đính
+                kèm file để AI phân tích nội dung.
               </p>
             </div>
           </div>

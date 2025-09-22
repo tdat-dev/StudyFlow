@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { X, MessageSquare, Minus, Maximize2, Minimize2 } from 'lucide-react';
 import { Message, ChatSession, User } from '../../../types/chat';
 import { FileContent } from '../../../services/fileProcessor';
@@ -100,6 +100,7 @@ export function ChatWidget({ user }: ChatWidgetProps) {
       const newSession: ChatSession = {
         id: newSessionId,
         title: 'Cuộc trò chuyện mới',
+        userId: user.uid || '',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         messageCount: 0,

@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { MainApp } from '../components/MainApp';
-import { LoginForm, RegisterForm, LandingPage, AuthLayout } from '../components/features/auth';
+import {
+  RegisterForm,
+  LandingPage,
+  AuthLayout,
+} from '../components/features/auth';
 import { LoadingScreen } from '../components/ui/LoadingScreen';
 import { User } from '../types/chat';
 import { auth } from '../services/firebase/config';
@@ -11,15 +15,16 @@ export default function Home() {
   const [showRegister, setShowRegister] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
+    const unsubscribe = auth.onAuthStateChanged(firebaseUser => {
       if (firebaseUser) {
         // Người dùng đã đăng nhập
-        firebaseUser.getIdToken().then((accessToken) => {
+        firebaseUser.getIdToken().then(accessToken => {
           setUser({
+            uid: firebaseUser.uid,
             name: firebaseUser.displayName || 'User',
             email: firebaseUser.email || '',
             accessToken,
-            photoURL: firebaseUser.photoURL || undefined
+            photoURL: firebaseUser.photoURL || undefined,
           });
         });
       } else {
@@ -47,7 +52,7 @@ export default function Home() {
   }
 
   return (
-    <div className="w-full min-h-svh relative overflow-hidden">
+    <div className="w-full min-h-svh relative">
       {user ? (
         <MainApp user={user} onLogout={handleLogout} />
       ) : showRegister ? (

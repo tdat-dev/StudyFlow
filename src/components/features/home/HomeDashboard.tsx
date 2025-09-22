@@ -3,7 +3,11 @@ import React, { useState, useEffect } from 'react';
 import Button from '../../ui/button';
 import { DailyTipCard } from '../../ui/DailyTipCard';
 import { AchievementPreview } from '../../ui/AchievementPreview';
-import { useDashboardData, useQuickActions, useCTAActions } from '../../../hooks/useDashboardData';
+import {
+  useDashboardData,
+  useQuickActions,
+  useCTAActions,
+} from '../../../hooks/useDashboardData';
 import {
   Card,
   CardContent,
@@ -45,16 +49,13 @@ interface HomeDashboardProps {
   onTabChange?: (tab: string) => void;
 }
 
-export function HomeDashboard({
-  user,
-  onTabChange,
-}: HomeDashboardProps) {
+export function HomeDashboard({ user, onTabChange }: HomeDashboardProps) {
   // Use real dashboard data
   const {
     userProgress,
     dailyMissions: realDailyMissions,
     upcomingAchievements,
-    completeMission: completeMissionAction
+    completeMission: completeMissionAction,
   } = useDashboardData(user);
 
   const { handleQuickAction } = useQuickActions(user);
@@ -62,16 +63,16 @@ export function HomeDashboard({
 
   // Local state for UI
   const [profile, setProfile] = useState(user);
-  
+
   // Use real daily missions or fallback to mock data
   const dailyMissions = realDailyMissions?.missions || [
-    { id: 1, text: "Ôn tập 5 từ vựng đã học", completed: false, xp: 10 },
-    { id: 2, text: "Làm quiz kiểm tra nhanh", completed: false, xp: 15 },
-    { id: 3, text: "Thử thách 5 phút", completed: false, xp: 8 },
-    { id: 4, text: "Hoàn thành 1 Pomodoro", completed: false, xp: 20 },
-    { id: 5, text: "Cập nhật thói quen học tập", completed: false, xp: 12 }
+    { id: 1, text: 'Ôn tập 5 từ vựng đã học', completed: false, xp: 10 },
+    { id: 2, text: 'Làm quiz kiểm tra nhanh', completed: false, xp: 15 },
+    { id: 3, text: 'Thử thách 5 phút', completed: false, xp: 8 },
+    { id: 4, text: 'Hoàn thành 1 Pomodoro', completed: false, xp: 20 },
+    { id: 5, text: 'Cập nhật thói quen học tập', completed: false, xp: 12 },
   ];
-  
+
   const completedMissions = realDailyMissions?.completedCount || 0;
   const [showMissionComplete, setShowMissionComplete] = useState(false);
 
@@ -119,9 +120,8 @@ export function HomeDashboard({
     }
   };
 
-
   return (
-    <div className="h-full w-full bg-gradient-to-b from-slate-950 to-slate-900 p-1 xl:p-2 flex flex-col">
+    <div className="h-full w-full bg-gradient-to-b from-slate-950 to-slate-900 p-1 xl:p-2 flex flex-col overflow-y-auto scrollbar-glass">
       {/* Header - Compact */}
       <div className="mb-2 xl:mb-3 flex-shrink-0">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -136,7 +136,10 @@ export function HomeDashboard({
           <div className="mt-1 sm:mt-0">
             <div className="flex items-center gap-2">
               {(profile.streak || 0) > 0 && (
-                <div className="flex items-center gap-1 text-yellow-400" title={`${profile.streak} ngày liên tiếp`}>
+                <div
+                  className="flex items-center gap-1 text-yellow-400"
+                  title={`${profile.streak} ngày liên tiếp`}
+                >
                   <span className="text-lg">🔥</span>
                   <span className="text-xs font-medium">{profile.streak}</span>
                 </div>
@@ -157,7 +160,7 @@ export function HomeDashboard({
       </div>
 
       {/* Main Content - Single Column Layout */}
-      <div className="flex-1">
+      <div className="flex-1 overflow-y-auto scrollbar-glass">
         {/* Main Content */}
         <div className="space-y-3 xl:space-y-4 max-w-full pb-6">
           {/* Progress Today - Full width */}
@@ -183,7 +186,12 @@ export function HomeDashboard({
                     {Math.round(progressPercentage)}% hoàn thành
                   </span>
                   <span className="text-white/70">
-                    Còn {Math.max(0, (profile.dailyGoal || 20) - (profile.todayProgress || 0))} từ
+                    Còn{' '}
+                    {Math.max(
+                      0,
+                      (profile.dailyGoal || 20) - (profile.todayProgress || 0),
+                    )}{' '}
+                    từ
                   </span>
                 </div>
               </div>
@@ -358,11 +366,15 @@ export function HomeDashboard({
               {/* Mission Progress */}
               <div className="mb-4">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-white/70">Tiến trình nhiệm vụ</span>
-                  <span className="text-sm text-white/70">{completedMissions}/5 hoàn thành</span>
+                  <span className="text-sm text-white/70">
+                    Tiến trình nhiệm vụ
+                  </span>
+                  <span className="text-sm text-white/70">
+                    {completedMissions}/5 hoàn thành
+                  </span>
                 </div>
                 <div className="w-full bg-white/10 rounded-full h-2">
-                  <div 
+                  <div
                     className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500"
                     style={{ width: `${(completedMissions / 5) * 100}%` }}
                   />
@@ -371,30 +383,40 @@ export function HomeDashboard({
 
               {/* Mission List */}
               <div className="space-y-3">
-                {dailyMissions.map((mission) => (
-                  <div 
-                    key={mission.id} 
+                {dailyMissions.map(mission => (
+                  <div
+                    key={mission.id}
                     className={`flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-all duration-200 ${
-                      mission.completed ? 'bg-green-500/10 border border-green-500/20' : ''
+                      mission.completed
+                        ? 'bg-green-500/10 border border-green-500/20'
+                        : ''
                     }`}
                   >
-                    <button 
+                    <button
                       onClick={() => toggleMission(mission.id.toString())}
                       className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 hover:scale-110 flex-shrink-0 ${
-                        mission.completed 
-                          ? 'border-green-400 bg-green-400' 
+                        mission.completed
+                          ? 'border-green-400 bg-green-400'
                           : 'border-white/30 hover:border-blue-400'
                       }`}
                     >
-                      {mission.completed && <Check className="h-3 w-3 text-white" />}
+                      {mission.completed && (
+                        <Check className="h-3 w-3 text-white" />
+                      )}
                     </button>
-                    <span className={`text-sm transition-all duration-200 break-words ${
-                      mission.completed ? 'text-green-300 line-through' : 'text-white/80'
-                    }`}>
+                    <span
+                      className={`text-sm transition-all duration-200 break-words ${
+                        mission.completed
+                          ? 'text-green-300 line-through'
+                          : 'text-white/80'
+                      }`}
+                    >
                       {mission.text}
                     </span>
                     {mission.completed && (
-                      <span className="text-xs text-green-400 font-medium">+{mission.xp} XP</span>
+                      <span className="text-xs text-green-400 font-medium">
+                        +{mission.xp} XP
+                      </span>
                     )}
                   </div>
                 ))}
@@ -403,13 +425,17 @@ export function HomeDashboard({
               {/* Completion Messages */}
               {showMissionComplete && (
                 <div className="mt-3 p-2 bg-green-500/20 border border-green-500/30 rounded-lg text-center animate-pulse">
-                  <span className="text-sm text-green-300">🎉 Nhiệm vụ hoàn thành! +XP</span>
+                  <span className="text-sm text-green-300">
+                    🎉 Nhiệm vụ hoàn thành! +XP
+                  </span>
                 </div>
               )}
-              
+
               {completedMissions === 5 && (
                 <div className="mt-3 p-3 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-lg text-center">
-                  <span className="text-sm text-yellow-300 font-medium">🏆 Tuyệt vời! Bạn đã hoàn thành tất cả nhiệm vụ hôm nay!</span>
+                  <span className="text-sm text-yellow-300 font-medium">
+                    🏆 Tuyệt vời! Bạn đã hoàn thành tất cả nhiệm vụ hôm nay!
+                  </span>
                 </div>
               )}
             </CardContent>

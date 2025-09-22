@@ -2,7 +2,10 @@ import { useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../services/firebase/config';
 import { User } from '../types/chat';
-import { getUserProfile, updateUserProfile } from '../services/firebase/firestore';
+import {
+  getUserProfile,
+  updateUserProfile,
+} from '../services/firebase/firestore';
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -10,24 +13,25 @@ export function useAuth() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async firebaseUser => {
       setLoading(true);
-      
+
       try {
         if (firebaseUser) {
           // Người dùng đã đăng nhập
           const token = await firebaseUser.getIdToken();
-          
+
           // Lấy thông tin profile từ Firestore
           const profile = await getUserProfile(firebaseUser.uid);
-          
+
           if (profile) {
             // Nếu đã có profile
             setUser({
+              uid: firebaseUser.uid,
               name: profile.name || firebaseUser.displayName || 'User',
               email: profile.email || firebaseUser.email || '',
               accessToken: token,
-              photoURL: profile.photoURL || firebaseUser.photoURL || undefined
+              photoURL: profile.photoURL || firebaseUser.photoURL || undefined,
             });
           } else {
             // Nếu chưa có profile, tạo mới
@@ -44,16 +48,17 @@ export function useAuth() {
               dailyGoal: 20,
               totalStudyTime: 0,
               isPremium: false,
-              createdAt: new Date().toISOString()
+              createdAt: new Date().toISOString(),
             };
-            
+
             await updateUserProfile(firebaseUser.uid, newUser);
-            
+
             setUser({
+              uid: firebaseUser.uid,
               name: newUser.name,
               email: newUser.email,
               accessToken: token,
-              photoURL: newUser.photoURL
+              photoURL: newUser.photoURL,
             });
           }
         } else {
@@ -75,7 +80,7 @@ export function useAuth() {
 
   const updateUser = (userData: Partial<User>) => {
     if (!user) return;
-    
+
     setUser(prevUser => {
       if (!prevUser) return null;
       return { ...prevUser, ...userData };
@@ -86,6 +91,6 @@ export function useAuth() {
     user,
     loading,
     error,
-    updateUser
+    updateUser,
   };
 }
