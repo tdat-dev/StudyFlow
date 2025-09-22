@@ -20,6 +20,7 @@ export interface SessionResult {
 }
 
 export interface UserProfile {
+  uid: string;
   name: string;
   email: string;
   accessToken: string;

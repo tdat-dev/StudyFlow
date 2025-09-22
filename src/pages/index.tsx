@@ -6,40 +6,37 @@ import {
   AuthLayout,
 } from '../components/features/auth';
 import { LoadingScreen } from '../components/ui/LoadingScreen';
-import { User } from '../types/chat';
-import { auth } from '../services/firebase/config';
+import { useAuth } from '../contexts/AuthContext';
+import { getCurrentAccessToken } from '../utils/auth-helpers';
 
 export default function Home() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
   const [showRegister, setShowRegister] = useState(false);
+  const [componentUser, setComponentUser] = useState<any>(null);
+  const { user, loading, signOut } = useAuth();
 
+  // Convert AuthContext user to component user format when user changes
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(firebaseUser => {
-      if (firebaseUser) {
-        // Người dùng đã đăng nhập
-        firebaseUser.getIdToken().then(accessToken => {
-          setUser({
-            uid: firebaseUser.uid,
-            name: firebaseUser.displayName || 'User',
-            email: firebaseUser.email || '',
-            accessToken,
-            photoURL: firebaseUser.photoURL || undefined,
-          });
+    const updateComponentUser = async () => {
+      if (user) {
+        const accessToken = await getCurrentAccessToken();
+        setComponentUser({
+          uid: user.uid,
+          name: user.name,
+          email: user.email,
+          accessToken: accessToken || '',
+          photoURL: user.photoURL,
         });
       } else {
-        // Người dùng đã đăng xuất
-        setUser(null);
+        setComponentUser(null);
       }
-      setLoading(false);
-    });
+    };
 
-    return () => unsubscribe();
-  }, []);
+    updateComponentUser();
+  }, [user]);
 
   const handleLogout = async () => {
     try {
-      await auth.signOut();
+      await signOut();
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
         console.error('Error signing out:', error);
@@ -53,8 +50,8 @@ export default function Home() {
 
   return (
     <div className="w-full min-h-svh relative">
-      {user ? (
-        <MainApp user={user} onLogout={handleLogout} />
+      {componentUser ? (
+        <MainApp user={componentUser} onLogout={handleLogout} />
       ) : showRegister ? (
         <AuthLayout type="register">
           <RegisterForm

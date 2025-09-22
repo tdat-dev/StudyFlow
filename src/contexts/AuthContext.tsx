@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../services/firebase/config';
 import { firebase } from '../services/firebase/client';
@@ -28,7 +34,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     // Listen for auth state changes
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async firebaseUser => {
       if (firebaseUser) {
         try {
           await loadUserProfile(firebaseUser as FirebaseUser);
@@ -54,6 +60,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     if (profile) {
       setUser({
+        uid: firebaseUser.uid,
         name: profile.name || firebaseUser.displayName || 'User',
         email: profile.email || firebaseUser.email || '',
         accessToken: token,
@@ -61,19 +68,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
         todayProgress: profile.todayProgress || 0,
         dailyGoal: profile.dailyGoal || 20,
         totalWordsLearned: profile.totalWordsLearned || 0,
-        photoURL: profile.photoURL || firebaseUser.photoURL || undefined
+        photoURL: profile.photoURL || firebaseUser.photoURL || undefined,
       });
     } else {
       // Create default profile if it doesn't exist
       const defaultProfile: UserProfile = {
-        name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+        uid: firebaseUser.uid,
+        name:
+          firebaseUser.displayName ||
+          firebaseUser.email?.split('@')[0] ||
+          'User',
         email: firebaseUser.email || '',
         accessToken: token,
         streak: 0,
         todayProgress: 0,
         dailyGoal: 20,
         totalWordsLearned: 0,
-        photoURL: firebaseUser.photoURL || undefined
+        photoURL: firebaseUser.photoURL || undefined,
       };
 
       await firebase.firestore.updateProfile(firebaseUser.uid, defaultProfile);
@@ -84,7 +95,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signIn = withErrorHandling(async (email: string, password: string) => {
     setLoading(true);
     const result = await firebase.auth.signInWithPassword(email, password);
-    
+
     if (result.error) {
       throw result.error;
     }
@@ -93,7 +104,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signUp = withErrorHandling(async (email: string, password: string) => {
     setLoading(true);
     const result = await firebase.auth.signUp(email, password);
-    
+
     if (result.error) {
       throw result.error;
     }
@@ -102,7 +113,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signInWithGoogle = withErrorHandling(async () => {
     setLoading(true);
     const result = await firebase.auth.signInWithOAuth({ provider: 'google' });
-    
+
     if (result.error) {
       throw result.error;
     }
@@ -113,13 +124,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setUser(null);
   });
 
-  const updateUserProfile = withErrorHandling(async (data: Partial<UserProfile>) => {
-    if (!user) return;
-    
-    await firebase.firestore.updateProfile(auth.currentUser!.uid, data);
-    
-    setUser(prev => prev ? { ...prev, ...data } : null);
-  });
+  const updateUserProfile = withErrorHandling(
+    async (data: Partial<UserProfile>) => {
+      if (!user) return;
+
+      await firebase.firestore.updateProfile(auth.currentUser!.uid, data);
+
+      setUser(prev => (prev ? { ...prev, ...data } : null));
+    },
+  );
 
   const value = {
     user,
@@ -128,7 +141,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     signUp,
     signInWithGoogle,
     signOut,
-    updateUserProfile
+    updateUserProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -136,10 +149,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  
+
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
-  
+
   return context;
 }

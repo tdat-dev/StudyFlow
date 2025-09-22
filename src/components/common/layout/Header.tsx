@@ -60,9 +60,13 @@ export function Header({ user, onLogout, onNavigateToProfile }: HeaderProps) {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setIsDropdownOpen(false);
-    onLogout();
+    try {
+      await onLogout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   const handleFullRefresh = () => {
