@@ -38,6 +38,7 @@ export function ChatWidget({ user }: ChatWidgetProps) {
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
+  const [attachedFile, setAttachedFile] = useState<FileContent | null>(null);
 
   // Auto-scroll đến tin nhắn mới nhất
   const scrollToBottom = useCallback(() => {
@@ -131,8 +132,7 @@ export function ChatWidget({ user }: ChatWidgetProps) {
   }, [currentChatId, widgetState, loadChatHistory]);
 
   const handleFileAttach = (file: FileContent | null) => {
-    // TODO: Implement file handling logic
-    console.log('File attached:', file);
+    setAttachedFile(file);
   };
 
   const handleSendMessage = async (content: string) => {
@@ -388,6 +388,7 @@ export function ChatWidget({ user }: ChatWidgetProps) {
             onFileAttach={handleFileAttach}
             loading={loading}
             disabled={!currentChatId}
+            attachedFile={attachedFile}
           />
         </div>
       </div>

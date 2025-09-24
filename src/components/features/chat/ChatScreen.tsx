@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import NextImage from 'next/image';
-import { X, File, FileText, Image } from 'lucide-react';
 import { Message, ChatSession, User } from '../../../types/chat';
 import { auth } from '../../../services/firebase/config';
 import { studyFlowWelcomeMessage } from './welcome-config';
@@ -91,24 +89,6 @@ export function ChatScreen({ user }: ChatScreenProps) {
   // Tạo unique ID
   const generateUniqueId = (prefix: string = 'msg') => {
     return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-  };
-
-  // Lấy icon và class phù hợp cho file
-  const getFileIcon = (file: FileContent) => {
-    if (file.type.startsWith('image/')) {
-      // eslint-disable-next-line jsx-a11y/alt-text
-      return { icon: <Image className="h-4 w-4" />, className: 'image' };
-    }
-    if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
-      return { icon: <File className="h-4 w-4" />, className: 'pdf' };
-    }
-    if (
-      file.type.includes('text') ||
-      file.name.match(/\.(txt|md|js|ts|css|html|json)$/i)
-    ) {
-      return { icon: <FileText className="h-4 w-4" />, className: 'text' };
-    }
-    return { icon: <File className="h-4 w-4" />, className: '' };
   };
 
   // Load chat sessions
@@ -499,51 +479,6 @@ export function ChatScreen({ user }: ChatScreenProps) {
         {/* Input Area with glass effect */}
         <div className="flex-shrink-0 py-4 border-t glass-surface border-gray-200 dark:border-gray-700">
           {/* File Preview - Show right above input */}
-          {attachedFile && (
-            <div className="px-4 lg:px-6 mb-3">
-              <div className="content-column">
-                <div className="attached-file-preview">
-                  <div className="attached-file-content">
-                    {attachedFile.preview ? (
-                      <NextImage
-                        src={attachedFile.preview}
-                        alt={attachedFile.name}
-                        width={100}
-                        height={100}
-                        className="attached-file-image"
-                      />
-                    ) : (
-                      (() => {
-                        const fileIconData = getFileIcon(attachedFile);
-                        return (
-                          <div
-                            className={`attached-file-icon ${fileIconData.className}`}
-                          >
-                            {fileIconData.icon}
-                          </div>
-                        );
-                      })()
-                    )}
-                    <div className="attached-file-info">
-                      <div className="attached-file-name">
-                        {attachedFile.name}
-                      </div>
-                      <div className="attached-file-size">
-                        {(attachedFile.size / 1024).toFixed(1)}KB
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setAttachedFile(null)}
-                      className="attached-file-remove"
-                      title="Xóa file"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
 
           <div className="composer-container px-4 lg:px-6">
             <ChatInput

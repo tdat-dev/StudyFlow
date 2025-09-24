@@ -5,6 +5,16 @@ export interface Message {
   content: string;
   sender: 'user' | 'ai';
   timestamp: string;
+  attachments?: MessageAttachment[];
+}
+
+export interface MessageAttachment {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  content: string; // Base64 hoặc text content
+  downloadUrl?: string; // URL để download file
 }
 
 export interface ChatSession {
