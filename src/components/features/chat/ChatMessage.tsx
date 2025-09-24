@@ -1,6 +1,7 @@
 import React from 'react';
 import { Bot, User, Copy } from 'lucide-react';
 import { Message } from '../../../types/chat';
+import { DownloadButton } from '../../ui/DownloadButton';
 
 // Định nghĩa hàm formatTime trong component
 function formatTime(dateString: string): string {
@@ -73,17 +74,22 @@ export function ChatMessage({ message }: ChatMessageProps) {
               {message.content}
             </p>
 
-            {/* Copy button - chỉ hiển thị cho tin nhắn AI */}
+            {/* Action buttons - chỉ hiển thị cho tin nhắn AI */}
             {message.sender === 'ai' && (
-              <button
-                onClick={handleCopy}
-                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:opacity-80 focus-visible:ring-2 rounded-lg bg-gray-100 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                title="Copy tin nhắn"
-              >
-                <Copy
-                  className="h-3 w-3 text-gray-500 dark:text-gray-400"
+              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-1">
+                <DownloadButton
+                  content={message.content}
+                  messageId={message.id}
+                  className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
                 />
-              </button>
+                <button
+                  onClick={handleCopy}
+                  className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  title="Copy tin nhắn"
+                >
+                  <Copy className="h-3 w-3 text-gray-500 dark:text-gray-400" />
+                </button>
+              </div>
             )}
           </div>
 
