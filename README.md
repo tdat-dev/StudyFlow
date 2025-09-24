@@ -1,35 +1,98 @@
-## StudyFlow
+## StudyFlow – AI-Powered Study Companion (Next.js + Firebase)
 
-Ứng dụng học tập thông minh kết hợp AI Tutor, Flashcards và Pomodoro, giúp bạn học nhanh – nhớ lâu – luyện tập đều đặn mỗi ngày.
+StudyFlow is a production-grade web app that helps learners practice and track their progress with an AI tutor, flashcards, habit tracking, and a Pomodoro timer. It supports rich file understanding (images, PDF, Word, Excel/CSV, code/HTML) powered by Google Gemini.
 
-### Điểm nổi bật của ứng dụng
+### Highlights
 
-- **AI Tutor (tiếng Việt thân thiện)**: Hỏi đáp đa môn học, giải thích từng bước, gợi ý bài tập và ví dụ thực tế.
-- **Flashcards tạo bằng AI**: Sinh thẻ theo môn/chủ đề, có ví dụ và bản dịch; lọc trùng, đa dạng từ vựng và hỗ trợ nhiều ngôn ngữ mặt trước.
-- **Luyện tập & theo dõi tiến độ**: Học thẻ, đánh dấu đã nhớ, đếm tổng số từ đã học, streak ngày học.
-- **Pomodoro hiện đại**: Tập trung theo phiên, tự động ghi nhận thời gian học.
-- **Habit tracker**: Tạo, theo dõi, hoàn thành thói quen học mỗi ngày.
-- **Giao diện đẹp, responsive, dark mode**: Dùng tốt trên desktop và mobile.
+- AI Tutor (Gemini) with file analysis and downloads
+- Flashcards with progress tracking
+- Habits and Pomodoro integrated into daily learning
+- Firebase Auth (Email/Password + Google), Firestore, Hosting
+- TypeScript strict, TailwindCSS, accessible dark UI
 
-### Công nghệ & kiến trúc
+---
 
-- **Frontend**: Next.js 14, React 18, Tailwind CSS, shadcn/ui, Lucide Icons.
-- **AI**: Google Gemini (qua Google AI Studio).
-- **Backend-as-a-Service**: Firebase Auth + Firestore + Firebase Hosting.
-- **Cấu trúc mã**: Tổ chức theo tính năng (`src/components/features/*`), services riêng (`src/services/*`), context/hooks dùng lại.
-- **Xuất tĩnh**: Cấu hình `next.config.js` dùng `output: 'export'` để deploy Firebase Hosting.
+### Table of Contents
 
-### Bắt đầu nhanh
+- Overview
+- Architecture & Tech Stack
+- Project Structure
+- Features
+- Firestore Data Model
+- Environment Variables
+- Local Development
+- Testing & Quality
+- Build & Deployment
+- Security & Privacy
+- Troubleshooting
+- Roadmap
+- Contributing
+- License
 
-Yêu cầu: Node.js 18+, tài khoản Firebase, khóa API Gemini.
+---
 
-1. Cài phụ thuộc
+### Overview
 
-```bash
-npm install
+StudyFlow provides a unified learning experience: converse with an AI tutor, upload files for AI analysis, practice flashcards, track habits, and stay focused using Pomodoro.
+
+---
+
+### Architecture & Tech Stack
+
+- Next.js 14, React 18, TypeScript
+- TailwindCSS, design tokens, dark theme
+- Firebase: Auth, Firestore, Hosting
+- Google Gemini API for chat, file/image analysis
+- ESLint + Prettier, Vitest + React Testing Library
+
+---
+
+### Project Structure
+
+```
+src/
+  components/
+    ui/            # Reusable UI
+    features/      # Feature modules (auth, chat, flashcards, habits, pomodoro, profile)
+  contexts/        # React Context providers
+  hooks/           # Custom hooks
+  services/        # Firebase, AI, file processing
+  types/           # Global TS types
+  utils/           # Helpers
+  styles/          # CSS and theme
+pages/             # Next.js pages
+public/            # Static assets
 ```
 
-2. Tạo file `.env.local` và điền biến môi trường:
+---
+
+### Features
+
+1. AI Chat Tutor
+   - Drag & drop uploads, file previews
+   - Image analysis (Vision), PDF/Word/Excel parsing, code/HTML review
+   - Download AI-generated code/text as files
+
+2. Authentication
+   - Firebase Auth (Email/Password, Google)
+   - Protected routes and global `AuthContext`
+
+3. Flashcards, Habits, Pomodoro, Profile & Dashboard
+
+---
+
+### Firestore Data Model
+
+- `profiles` – user profiles and settings
+- `flashcard_decks` – decks and cards
+- `habits` – user habits and streaks
+- `progress` – daily progress tracking
+
+Indexes: `firestore.indexes.json` · Rules: `firestore.rules`
+
+---
+
+### Environment Variables (.env.local)
 
 ```bash
 # Firebase
@@ -40,31 +103,88 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
 NEXT_PUBLIC_FIREBASE_APP_ID=
 
-# Gemini AI
+# Gemini
 NEXT_PUBLIC_GEMINI_API_KEY=
-NEXT_PUBLIC_GEMINI_MODEL=gemini-1.5-flash
 ```
 
-3. Chạy dev
+See `GEMINI_SETUP_GUIDE.md` for setup details and best practices.
+
+---
+
+### Local Development
 
 ```bash
-npm run dev
+npm install
+npm run dev   # http://localhost:3000
 ```
 
-Mở `http://localhost:3000` để truy cập ứng dụng.
-
-4. Build & Deploy (Firebase Hosting)
+Common scripts:
 
 ```bash
-npm run build      # build
-npm run deploy     # export + deploy hosting
+npm run build
+npm run start
+npm run lint
+npm run test
 ```
 
-### Tài liệu thêm
+---
 
-- Kiến trúc, luồng dữ liệu và hướng dẫn mở rộng: `src/README.md`.
-- Attributions: `Attributions.md`.
+### Testing & Quality
 
-### Quy ước commit (gợi ý)
+- Vitest + React Testing Library under `src/__tests__/`
+- ESLint + Prettier
 
-- Luôn dùng tiếng Việt theo Conventional Commits: `feat: …`, `fix: …`, `docs: …`.
+```bash
+npm run test
+npm run lint
+```
+
+---
+
+### Build & Deployment (Firebase Hosting)
+
+```bash
+npm run build
+firebase login
+firebase emulators:start   # optional preview
+firebase deploy
+```
+
+---
+
+### Security & Privacy
+
+- Role-based Firestore security rules
+- Secrets via environment variables
+- HTTPS in production
+- Client-side validation + Firestore rules
+
+---
+
+### Troubleshooting
+
+- Image analysis not working → set `NEXT_PUBLIC_GEMINI_API_KEY` and restart dev server
+- PDF/Word/Excel parsing → ensure `pdfjs-dist`, `mammoth`, `xlsx` are installed
+- Send button disabled with file only → fixed (enabled for text OR file)
+- Message not cleared after sending → fixed (ChatInput clears text + file)
+
+---
+
+### Roadmap
+
+- Advanced PowerPoint reading
+- Batch file processing & multi-file context
+- Enhanced OCR and diagram reasoning
+- Cloud storage & versioning
+
+---
+
+### Contributing
+
+PRs and issues are welcome. Follow strict TypeScript, functional components, ESLint + Prettier, no inline styles.
+
+---
+
+### License
+
+MIT (to be added).

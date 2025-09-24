@@ -273,7 +273,7 @@ ${analysis}`;
   } catch (error) {
     console.error('Error reading PDF:', error);
     return `[File PDF: ${file.name}] - Kích thước: ${(file.size / 1024).toFixed(1)}KB
-
+  
 ❌ **Không thể đọc nội dung PDF tự động.**
 Lỗi: ${error instanceof Error ? error.message : 'Không xác định'}
 
@@ -344,7 +344,7 @@ ${analysis}`;
   } catch (error) {
     console.error('Error reading Word file:', error);
     return `[File Word: ${file.name}] - Kích thước: ${(file.size / 1024).toFixed(1)}KB
-
+  
 ❌ **Không thể đọc nội dung Word tự động.**
 Lỗi: ${error instanceof Error ? error.message : 'Không xác định'}
 
