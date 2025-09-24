@@ -44,7 +44,15 @@ export async function getDailyMissions(userId: string): Promise<DailyMissions> {
   try {
     const today = new Date().toISOString().split('T')[0];
     const missionsRef = doc(db, 'daily_missions', `${userId}_${today}`);
-    const missionsSnap = await getDoc(missionsRef);
+
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Operation timeout')), 10000);
+    });
+
+    const missionsSnap = await Promise.race([
+      getDoc(missionsRef),
+      timeoutPromise,
+    ]);
 
     if (missionsSnap.exists()) {
       return missionsSnap.data() as DailyMissions;
@@ -69,11 +77,25 @@ export async function getDailyMissions(userId: string): Promise<DailyMissions> {
         updatedAt: new Date().toISOString(),
       };
 
-      await setDoc(missionsRef, dailyMissions);
+      await Promise.race([setDoc(missionsRef, dailyMissions), timeoutPromise]);
       return dailyMissions;
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error getting daily missions:', error);
+    // Return default missions on network error
+    if (error.message === 'Operation timeout' || error.code === 'unavailable') {
+      const today = new Date().toISOString().split('T')[0];
+      return {
+        id: `${userId}_${today}`,
+        userId,
+        date: today,
+        missions: [],
+        completedCount: 0,
+        totalXP: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+    }
     throw error;
   }
 }
@@ -114,12 +136,18 @@ export async function completeMission(
       .filter(m => m.completed)
       .reduce((sum, m) => sum + m.xp, 0);
 
-    await updateDoc(missionsRef, {
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Operation timeout')), 10000);
+    });
+
+    const updatePromise = updateDoc(missionsRef, {
       missions: updatedMissions,
       completedCount,
       totalXP,
       updatedAt: new Date().toISOString(),
     });
+
+    await Promise.race([updatePromise, timeoutPromise]);
 
     return {
       missions: {

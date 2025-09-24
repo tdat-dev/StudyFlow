@@ -281,12 +281,14 @@ export function ChatWidget({ user }: ChatWidgetProps) {
               <button
                 onClick={() => setWidgetState('open')}
                 className="p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded"
+                aria-label="Mở rộng chat"
               >
                 <Maximize2 size={16} />
               </button>
               <button
                 onClick={() => setWidgetState('closed')}
                 className="p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded"
+                aria-label="Đóng chat"
               >
                 <X size={16} />
               </button>
@@ -326,18 +328,21 @@ export function ChatWidget({ user }: ChatWidgetProps) {
             <button
               onClick={toggleFullscreen}
               className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md text-gray-600 dark:text-gray-400"
+              aria-label={isFullscreen ? 'Thu nhỏ' : 'Toàn màn hình'}
             >
               {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
             </button>
             <button
               onClick={minimizeWidget}
               className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md text-gray-600 dark:text-gray-400"
+              aria-label="Thu gọn"
             >
               <Minus size={16} />
             </button>
             <button
               onClick={() => setWidgetState('closed')}
               className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-md text-gray-600 dark:text-gray-400"
+              aria-label="Đóng chat"
             >
               <X size={16} />
             </button>
@@ -365,14 +370,8 @@ export function ChatWidget({ user }: ChatWidgetProps) {
                     <div className="bg-white dark:bg-white/5 shadow-sm rounded-2xl px-4 py-2">
                       <div className="flex space-x-1">
                         <div className="w-2 h-2 bg-gray-400 dark:bg-gray-400 rounded-full animate-bounce"></div>
-                        <div
-                          className="w-2 h-2 bg-gray-400 dark:bg-gray-400 rounded-full animate-bounce"
-                          style={{ animationDelay: '0.1s' }}
-                        ></div>
-                        <div
-                          className="w-2 h-2 bg-gray-400 dark:bg-gray-400 rounded-full animate-bounce"
-                          style={{ animationDelay: '0.2s' }}
-                        ></div>
+                        <div className="w-2 h-2 bg-gray-400 dark:bg-gray-400 rounded-full animate-bounce animate-delay-100"></div>
+                        <div className="w-2 h-2 bg-gray-400 dark:bg-gray-400 rounded-full animate-bounce animate-delay-200"></div>
                       </div>
                     </div>
                   </div>

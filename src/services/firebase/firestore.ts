@@ -15,7 +15,13 @@ import { db } from './config';
 export async function getUserProfile(userId: string): Promise<any> {
   try {
     const profileRef = doc(db, 'user_profiles', userId);
-    const profileDoc = await getDoc(profileRef);
+
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Operation timeout')), 10000);
+    });
+
+    const profilePromise = getDoc(profileRef);
+    const profileDoc = await Promise.race([profilePromise, timeoutPromise]);
 
     if (profileDoc.exists()) {
       return {
@@ -38,10 +44,17 @@ export async function updateUserProfile(
 ): Promise<any> {
   try {
     const profileRef = doc(db, 'user_profiles', userId);
-    await updateDoc(profileRef, {
+
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Operation timeout')), 10000);
+    });
+
+    const updatePromise = updateDoc(profileRef, {
       ...profileData,
       updatedAt: new Date().toISOString(),
     });
+
+    await Promise.race([updatePromise, timeoutPromise]);
 
     return { success: true, error: null };
   } catch (error) {
@@ -57,7 +70,13 @@ export async function updateUserProgress(
 ): Promise<any> {
   try {
     const profileRef = doc(db, 'user_profiles', userId);
-    const profileDoc = await getDoc(profileRef);
+
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Operation timeout')), 10000);
+    });
+
+    const getProfilePromise = getDoc(profileRef);
+    const profileDoc = await Promise.race([getProfilePromise, timeoutPromise]);
 
     if (profileDoc.exists()) {
       const profileData = profileDoc.data();
@@ -80,7 +99,11 @@ export async function updateUserProgress(
         }
       }
 
-      await updateDoc(profileRef, {
+      const timeoutPromise2 = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Operation timeout')), 10000);
+      });
+
+      const updatePromise = updateDoc(profileRef, {
         totalWordsLearned:
           (profileData.totalWordsLearned || 0) + progress.wordsLearned,
         totalStudyTime: (profileData.totalStudyTime || 0) + progress.studyTime,
@@ -89,6 +112,8 @@ export async function updateUserProgress(
         lastUpdateDate: currentDate,
         updatedAt: new Date().toISOString(),
       });
+
+      await Promise.race([updatePromise, timeoutPromise2]);
 
       return { success: true, error: null };
     } else {
@@ -105,7 +130,13 @@ export async function getChatSessions(userId: string): Promise<any[]> {
   try {
     const sessionsRef = collection(db, 'chat_sessions');
     const q = query(sessionsRef, where('userId', '==', userId));
-    const querySnapshot = await getDocs(q);
+
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Operation timeout')), 10000);
+    });
+
+    const queryPromise = getDocs(q);
+    const querySnapshot = await Promise.race([queryPromise, timeoutPromise]);
 
     const sessions: any[] = [];
     querySnapshot.forEach(doc => {
@@ -136,7 +167,12 @@ export async function createChatSession(userId: string): Promise<string> {
       messageCount: 0,
     };
 
-    const docRef = await addDoc(sessionsRef, newSession);
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Operation timeout')), 10000);
+    });
+
+    const addPromise = addDoc(sessionsRef, newSession);
+    const docRef = await Promise.race([addPromise, timeoutPromise]);
     return docRef.id;
   } catch (error) {
     console.error('Error creating chat session:', error);
@@ -147,7 +183,12 @@ export async function createChatSession(userId: string): Promise<string> {
 // Xóa chat session
 export async function deleteChatSession(chatId: string): Promise<void> {
   try {
-    await deleteDoc(doc(db, 'chat_sessions', chatId));
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Operation timeout')), 10000);
+    });
+
+    const deletePromise = deleteDoc(doc(db, 'chat_sessions', chatId));
+    await Promise.race([deletePromise, timeoutPromise]);
   } catch (error) {
     console.error('Error deleting chat session:', error);
     throw error;
@@ -161,10 +202,17 @@ export async function renameChatSession(
 ): Promise<void> {
   try {
     const sessionRef = doc(db, 'chat_sessions', chatId);
-    await updateDoc(sessionRef, {
+
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Operation timeout')), 10000);
+    });
+
+    const updatePromise = updateDoc(sessionRef, {
       title: newTitle,
       updatedAt: new Date().toISOString(),
     });
+
+    await Promise.race([updatePromise, timeoutPromise]);
   } catch (error) {
     console.error('Error renaming chat session:', error);
     throw error;
@@ -176,7 +224,13 @@ export async function getChatMessages(chatId: string): Promise<any[]> {
   try {
     const messagesRef = collection(db, 'chat_messages');
     const q = query(messagesRef, where('chatId', '==', chatId));
-    const querySnapshot = await getDocs(q);
+
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Operation timeout')), 10000);
+    });
+
+    const queryPromise = getDocs(q);
+    const querySnapshot = await Promise.race([queryPromise, timeoutPromise]);
 
     const messages: any[] = [];
     querySnapshot.forEach(doc => {
@@ -208,14 +262,33 @@ export async function saveMessage(
       chatId,
     };
 
-    const docRef = await addDoc(messagesRef, messageData);
+    const timeoutPromise1 = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Operation timeout')), 10000);
+    });
+
+    const addPromise = addDoc(messagesRef, messageData);
+    const docRef = await Promise.race([addPromise, timeoutPromise1]);
 
     // Cập nhật session
     const sessionRef = doc(db, 'chat_sessions', chatId);
-    await updateDoc(sessionRef, {
-      updatedAt: new Date().toISOString(),
-      messageCount: (await getDoc(sessionRef)).data()?.messageCount + 1 || 1,
+
+    const timeoutPromise2 = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Operation timeout')), 10000);
     });
+
+    const getPromise = getDoc(sessionRef);
+    const sessionDoc = await Promise.race([getPromise, timeoutPromise2]);
+
+    const timeoutPromise3 = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Operation timeout')), 10000);
+    });
+
+    const updatePromise = updateDoc(sessionRef, {
+      updatedAt: new Date().toISOString(),
+      messageCount: sessionDoc.data()?.messageCount + 1 || 1,
+    });
+
+    await Promise.race([updatePromise, timeoutPromise3]);
 
     return docRef.id;
   } catch (error) {

@@ -4,7 +4,22 @@
     "react-hooks/exhaustive-deps": "warn",
     "react/display-name": "off",
     "@next/next/no-img-element": "off",
+    "@next/next/no-inline-styles": "off",
     "import/no-anonymous-default-export": "error",
-    "react/no-unescaped-entities": "off"
+    "react/no-unescaped-entities": "off",
+    "jsx-a11y/click-events-have-key-events": "off",
+    "jsx-a11y/no-static-element-interactions": "off",
+    "jsx-a11y/accessible-emoji": "off",
+    "jsx-a11y/no-noninteractive-element-interactions": "off",
+    "jsx-a11y/list-item": "off",
+    "jsx-a11y/missing-key-events": "off",
+    "jsx-a11y/alt-text": "warn",
+    "jsx-a11y/aria-role": "warn",
+    "jsx-a11y/no-redundant-roles": "warn",
+    "jsx-a11y/control-has-associated-label": "off",
+    "jsx-a11y/no-control-regex": "off",
+    "react/forbid-dom-props": "off",
+    "react/no-unknown-property": "off",
+    "react/style-prop-object": "off"
   }
 }

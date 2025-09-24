@@ -386,6 +386,7 @@ export function PomodoroTimer() {
                   className="control-primary !px-3"
                   onClick={addTask}
                   disabled={!newTaskText.trim()}
+                  aria-label="Thêm task"
                 >
                   <Plus className="h-4 w-4" />
                 </button>

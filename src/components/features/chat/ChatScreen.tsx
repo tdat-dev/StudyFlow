@@ -550,6 +550,7 @@ export function ChatScreen({ user }: ChatScreenProps) {
               onSendMessage={handleSendMessage}
               onFileAttach={handleFileAttach}
               loading={loading}
+              attachedFile={attachedFile}
             />
           </div>
         </div>

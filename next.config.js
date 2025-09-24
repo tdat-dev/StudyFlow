@@ -6,6 +6,13 @@ const nextConfig = {
   swcMinify: true,
   output: 'export', // Enable static HTML export
   trailingSlash: true, // Add trailing slash for better compatibility
+
+  // ESLint configuration
+  eslint: {
+    ignoreDuringBuilds: false,
+    dirs: ['src'],
+  },
+
   images: {
     unoptimized: true, // Disable image optimization for static export
     domains: [

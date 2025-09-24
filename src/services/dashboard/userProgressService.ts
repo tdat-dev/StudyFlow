@@ -46,8 +46,17 @@ export interface WeeklyStats {
 // Lấy hoặc tạo user progress
 export async function getUserProgress(userId: string): Promise<UserProgress> {
   try {
+    // Timeout wrapper for Firestore operations
     const progressRef = doc(db, 'user_progress', userId);
-    const progressSnap = await getDoc(progressRef);
+
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Operation timeout')), 10000);
+    });
+
+    const progressSnap = await Promise.race([
+      getDoc(progressRef),
+      timeoutPromise,
+    ]);
 
     if (progressSnap.exists()) {
       return progressSnap.data() as UserProgress;
@@ -67,11 +76,27 @@ export async function getUserProgress(userId: string): Promise<UserProgress> {
         updatedAt: new Date().toISOString(),
       };
 
-      await setDoc(progressRef, newProgress);
+      await Promise.race([setDoc(progressRef, newProgress), timeoutPromise]);
       return newProgress;
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error getting user progress:', error);
+    // Return default values on network error instead of throwing
+    if (error.message === 'Operation timeout' || error.code === 'unavailable') {
+      return {
+        id: userId,
+        userId,
+        todayProgress: 0,
+        dailyGoal: 20,
+        totalWordsLearned: 0,
+        streak: 0,
+        level: 1,
+        xp: 0,
+        lastActiveDate: new Date().toISOString().split('T')[0],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+    }
     throw error;
   }
 }
@@ -201,7 +226,11 @@ export async function getWeeklyStats(userId: string): Promise<WeeklyStats> {
       where('date', '<=', weekEnd.toISOString().split('T')[0]),
     );
 
-    const statsSnap = await getDocs(statsQuery);
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('Operation timeout')), 10000);
+    });
+
+    const statsSnap = await Promise.race([getDocs(statsQuery), timeoutPromise]);
 
     let totalWords = 0;
     let totalStudyTime = 0;
@@ -227,8 +256,27 @@ export async function getWeeklyStats(userId: string): Promise<WeeklyStats> {
       totalXP,
       averageDailyWords: dayCount > 0 ? Math.round(totalWords / dayCount) : 0,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error getting weekly stats:', error);
+    // Return default stats on network error
+    if (error.message === 'Operation timeout' || error.code === 'unavailable') {
+      const today = new Date();
+      const weekStart = new Date(
+        today.setDate(today.getDate() - today.getDay()),
+      );
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+
+      return {
+        weekStart: weekStart.toISOString().split('T')[0],
+        weekEnd: weekEnd.toISOString().split('T')[0],
+        totalWords: 0,
+        totalStudyTime: 0,
+        totalMissions: 0,
+        totalXP: 0,
+        averageDailyWords: 0,
+      };
+    }
     throw error;
   }
 }

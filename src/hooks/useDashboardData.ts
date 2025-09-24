@@ -69,17 +69,52 @@ export function useDashboardData(user: User): DashboardData & DashboardActions {
       setLoading(true);
       setError(null);
 
-      const [progress, missions, achievements, stats] = await Promise.all([
-        getUserProgress(user.uid),
-        getDailyMissions(user.uid),
-        getUpcomingAchievements(user.uid, 4),
-        getWeeklyStats(user.uid),
-      ]);
+      // Helper function for retry with exponential backoff
+      const retryWithBackoff = async <T>(
+        fn: () => Promise<T>,
+        maxRetries = 2,
+        baseDelay = 1000,
+      ): Promise<T | null> => {
+        for (let i = 0; i <= maxRetries; i++) {
+          try {
+            return await fn();
+          } catch (error: any) {
+            if (i === maxRetries) {
+              console.warn(
+                `Failed after ${maxRetries + 1} attempts:`,
+                error.message,
+              );
+              return null;
+            }
 
-      setUserProgress(progress);
-      setDailyMissions(missions);
-      setUpcomingAchievements(achievements);
-      setWeeklyStats(stats);
+            // Don't retry on permission errors
+            if (error.code === 'permission-denied') {
+              return null;
+            }
+
+            const delay = baseDelay * Math.pow(2, i);
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
+        }
+        return null;
+      };
+
+      // Load data with retry logic and graceful fallbacks
+      const [progress, missions, achievements, stats] =
+        await Promise.allSettled([
+          retryWithBackoff(() => getUserProgress(user.uid!)),
+          retryWithBackoff(() => getDailyMissions(user.uid!)),
+          retryWithBackoff(() => getUpcomingAchievements(user.uid!, 4)),
+          retryWithBackoff(() => getWeeklyStats(user.uid!)),
+        ]);
+
+      // Set results with fallbacks
+      setUserProgress(progress.status === 'fulfilled' ? progress.value : null);
+      setDailyMissions(missions.status === 'fulfilled' ? missions.value : null);
+      setUpcomingAchievements(
+        achievements.status === 'fulfilled' ? achievements.value || [] : [],
+      );
+      setWeeklyStats(stats.status === 'fulfilled' ? stats.value : null);
     } catch (err) {
       console.error('Error loading dashboard data:', err);
       setError(

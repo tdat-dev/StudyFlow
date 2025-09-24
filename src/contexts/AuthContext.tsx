@@ -54,41 +54,76 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [handleError]);
 
   const loadUserProfile = async (firebaseUser: FirebaseUser) => {
-    // Sử dụng as any để tránh lỗi TypeScript với getIdToken
-    const token = await (firebaseUser as any).getIdToken(true);
-    const { profile } = await firebase.firestore.getProfile(firebaseUser.uid);
+    try {
+      // Sử dụng as any để tránh lỗi TypeScript với getIdToken
+      // Không force refresh để tránh network issues
+      const token = await (firebaseUser as any).getIdToken(false);
 
-    if (profile) {
+      // Add timeout to prevent hanging requests
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Profile load timeout')), 10000),
+      );
+
+      const profilePromise = firebase.firestore.getProfile(firebaseUser.uid);
+      const { profile } = (await Promise.race([
+        profilePromise,
+        timeoutPromise,
+      ])) as any;
+
+      if (profile) {
+        setUser({
+          uid: firebaseUser.uid,
+          name: profile.name || firebaseUser.displayName || 'User',
+          email: profile.email || firebaseUser.email || '',
+          accessToken: token,
+          streak: profile.streak || 0,
+          todayProgress: profile.todayProgress || 0,
+          dailyGoal: profile.dailyGoal || 20,
+          totalWordsLearned: profile.totalWordsLearned || 0,
+          photoURL: profile.photoURL || firebaseUser.photoURL || undefined,
+        });
+      } else {
+        // Create default profile if it doesn't exist
+        const defaultProfile: UserProfile = {
+          uid: firebaseUser.uid,
+          name:
+            firebaseUser.displayName ||
+            firebaseUser.email?.split('@')[0] ||
+            'User',
+          email: firebaseUser.email || '',
+          accessToken: token,
+          streak: 0,
+          todayProgress: 0,
+          dailyGoal: 20,
+          totalWordsLearned: 0,
+          photoURL: firebaseUser.photoURL || undefined,
+        };
+
+        await firebase.firestore.updateProfile(
+          firebaseUser.uid,
+          defaultProfile,
+        );
+        setUser(defaultProfile);
+      }
+    } catch (error) {
+      console.error('Error loading user profile:', error);
+      // Fallback to basic user info if profile loading fails
       setUser({
-        uid: firebaseUser.uid,
-        name: profile.name || firebaseUser.displayName || 'User',
-        email: profile.email || firebaseUser.email || '',
-        accessToken: token,
-        streak: profile.streak || 0,
-        todayProgress: profile.todayProgress || 0,
-        dailyGoal: profile.dailyGoal || 20,
-        totalWordsLearned: profile.totalWordsLearned || 0,
-        photoURL: profile.photoURL || firebaseUser.photoURL || undefined,
-      });
-    } else {
-      // Create default profile if it doesn't exist
-      const defaultProfile: UserProfile = {
         uid: firebaseUser.uid,
         name:
           firebaseUser.displayName ||
           firebaseUser.email?.split('@')[0] ||
           'User',
         email: firebaseUser.email || '',
-        accessToken: token,
+        accessToken: '',
         streak: 0,
         todayProgress: 0,
         dailyGoal: 20,
         totalWordsLearned: 0,
         photoURL: firebaseUser.photoURL || undefined,
-      };
-
-      await firebase.firestore.updateProfile(firebaseUser.uid, defaultProfile);
-      setUser(defaultProfile);
+      });
+    } finally {
+      setLoading(false);
     }
   };
 

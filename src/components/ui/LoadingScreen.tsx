@@ -5,11 +5,14 @@ interface LoadingScreenProps {
   message?: string;
 }
 
-export function LoadingScreen({ message = "Đang tải..." }: LoadingScreenProps) {
+export function LoadingScreen({ message = 'Đang tải...' }: LoadingScreenProps) {
   return (
-    <div className="h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center relative overflow-hidden">
+    <div
+      className="h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center relative overflow-hidden"
+      suppressHydrationWarning
+    >
       {/* Animated Background */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0" suppressHydrationWarning>
         <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
         <div className="absolute top-0 -right-4 w-72 h-72 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
         <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
@@ -37,8 +40,14 @@ export function LoadingScreen({ message = "Đang tải..." }: LoadingScreenProps
         {/* Loading Dots */}
         <div className="flex space-x-2 mt-8">
           <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce"></div>
-          <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-          <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+          <div
+            className="w-2 h-2 bg-white/60 rounded-full animate-bounce"
+            style={{ animationDelay: '0.1s' }}
+          ></div>
+          <div
+            className="w-2 h-2 bg-white/60 rounded-full animate-bounce"
+            style={{ animationDelay: '0.2s' }}
+          ></div>
         </div>
       </div>
     </div>

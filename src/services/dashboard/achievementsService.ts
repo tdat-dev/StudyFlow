@@ -428,8 +428,12 @@ export async function getUpcomingAchievements(
       .slice(0, limit);
 
     return upcomingAchievements;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error getting upcoming achievements:', error);
+    // Return empty array on network error
+    if (error.message === 'Operation timeout' || error.code === 'unavailable') {
+      return [];
+    }
     throw error;
   }
 }

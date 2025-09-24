@@ -1520,4 +1520,13 @@ img[src*='/images/logo-'] {
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  /* Animation delay utilities */
+  .animate-delay-100 {
+    animation-delay: 0.1s;
+  }
+
+  .animate-delay-200 {
+    animation-delay: 0.2s;
+  }
 }
