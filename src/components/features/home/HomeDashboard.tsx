@@ -3,20 +3,16 @@ import React, { useState, useEffect } from 'react';
 import Button from '../../ui/button';
 import { DailyTipCard } from '../../ui/DailyTipCard';
 import { AchievementPreview } from '../../ui/AchievementPreview';
+import { useDashboardData } from '../../../hooks/useDashboardData';
 import {
-  useDashboardData,
-  useQuickActions,
-  useCTAActions,
-} from '../../../hooks/useDashboardData';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '../../ui/card';
-import { Progress } from '../../ui/progress';
+  useDashboardIntegration,
+  useRealtimeUpdates,
+} from '../../../hooks/useDashboardIntegration';
+import { QuickActions } from './QuickActions';
+import { WeeklyProgress } from './WeeklyProgress';
+import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { Badge } from '../../ui/badge';
+import { Progress } from '../../ui/progress';
 import {
   Play,
   Calendar,
@@ -50,16 +46,22 @@ interface HomeDashboardProps {
 }
 
 export function HomeDashboard({ user, onTabChange }: HomeDashboardProps) {
-  // Use real dashboard data
+  // Use integrated dashboard data
   const {
-    userProgress,
+    progress: integratedProgress,
+    completeFlashcardSession,
+    refreshProgress,
+  } = useDashboardIntegration(user);
+
+  // Use real dashboard data for missions and achievements
+  const {
     dailyMissions: realDailyMissions,
     upcomingAchievements,
     completeMission: completeMissionAction,
   } = useDashboardData(user);
 
-  const { handleQuickAction } = useQuickActions(user);
-  const { handleStartLearning } = useCTAActions(user);
+  // Enable realtime updates
+  useRealtimeUpdates(user);
 
   // Local state for UI
   const [profile, setProfile] = useState(user);
@@ -76,26 +78,21 @@ export function HomeDashboard({ user, onTabChange }: HomeDashboardProps) {
   const completedMissions = realDailyMissions?.completedCount || 0;
   const [showMissionComplete, setShowMissionComplete] = useState(false);
 
-  // Update profile with real data
+  // Update profile with integrated data
   useEffect(() => {
-    if (userProgress) {
+    if (integratedProgress) {
       const updatedProfile = {
         ...user,
-        streak: userProgress.streak,
-        todayProgress: userProgress.todayProgress,
-        dailyGoal: userProgress.dailyGoal,
-        totalWordsLearned: userProgress.totalWordsLearned,
-        level: userProgress.level,
-        xp: userProgress.xp,
+        streak: integratedProgress.streak,
+        todayProgress: integratedProgress.dailyProgress,
+        dailyGoal: integratedProgress.dailyGoal,
+        totalWordsLearned: integratedProgress.totalWordsLearned,
+        level: integratedProgress.level,
+        xp: integratedProgress.xp,
       };
       setProfile(updatedProfile);
     }
-  }, [userProgress, user]);
-
-  const progressPercentage = Math.min(
-    ((profile.todayProgress || 0) / (profile.dailyGoal || 20)) * 100,
-    100,
-  );
+  }, [integratedProgress, user]);
 
   // Mission completion logic
   const toggleMission = async (missionId: string) => {
@@ -113,8 +110,13 @@ export function HomeDashboard({ user, onTabChange }: HomeDashboardProps) {
   // CTA button handler
   const handleStartLearningAction = async () => {
     try {
-      await handleStartLearning();
-      onTabChange && onTabChange('chat');
+      // Sử dụng hệ thống tích hợp mới
+      const result = await completeFlashcardSession(5, 15); // 5 từ vựng, 15 phút
+      if (result.success) {
+        // Refresh progress
+        await refreshProgress();
+      }
+      onTabChange && onTabChange('flashcards');
     } catch (error) {
       console.error('Error in start learning:', error);
     }
@@ -149,8 +151,8 @@ export function HomeDashboard({ user, onTabChange }: HomeDashboardProps) {
                 className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 text-xs"
               >
                 <Zap
-                  className="text-yellow-500 dark:text-yellow-400"
-                  style={{ width: '10px', height: '10px', marginRight: '2px' }}
+                  className="text-yellow-500 dark:text-yellow-400 mr-1"
+                  size={10}
                 />
                 {profile.streak || 0} ngày
               </Badge>
@@ -163,40 +165,15 @@ export function HomeDashboard({ user, onTabChange }: HomeDashboardProps) {
       <div className="flex-1 overflow-y-auto scrollbar-glass">
         {/* Main Content */}
         <div className="space-y-3 xl:space-y-4 max-w-full pb-6">
-          {/* Progress Today - Full width */}
-          <Card className="card-glass overflow-hidden">
-            <CardHeader className="pb-2 p-4">
-              <CardTitle className="text-base xl:text-lg text-gray-900 dark:text-gray-100 flex items-center">
-                <Target
-                  className="text-blue-500 mr-2"
-                  style={{ width: '16px', height: '16px' }}
-                />
-                Progress hôm nay
-              </CardTitle>
-              <CardDescription className="text-xs xl:text-sm text-gray-600 dark:text-gray-400">
-                Bạn đã học {profile.todayProgress || 0}/
-                {profile.dailyGoal || 20} từ vựng
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-4 pt-0">
-              <div className="mb-3">
-                <Progress value={progressPercentage} className="h-2 mb-2" />
-                <div className="flex justify-between text-xs">
-                  <span className="text-white/70">
-                    {Math.round(progressPercentage)}% hoàn thành
-                  </span>
-                  <span className="text-white/70">
-                    Còn{' '}
-                    {Math.max(
-                      0,
-                      (profile.dailyGoal || 20) - (profile.todayProgress || 0),
-                    )}{' '}
-                    từ
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Quick Actions - New integrated component */}
+          <QuickActions
+            user={user}
+            progress={integratedProgress}
+            onTabChange={onTabChange}
+          />
+
+          {/* Weekly Progress - New integrated component */}
+          <WeeklyProgress progress={integratedProgress} />
 
           {/* Stats Cards - CSS Grid responsive: 1 col <480px, 2 cols <768px, 4 cols >=768px */}
           <div className="w-full grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-3 xl:gap-4">
@@ -211,7 +188,7 @@ export function HomeDashboard({ user, onTabChange }: HomeDashboardProps) {
                   />
                 </div>
                 <p className="text-xl xl:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
-                  {profile.streak || 0}
+                  {integratedProgress?.streak || 0}
                 </p>
                 <p className="text-xs xl:text-sm text-gray-600 dark:text-gray-100 leading-tight font-medium">
                   Ngày liên tiếp
@@ -229,7 +206,7 @@ export function HomeDashboard({ user, onTabChange }: HomeDashboardProps) {
                   />
                 </div>
                 <p className="text-xl xl:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
-                  {profile.totalWordsLearned || 0}
+                  {integratedProgress?.totalWordsLearned || 0}
                 </p>
                 <p className="text-xs xl:text-sm text-gray-600 dark:text-gray-100 leading-tight font-medium">
                   Từ đã học
@@ -248,7 +225,7 @@ export function HomeDashboard({ user, onTabChange }: HomeDashboardProps) {
                   />
                 </div>
                 <p className="text-xl xl:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
-                  Level {profile.level || 1}
+                  Level {integratedProgress?.level || 1}
                 </p>
                 <p className="text-xs xl:text-sm text-gray-600 dark:text-gray-100 leading-tight font-medium">
                   Cấp độ
@@ -256,20 +233,17 @@ export function HomeDashboard({ user, onTabChange }: HomeDashboardProps) {
               </CardContent>
             </Card>
 
-            {/* Card 4: Giờ học tập */}
+            {/* Card 4: Pomodoro hôm nay */}
             <Card className="card-glass hover-scale overflow-hidden">
               <CardContent className="p-3 xl:p-4 text-center flex flex-col items-center justify-center h-full">
-                <div className="w-10 h-10 xl:w-12 xl:h-12 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg flex items-center justify-center mb-2">
-                  <Clock
-                    className="text-yellow-600 dark:text-yellow-400"
-                    size={18}
-                  />
+                <div className="w-10 h-10 xl:w-12 xl:h-12 bg-red-100 dark:bg-red-900/20 rounded-lg flex items-center justify-center mb-2">
+                  <Clock className="text-red-600 dark:text-red-400" size={18} />
                 </div>
                 <p className="text-xl xl:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
-                  {profile.totalStudyTime || 0}
+                  {integratedProgress?.pomodorosCompletedToday || 0}
                 </p>
                 <p className="text-xs xl:text-sm text-gray-600 dark:text-gray-100 leading-tight font-medium">
-                  Giờ học tập
+                  Pomodoro hôm nay
                 </p>
               </CardContent>
             </Card>
@@ -292,62 +266,10 @@ export function HomeDashboard({ user, onTabChange }: HomeDashboardProps) {
                   onClick={handleStartLearningAction}
                   disabled={false}
                 >
-                  <Play
-                    className="text-yellow-400 mr-2"
-                    style={{ width: '14px', height: '14px' }}
-                  />
+                  <Play className="text-yellow-400 mr-2" size={14} />
                   Học ngay
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Quick Actions - Compact */}
-          <Card className="card-glass overflow-hidden">
-            <CardHeader className="pb-2 p-4">
-              <CardTitle className="text-base xl:text-lg text-gray-900 dark:text-gray-100">
-                Hoạt động nhanh
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 p-4 pt-0">
-              <Button
-                variant="outline"
-                className="w-full justify-start h-auto py-3 px-4 border-white/20 hover:bg-white/10 text-white hover:text-white text-sm transition-all duration-200 hover:scale-[1.01]"
-                onClick={() => handleQuickAction('review', 3)}
-                disabled={false}
-              >
-                <BookOpen
-                  className="text-blue-500 mr-3"
-                  style={{ width: '16px', height: '16px' }}
-                />
-                <span className="text-left">Ôn tập từ vựng đã học (+3 từ)</span>
-              </Button>
-
-              <Button
-                variant="outline"
-                className="w-full justify-start h-auto py-3 px-4 border-white/20 hover:bg-white/10 text-white hover:text-white text-sm transition-all duration-200 hover:scale-[1.01]"
-                onClick={() => handleQuickAction('quiz', 5)}
-                disabled={false}
-              >
-                <Target
-                  className="text-green-500 mr-3"
-                  style={{ width: '16px', height: '16px' }}
-                />
-                <span className="text-left">Quiz kiểm tra nhanh (+5 từ)</span>
-              </Button>
-
-              <Button
-                variant="outline"
-                className="w-full justify-start h-auto py-3 px-4 border-white/20 hover:bg-white/10 text-white hover:text-white text-sm transition-all duration-200 hover:scale-[1.01]"
-                onClick={() => handleQuickAction('challenge', 2)}
-                disabled={false}
-              >
-                <Zap
-                  className="text-yellow-500 mr-3"
-                  style={{ width: '16px', height: '16px' }}
-                />
-                <span className="text-left">Thử thách 5 phút (+2 từ)</span>
-              </Button>
             </CardContent>
           </Card>
 
@@ -373,12 +295,10 @@ export function HomeDashboard({ user, onTabChange }: HomeDashboardProps) {
                     {completedMissions}/5 hoàn thành
                   </span>
                 </div>
-                <div className="w-full bg-white/10 rounded-full h-2">
-                  <div
-                    className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${(completedMissions / 5) * 100}%` }}
-                  />
-                </div>
+                <Progress
+                  value={Math.min((completedMissions / 5) * 100, 100)}
+                  className="h-2 bg-white/10"
+                />
               </div>
 
               {/* Mission List */}

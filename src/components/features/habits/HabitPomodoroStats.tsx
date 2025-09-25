@@ -1,5 +1,6 @@
 import React from 'react';
 import { Clock, Target, TrendingUp, Calendar } from 'lucide-react';
+import { Progress } from '../../ui/progress';
 import { HabitPomodoroStats as HabitPomodoroStatsType } from '../../../types/pomodoro-habits';
 
 interface HabitPomodoroStatsProps {
@@ -17,10 +18,7 @@ export function HabitPomodoroStats({
     return (
       <div className="bg-gray-50 dark:bg-studyflow-surface rounded-lg p-4">
         <div className="flex items-center gap-3 mb-3">
-          <div 
-            className="w-3 h-3 rounded-full"
-            style={{ backgroundColor: habitColor }}
-          />
+          <div className={`w-3 h-3 rounded-full ${habitColor}`} />
           <h4 className="font-medium text-gray-900 dark:text-gray-100">
             Thống kê Pomodoro
           </h4>
@@ -32,32 +30,39 @@ export function HabitPomodoroStats({
     );
   }
 
-  const completionRate = stats.totalTasks > 0 
-    ? Math.round((stats.completedTasks / stats.totalTasks) * 100)
-    : 0;
+  const completionRate =
+    stats.totalTasks > 0
+      ? Math.round((stats.completedTasks / stats.totalTasks) * 100)
+      : 0;
 
   const formatLastPomodoroDate = (dateString?: string) => {
     if (!dateString) return 'Chưa có';
-    
+
     const date = new Date(dateString);
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 1) return 'Hôm qua';
     if (diffDays < 7) return `${diffDays} ngày trước`;
     if (diffDays < 30) return `${Math.ceil(diffDays / 7)} tuần trước`;
     return `${Math.ceil(diffDays / 30)} tháng trước`;
   };
 
+  const heightClassForPercent = (percent: number) => {
+    if (percent <= 0) return 'h-0 opacity-30';
+    if (percent < 25) return 'h-[20%]';
+    if (percent < 50) return 'h-[40%]';
+    if (percent < 75) return 'h-[60%]';
+    if (percent < 100) return 'h-[80%]';
+    return 'h-full';
+  };
+
   return (
     <div className="bg-white dark:bg-studyflow-surface border border-gray-200 dark:border-gray-700 rounded-lg p-4">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div 
-            className="w-3 h-3 rounded-full"
-            style={{ backgroundColor: habitColor }}
-          />
+          <div className={`w-3 h-3 rounded-full ${habitColor}`} />
           <h4 className="font-medium text-gray-900 dark:text-gray-100">
             Thống kê Pomodoro
           </h4>
@@ -103,21 +108,27 @@ export function HabitPomodoroStats({
       {/* Task Statistics */}
       <div className="space-y-3">
         <div className="flex items-center justify-between text-sm">
-          <span className="text-gray-600 dark:text-gray-400">Tasks hoàn thành</span>
+          <span className="text-gray-600 dark:text-gray-400">
+            Tasks hoàn thành
+          </span>
           <span className="font-medium text-gray-900 dark:text-gray-100">
             {stats.completedTasks}/{stats.totalTasks}
           </span>
         </div>
 
         <div className="flex items-center justify-between text-sm">
-          <span className="text-gray-600 dark:text-gray-400">Trung bình Pomodoro/task</span>
+          <span className="text-gray-600 dark:text-gray-400">
+            Trung bình Pomodoro/task
+          </span>
           <span className="font-medium text-gray-900 dark:text-gray-100">
             {stats.averageTaskDuration.toFixed(1)}
           </span>
         </div>
 
         <div className="flex items-center justify-between text-sm">
-          <span className="text-gray-600 dark:text-gray-400">Lần cuối thực hiện</span>
+          <span className="text-gray-600 dark:text-gray-400">
+            Lần cuối thực hiện
+          </span>
           <span className="font-medium text-gray-900 dark:text-gray-100">
             {formatLastPomodoroDate(stats.lastPomodoroDate)}
           </span>
@@ -130,15 +141,12 @@ export function HabitPomodoroStats({
           <span>Tiến độ hoàn thành tasks</span>
           <span>{completionRate}%</span>
         </div>
-        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-          <div
-            className="h-2 rounded-full transition-all duration-300"
-            style={{ 
-              width: `${completionRate}%`,
-              backgroundColor: habitColor 
-            }}
-          />
-        </div>
+        <Progress
+          value={completionRate}
+          className="h-2 bg-gray-200 dark:bg-gray-700"
+        >
+          {/* Indicator color uses theme primary; can be themed via Tailwind */}
+        </Progress>
       </div>
 
       {/* Weekly Trend (if available) */}
@@ -154,7 +162,7 @@ export function HabitPomodoroStats({
             {stats.weeklyPomodoros.map((count, index) => {
               const maxCount = Math.max(...stats.weeklyPomodoros);
               const height = maxCount > 0 ? (count / maxCount) * 100 : 0;
-              
+
               return (
                 <div
                   key={index}
@@ -162,19 +170,14 @@ export function HabitPomodoroStats({
                   title={`${['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'][index]}: ${count} Pomodoro`}
                 >
                   <div
-                    className="rounded-sm transition-all duration-300"
-                    style={{
-                      height: `${height}%`,
-                      backgroundColor: habitColor,
-                      opacity: count > 0 ? 1 : 0.3,
-                    }}
+                    className={`rounded-sm transition-all duration-300 ${habitColor} ${heightClassForPercent(height)}`}
                   />
                 </div>
               );
             })}
           </div>
           <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
-            {['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'].map((day) => (
+            {['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'].map(day => (
               <span key={day}>{day}</span>
             ))}
           </div>

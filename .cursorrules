@@ -1,0 +1,92 @@
+# Cursor Rules for StudyFlow (Next.js + Firebase)
+
+project_goals:
+  - Ứng dụng học tập StudyFlow (Next.js 14, React 18, TypeScript) với TailwindCSS, Firebase Auth + Firestore.
+  - UI đồng bộ dark/light, không dùng inline style, sử dụng các token/utility đã có.
+  - Code rõ ràng, dễ hiểu cho sinh viên năm 1 nhưng chuẩn clean code.
+  - Toàn bộ trả lời, docstring, copy viết bằng tiếng Việt.
+
+style:
+  language: typescript
+  framework: nextjs
+  ui: tailwind
+  testing: vitest + React Testing Library
+  validation: zod (bắt buộc khi thêm input mới)
+  formatting:
+    eslint: true
+    prettier: true
+    rules:
+      semi: true
+      singleQuote: true
+      trailingComma: es5
+  naming:
+    variables: camelCase
+    components: PascalCase
+    files: kebab-case (components có thể PascalCase)
+
+constraints:
+  - Không dùng inline styles hoặc style props; dùng Tailwind utilities/variants.
+  - Không dùng class components; chỉ function components + hooks.
+  - Không dùng any; luôn định nghĩa types trong `src/types`.
+  - Không log bằng console trong production code; dùng error handler có sẵn.
+  - Không hardcode secrets; dùng .env.local và `src/config/env.ts`.
+  - UI phải có dark mode (`dark:`) và trạng thái focus/ARIA phù hợp.
+
+tech_stack:
+  frontend: [Next.js 14, React 18, TailwindCSS]
+  backend: [Firebase Auth, Firestore]
+  state: [React Context + Custom Hooks]
+  ai: [Gemini via `src/services/ai/gemini.ts`]
+
+architecture:
+  - Tuân theo cấu trúc: `src/components`, `src/contexts`, `src/hooks`, `src/services`, `src/types`, `src/utils`.
+  - Feature-first trong `src/components/features` (auth, chat, flashcards, habits, pomodoro, profile).
+  - Tách UI primitives ở `src/components/ui`.
+  - Mọi logic call Firebase đặt trong `src/services/firebase/*`.
+
+ui_tokens:
+  - Buttons: dùng `Button`/`loading-button` và variants (btn-primary, btn-ghost theo tokens có sẵn).
+  - Cards/inputs: dùng components trong `src/components/ui` (card, input, label, progress, dialog, etc.).
+  - Progress bars: dùng `Progress` thay vì tự vẽ.
+
+security:
+  - Auth: Firebase Auth (Email/Password + Google OAuth). Protected routes redirect nếu chưa đăng nhập.
+  - Firestore: tuân rules, chỉ đọc/ghi theo uid hiện tại.
+  - Input: luôn validate bằng Zod khi thêm form/endpoint mới.
+
+accessibility:
+  - Thêm `aria-*`, `title` hoặc text thay thế cho icon buttons.
+  - Focus-visible, tab order hợp lý.
+
+performance:
+  - SSR/ISR theo mặc định Next. Tránh fetch lặp trong client nếu có context.
+  - Dùng dynamic import khi module nặng (pdfjs, xlsx, mammoth).
+
+code_guidance:
+  - Viết code rõ ràng, tách nhỏ hàm, dùng early return.
+  - Thêm JSDoc ngắn cho hooks/services.
+  - Khi viết mới, kèm unit test Vitest cho utils/logic quan trọng.
+
+prompting_defaults:
+  - Trả lời bằng tiếng Việt, súc tích. Khi chèn code, dùng Tailwind, không inline CSS.
+  - Khi chỉnh code, ưu tiên tạo/đổi sang components trong `src/components/ui`.
+
+file_specific_rules:
+  - src/components/features/pomodoro/**:
+      - Bố cục 2 cột ở desktop; tránh wrap bằng `min-w-0` cột trái và `min-w-[320px]` cột phải.
+      - Không dùng inline style cho màu hoặc height; dùng Tailwind hoặc class utilities.
+  - src/components/features/habits/**:
+      - `habitColor` phải là Tailwind class (vd: `bg-blue-500`), không hex inline.
+      - Weekly trend: dùng lớp chiều cao bậc (h-0, h-[20%], h-[40%], ...), không inline.
+  - src/services/fileProcessor.ts:
+      - Chỉ dùng dynamic import cho pdfjs, xlsx, mammoth và AI; giữ lỗi thân thiện.
+  - src/services/ai/gemini.ts:
+      - Không đọc file trực tiếp; luôn truyền text/base64 đã đọc từ client.
+
+review_checklist:
+  - [ ] Không inline style
+  - [ ] Có dark/light classes
+  - [ ] Types an toàn, không any
+  - [ ] A11y cho nút/icon
+  - [ ] Logic tách khỏi UI
+  - [ ] Lint/type pass

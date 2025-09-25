@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Head from 'next/head';
 import { Loader2 } from 'lucide-react';
-import { useAuth, useErrorHandler } from '../hooks';
+import { useAuth } from '../contexts/AuthContext';
 import { MainApp } from './MainApp';
 import { LoginForm, RegisterForm, AuthLayout } from './features/auth';
 
@@ -18,15 +18,8 @@ const LoadingScreen = () => (
 );
 
 export default function App() {
-  const { user, loading, error } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const [showRegister, setShowRegister] = useState(false);
-  const { handleError } = useErrorHandler();
-
-  useEffect(() => {
-    if (error) {
-      handleError(new Error(error));
-    }
-  }, [error, handleError]);
 
   // Show loading screen while checking authentication
   if (loading) {
@@ -98,7 +91,12 @@ export default function App() {
       </Head>
       <div className="w-full min-h-svh relative">
         {user ? (
-          <MainApp user={user} onLogout={() => {}} />
+          <MainApp
+            user={user}
+            onLogout={async () => {
+              await signOut();
+            }}
+          />
         ) : (
           <AuthLayout type={showRegister ? 'register' : 'login'}>
             {showRegister ? (

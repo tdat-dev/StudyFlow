@@ -245,6 +245,18 @@ export function ChatScreen({ user }: ChatScreenProps) {
         content: userMessageContent,
         sender: 'user',
         timestamp: new Date().toISOString(),
+        attachments: fileContent
+          ? [
+              {
+                id: generateUniqueId('att'),
+                name: fileContent.name,
+                type: fileContent.type,
+                size: fileContent.size,
+                // store image preview (base64) for thumbnail; keep empty for non-images
+                content: fileContent.preview || '',
+              },
+            ]
+          : undefined,
       };
 
       // Thêm vào UI ngay lập tức
