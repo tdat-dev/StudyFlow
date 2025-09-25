@@ -1,13 +1,10 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
-// Vitest compatibility alias for Jest APIs used in tests
-// Map jest.* to vi.* so existing mocks continue to work
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const jest = vi as any;
-// Also expose on global for libraries referencing globalThis.jest
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-(globalThis as any).jest = jest;
+// Vitest compatibility alias for Jest APIs used trong tests
+const jest: typeof vi = vi;
+// Expose trên global để các thư viện tìm thấy
+(globalThis as unknown as { jest?: typeof vi }).jest = jest;
 
 // Global Firebase mocks to avoid accessing real SDK in tests
 vi.mock('firebase/app', () => ({
