@@ -2,9 +2,12 @@
 // Sử dụng file này để kết nối với Firebase Emulator Suite
 // Chạy lệnh: firebase emulators:start để khởi động emulator
 
-const { initializeApp } = require("firebase/app");
-const { getFirestore, connectFirestoreEmulator } = require("firebase/firestore");
-const { getAuth, connectAuthEmulator } = require("firebase/auth");
+const { initializeApp } = require('firebase/app');
+const {
+  getFirestore,
+  connectFirestoreEmulator,
+} = require('firebase/firestore');
+const { getAuth, connectAuthEmulator } = require('firebase/auth');
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -13,7 +16,7 @@ const firebaseConfig = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 // Khởi tạo Firebase

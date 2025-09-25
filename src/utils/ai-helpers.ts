@@ -1,35 +1,35 @@
 // Utility functions for AI integration
 export async function generateAIResponse(
   userMessage: string,
-  user: any
+  user: any,
 ): Promise<string> {
   try {
     // Trong môi trường development, log prompt
-    if (process.env.NODE_ENV === "development") {
-      console.log("User message:", userMessage);
-      console.log("User context:", user);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('User message:', userMessage);
+      console.log('User context:', user);
     }
 
     // Import GoogleGenerativeAI dynamically để tránh lỗi server-side
-    const { GoogleGenerativeAI } = await import("@google/generative-ai");
+    const { GoogleGenerativeAI } = await import('@google/generative-ai');
 
     const genAI = new GoogleGenerativeAI(
-      process.env.NEXT_PUBLIC_GEMINI_API_KEY || ""
+      process.env.NEXT_PUBLIC_GEMINI_API_KEY || '',
     );
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     // Tạo prompt context dựa trên thông tin user
     const userContext = user
       ? `
     Thông tin người dùng:
-    - Tên: ${user.displayName || "Người dùng"}
-    - Email: ${user.email || "Không có"}
-    - Trình độ hiện tại: ${user.level || "Mới bắt đầu"}
+    - Tên: ${user.displayName || 'Người dùng'}
+    - Email: ${user.email || 'Không có'}
+    - Trình độ hiện tại: ${user.level || 'Mới bắt đầu'}
     - Mục tiêu học tập: ${
-      user.goals?.join(", ") || "Cải thiện tiếng Anh tổng quát"
+      user.goals?.join(', ') || 'Cải thiện tiếng Anh tổng quát'
     }
     `
-      : "Người dùng chưa đăng nhập";
+      : 'Người dùng chưa đăng nhập';
 
     const systemPrompt = `
     Bạn là một trợ lý AI chuyên về học tiếng Anh. Hãy trả lời bằng tiếng Việt một cách thân thiện và hữu ích.
@@ -54,35 +54,35 @@ export async function generateAIResponse(
 
     return text;
   } catch (error) {
-    console.error("Error generating AI response:", error);
-    return "Xin lỗi, tôi không thể trả lời câu hỏi này lúc này. Vui lòng thử lại sau.";
+    console.error('Error generating AI response:', error);
+    return 'Xin lỗi, tôi không thể trả lời câu hỏi này lúc này. Vui lòng thử lại sau.';
   }
 }
 
 export async function generateFlashcardsAI(
   prompt: string,
-  user: any
+  user: any,
 ): Promise<string> {
   try {
     // Import GoogleGenerativeAI dynamically để tránh lỗi server-side
-    const { GoogleGenerativeAI } = await import("@google/generative-ai");
+    const { GoogleGenerativeAI } = await import('@google/generative-ai');
 
     const genAI = new GoogleGenerativeAI(
-      process.env.NEXT_PUBLIC_GEMINI_API_KEY || ""
+      process.env.NEXT_PUBLIC_GEMINI_API_KEY || '',
     );
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     // Tạo prompt context dựa trên thông tin user
     const userContext = user
       ? `
     Thông tin người dùng:
-    - Tên: ${user.displayName || "Người dùng"}
-    - Trình độ hiện tại: ${user.level || "Mới bắt đầu"}
+    - Tên: ${user.displayName || 'Người dùng'}
+    - Trình độ hiện tại: ${user.level || 'Mới bắt đầu'}
     - Mục tiêu học tập: ${
-      user.goals?.join(", ") || "Cải thiện tiếng Anh tổng quát"
+      user.goals?.join(', ') || 'Cải thiện tiếng Anh tổng quát'
     }
     `
-      : "Người dùng chưa đăng nhập";
+      : 'Người dùng chưa đăng nhập';
 
     const systemPrompt = `
     Bạn là một trợ lý AI chuyên tạo flashcards học tiếng Anh.
@@ -112,14 +112,14 @@ export async function generateFlashcardsAI(
 
     return text;
   } catch (error) {
-    console.error("Error generating flashcards:", error);
+    console.error('Error generating flashcards:', error);
     return JSON.stringify({
       flashcards: [
         {
-          front: "Error",
-          back: "Không thể tạo flashcards lúc này",
-          category: "error",
-          difficulty: "easy",
+          front: 'Error',
+          back: 'Không thể tạo flashcards lúc này',
+          category: 'error',
+          difficulty: 'easy',
         },
       ],
     });

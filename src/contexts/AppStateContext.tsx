@@ -29,10 +29,12 @@ const initialState: AppState = {
   hasSeenOnboarding: false,
   flashcardDecks: [],
   habits: [],
-  isLoading: {}
+  isLoading: {},
 };
 
-const AppStateContext = createContext<AppStateContextType | undefined>(undefined);
+const AppStateContext = createContext<AppStateContextType | undefined>(
+  undefined,
+);
 
 interface AppStateProviderProps {
   children: ReactNode;
@@ -42,10 +44,11 @@ export function AppStateProvider({ children }: AppStateProviderProps) {
   const [state, setState] = useState<AppState>(() => {
     // Khởi tạo state từ localStorage nếu có
     if (typeof window !== 'undefined') {
-      const onboardingSeen = localStorage.getItem('hasSeenOnboarding') === 'true';
+      const onboardingSeen =
+        localStorage.getItem('hasSeenOnboarding') === 'true';
       return {
         ...initialState,
-        hasSeenOnboarding: onboardingSeen
+        hasSeenOnboarding: onboardingSeen,
       };
     }
     return initialState;
@@ -79,8 +82,8 @@ export function AppStateProvider({ children }: AppStateProviderProps) {
       ...prev,
       isLoading: {
         ...prev.isLoading,
-        [key]: isLoading
-      }
+        [key]: isLoading,
+      },
     }));
   };
 
@@ -91,18 +94,22 @@ export function AppStateProvider({ children }: AppStateProviderProps) {
     setHasSeenOnboarding,
     setFlashcardDecks,
     setHabits,
-    setLoading
+    setLoading,
   };
 
-  return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;
+  return (
+    <AppStateContext.Provider value={value}>
+      {children}
+    </AppStateContext.Provider>
+  );
 }
 
 export function useAppState() {
   const context = useContext(AppStateContext);
-  
+
   if (context === undefined) {
     throw new Error('useAppState must be used within an AppStateProvider');
   }
-  
+
   return context;
 }

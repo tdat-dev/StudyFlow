@@ -61,15 +61,15 @@ module.exports = {
         },
         // StudyFlow custom colors - High Contrast & Accessibility
         studyflow: {
-          bg: '#101215',      // Main background
+          bg: '#101215', // Main background
           surface: '#1A1C20', // Sidebar/card background
-          text: '#E0E0E0',    // Primary text - soft white for better contrast
-          'text-muted': '#B4B4B4',   // Secondary text - improved contrast
-          'text-subtle': '#9A9A9A',  // Less important text - better readability
-          accent: '#4A90E2',  // Desaturated blue for comfort
+          text: '#E0E0E0', // Primary text - soft white for better contrast
+          'text-muted': '#B4B4B4', // Secondary text - improved contrast
+          'text-subtle': '#9A9A9A', // Less important text - better readability
+          accent: '#4A90E2', // Desaturated blue for comfort
           success: '#3fb950', // Green
           warning: '#d29922', // Yellow
-          danger: '#f85149',  // Red
+          danger: '#f85149', // Red
         },
       },
       borderRadius: {
@@ -90,8 +90,8 @@ module.exports = {
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'blob': 'blob 7s infinite',
-        'float': 'float 6s ease-in-out infinite',
+        blob: 'blob 7s infinite',
+        float: 'float 6s ease-in-out infinite',
         'fade-in': 'fade-in 0.5s ease-out',
         'slide-up': 'slide-up 0.5s ease-out',
       },
@@ -104,7 +104,7 @@ module.exports = {
           from: { height: 'var(--radix-accordion-content-height)' },
           to: { height: 0 },
         },
-        'blob': {
+        blob: {
           '0%': {
             transform: 'translate(0px, 0px) scale(1)',
           },
@@ -118,7 +118,7 @@ module.exports = {
             transform: 'translate(0px, 0px) scale(1)',
           },
         },
-        'float': {
+        float: {
           '0%, 100%': {
             transform: 'translateY(0px)',
           },
@@ -151,19 +151,23 @@ module.exports = {
   },
   plugins: [
     require('tailwindcss-animate'),
-    function({ addUtilities }) {
+    function ({ addUtilities }) {
       addUtilities({
         '.auth-card': {
-          '@apply bg-neutral-900/95 border border-white/10 rounded-xl shadow-lg': {},
+          '@apply bg-neutral-900/95 border border-white/10 rounded-xl shadow-lg':
+            {},
         },
         '.auth-input': {
-          '@apply bg-neutral-950/60 border border-white/10 text-white placeholder:text-white/40 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500': {},
+          '@apply bg-neutral-950/60 border border-white/10 text-white placeholder:text-white/40 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500':
+            {},
         },
         '.btn-primary': {
-          '@apply bg-gradient-to-r from-indigo-500 to-violet-500 text-white hover:opacity-90 disabled:opacity-60': {},
+          '@apply bg-gradient-to-r from-indigo-500 to-violet-500 text-white hover:opacity-90 disabled:opacity-60':
+            {},
         },
         '.btn-ghost': {
-          '@apply bg-white text-gray-900 hover:bg-gray-50 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-50': {},
+          '@apply bg-white text-gray-900 hover:bg-gray-50 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-50':
+            {},
         },
         '.animation-delay-2000': {
           'animation-delay': '2s',
@@ -171,7 +175,7 @@ module.exports = {
         '.animation-delay-4000': {
           'animation-delay': '4s',
         },
-      })
-    }
+      });
+    },
   ],
 };

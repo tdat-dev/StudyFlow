@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Plus, Target, Clock, Flag, X } from 'lucide-react';
-import { HabitOption, CreateHabitTaskData } from '../../../types/pomodoro-habits';
+import {
+  HabitOption,
+  CreateHabitTaskData,
+} from '../../../types/pomodoro-habits';
 
 interface HabitTaskCreatorProps {
   habitOptions: HabitOption[];
@@ -8,10 +11,10 @@ interface HabitTaskCreatorProps {
   loading?: boolean;
 }
 
-export function HabitTaskCreator({ 
-  habitOptions, 
-  onCreateTask, 
-  loading = false 
+export function HabitTaskCreator({
+  habitOptions,
+  onCreateTask,
+  loading = false,
 }: HabitTaskCreatorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [taskText, setTaskText] = useState('');
@@ -51,19 +54,27 @@ export function HabitTaskCreator({
 
   const getPriorityColor = (p: string) => {
     switch (p) {
-      case 'high': return 'text-red-600 bg-red-100 dark:bg-red-900/20';
-      case 'medium': return 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20';
-      case 'low': return 'text-green-600 bg-green-100 dark:bg-green-900/20';
-      default: return 'text-gray-600 bg-gray-100 dark:bg-gray-900/20';
+      case 'high':
+        return 'text-red-600 bg-red-100 dark:bg-red-900/20';
+      case 'medium':
+        return 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20';
+      case 'low':
+        return 'text-green-600 bg-green-100 dark:bg-green-900/20';
+      default:
+        return 'text-gray-600 bg-gray-100 dark:bg-gray-900/20';
     }
   };
 
   const getPriorityIcon = (p: string) => {
     switch (p) {
-      case 'high': return '🔴';
-      case 'medium': return '🟡';
-      case 'low': return '🟢';
-      default: return '⚪';
+      case 'high':
+        return '🔴';
+      case 'medium':
+        return '🟡';
+      case 'low':
+        return '🟢';
+      default:
+        return '⚪';
     }
   };
 
@@ -102,12 +113,12 @@ export function HabitTaskCreator({
           </label>
           <select
             value={selectedHabitId}
-            onChange={(e) => setSelectedHabitId(e.target.value)}
+            onChange={e => setSelectedHabitId(e.target.value)}
             className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-studyflow-surface text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
           >
             <option value="">Chọn thói quen...</option>
-            {habitOptions.map((habit) => (
+            {habitOptions.map(habit => (
               <option key={habit.id} value={habit.id}>
                 {habit.title}
               </option>
@@ -123,7 +134,7 @@ export function HabitTaskCreator({
           <input
             type="text"
             value={taskText}
-            onChange={(e) => setTaskText(e.target.value)}
+            onChange={e => setTaskText(e.target.value)}
             placeholder="Ví dụ: Đọc 20 trang sách..."
             className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-studyflow-surface text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
@@ -141,7 +152,7 @@ export function HabitTaskCreator({
             min="1"
             max="10"
             value={estimatedPomodoros}
-            onChange={(e) => setEstimatedPomodoros(parseInt(e.target.value) || 1)}
+            onChange={e => setEstimatedPomodoros(parseInt(e.target.value) || 1)}
             className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-studyflow-surface text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
@@ -153,7 +164,7 @@ export function HabitTaskCreator({
             Độ ưu tiên
           </label>
           <div className="flex gap-2">
-            {(['low', 'medium', 'high'] as const).map((p) => (
+            {(['low', 'medium', 'high'] as const).map(p => (
               <button
                 key={p}
                 type="button"
