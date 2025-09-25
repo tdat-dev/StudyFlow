@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Progress } from '../../ui/progress';
 import {
   Play,
   Pause,
@@ -331,20 +332,16 @@ export function PomodoroTimer() {
 
             {/* Progress Bar */}
             <div className="w-full max-w-md mx-auto mb-6">
-              <div className="w-full h-1 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
-                <div
-                  className="h-full rounded-full transition-all duration-1000 ease-linear"
-                  style={{
-                    width: `${100 - calculateProgress()}%`,
-                    backgroundColor:
-                      timerMode === 'pomodoro'
-                        ? 'var(--accent-work)'
-                        : timerMode === 'shortBreak'
-                          ? 'var(--accent-short)'
-                          : 'var(--accent-long)',
-                  }}
-                ></div>
-              </div>
+              <Progress
+                value={100 - calculateProgress()}
+                className={`h-1 bg-gray-200 dark:bg-gray-700 ${
+                  timerMode === 'pomodoro'
+                    ? '[&>div]:bg-[color:var(--accent-work)]'
+                    : timerMode === 'shortBreak'
+                      ? '[&>div]:bg-[color:var(--accent-short)]'
+                      : '[&>div]:bg-[color:var(--accent-long)]'
+                }`}
+              />
             </div>
 
             {/* Session Info */}
@@ -397,14 +394,12 @@ export function PomodoroTimer() {
                 {tasks.map(task => (
                   <div key={task.id} className="task-item">
                     <button
-                      className="task-checkbox"
+                      className={`task-checkbox ${
+                        task.completed
+                          ? '!bg-red-500 !border-red-500'
+                          : 'border-gray-300 dark:border-gray-600'
+                      }`}
                       onClick={() => toggleTask(task.id)}
-                      style={{
-                        backgroundColor: task.completed
-                          ? '#ef4444'
-                          : 'transparent',
-                        borderColor: task.completed ? '#ef4444' : '#e5e7eb',
-                      }}
                     >
                       {task.completed && (
                         <CheckCircle2 className="h-3 w-3 text-white" />
@@ -451,14 +446,6 @@ export function PomodoroTimer() {
                               : 'hover:bg-gray-100 dark:hover:bg-gray-800'
                           }`}
                           onClick={() => setCurrentTaskId(task.id)}
-                          style={{
-                            backgroundColor:
-                              currentTaskId === task.id
-                                ? 'var(--accent-tint-12)'
-                                : 'transparent',
-                            color:
-                              currentTaskId === task.id ? '#ef4444' : '#374151',
-                          }}
                         >
                           {task.text}
                         </button>

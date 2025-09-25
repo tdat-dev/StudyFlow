@@ -64,6 +64,10 @@ export function Header({ user, onLogout, onNavigateToProfile }: HeaderProps) {
     setIsDropdownOpen(false);
     try {
       await onLogout();
+      // Force reload to reset all client state and go to auth screen
+      if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      }
     } catch (error) {
       console.error('Logout error:', error);
     }

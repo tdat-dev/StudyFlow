@@ -343,9 +343,9 @@ export function PomodoroTimerWithHabits({
   return (
     <div className="pomodoro-page min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-studyflow-bg dark:to-studyflow-surface">
       <div className="pomodoro-container max-w-7xl mx-auto p-4">
-        <div className="pomodoro-grid grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="pomodoro-grid grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)] gap-6 items-start">
           {/* Timer Section */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-1 min-w-0">
             <div className="timer-card bg-white dark:bg-studyflow-surface dark:card-elevated rounded-2xl shadow-lg p-8">
               {/* Timer Tabs */}
               <div className="timer-tabs flex justify-center mb-8">
@@ -492,7 +492,7 @@ export function PomodoroTimerWithHabits({
           </div>
 
           {/* Tasks Section */}
-          <div className="tasks-card bg-white dark:bg-studyflow-surface rounded-2xl shadow-lg p-6">
+          <div className="tasks-card bg-white dark:bg-studyflow-surface rounded-2xl shadow-lg p-6 lg:sticky lg:top-6 min-w-[320px]">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                 Tasks & Thói quen
@@ -505,6 +505,7 @@ export function PomodoroTimerWithHabits({
                       ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
                       : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
                   }`}
+                  title={showTasks ? 'Ẩn danh sách' : 'Hiện danh sách'}
                 >
                   <List className="w-5 h-5" />
                 </button>
@@ -515,6 +516,7 @@ export function PomodoroTimerWithHabits({
                       ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
                       : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
                   }`}
+                  title={showHistory ? 'Ẩn thống kê' : 'Hiện thống kê'}
                 >
                   <BarChart3 className="w-5 h-5" />
                 </button>
@@ -651,6 +653,7 @@ export function PomodoroTimerWithHabits({
                               deleteTraditionalTask(task.id);
                             }}
                             className="text-red-600 hover:text-red-700 p-1 rounded transition-colors"
+                            title="Xóa task"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>

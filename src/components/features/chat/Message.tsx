@@ -2,6 +2,8 @@ import React from 'react';
 import { Bot, User, Copy } from 'lucide-react';
 import { Message as MessageType } from '../../../types/chat';
 import { MarkdownRenderer } from './MarkdownRenderer';
+import { DownloadButton } from '../../ui/DownloadButton';
+import { Paperclip } from 'lucide-react';
 
 // Định nghĩa hàm formatTime trong component
 function formatTime(dateString: string): string {
@@ -40,8 +42,8 @@ export function Message({
   const Avatar = () => (
     <div
       className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm ${
-        isUser 
-          ? 'bg-gradient-to-br from-blue-500 to-blue-600' 
+        isUser
+          ? 'bg-gradient-to-br from-blue-500 to-blue-600'
           : 'bg-gradient-to-br from-purple-500 to-purple-600'
       }`}
     >
@@ -83,23 +85,43 @@ export function Message({
             className={`relative break-words ${
               groupedWithNext ? 'mb-1' : 'mb-0'
             } ${groupedWithPrev ? '-mt-1' : ''} ${
-              isUser 
-                ? 'bg-blue-600 text-white' 
+              isUser
+                ? 'bg-blue-600 text-white'
                 : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
             } rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200`}
             style={{ maxWidth: 'none' }}
           >
             {/* Message content padding */}
             <div className="px-4 py-3">
+              {/* Attachment pill (for user messages with files) */}
+              {isUser && message.attachments?.length ? (
+                <div className="mb-3 inline-flex items-center gap-2 rounded-xl bg-white/60 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 px-3 py-2">
+                  <Paperclip className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />
+                  <span className="text-sm text-gray-700 dark:text-gray-300 font-medium truncate max-w-[18rem]">
+                    {message.attachments[0].name}
+                  </span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    {(message.attachments[0].size / 1024).toFixed(1)}KB
+                  </span>
+                </div>
+              ) : null}
+
               {/* Copy button for AI messages */}
               {isAssistant && (
-                <button
-                  onClick={handleCopyMessage}
-                  className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-200 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus-visible:ring-2 focus-visible:ring-blue-500"
-                  title="Copy tin nhắn"
-                >
-                  <Copy className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
-                </button>
+                <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                  <DownloadButton
+                    content={message.content}
+                    messageId={message.id}
+                    className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                  />
+                  <button
+                    onClick={handleCopyMessage}
+                    className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus-visible:ring-2 focus-visible:ring-blue-500"
+                    title="Copy tin nhắn"
+                  >
+                    <Copy className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
+                  </button>
+                </div>
               )}
 
               {/* Message content - render as Markdown for AI, plain text for user */}

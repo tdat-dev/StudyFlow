@@ -65,7 +65,7 @@ async function analyzeTextFileWithAI(
       analyzeHTMLWithGemini,
       analyzeJSONWithGemini,
       analyzeMarkdownWithGemini,
-    } = await import('../services/ai/gemini');
+    } = await import('./ai/gemini');
 
     const language = getFileLanguage(fileName);
 
@@ -186,7 +186,7 @@ Bạn có thể mô tả hình ảnh này hoặc hỏi AI về nội dung trong 
 async function analyzeImageWithGemini(imageDataUrl: string): Promise<string> {
   try {
     // Import Gemini service dynamically để tránh circular dependency
-    const { generateImageAnalysis } = await import('../services/ai/gemini');
+    const { generateImageAnalysis } = await import('./ai/gemini');
 
     // Extract base64 data từ data URL
     const base64Data = imageDataUrl.split(',')[1];
@@ -207,7 +207,7 @@ async function analyzeImageBasic(
   fileSize: number,
 ): Promise<string> {
   try {
-    const { analyzeMarkdownWithGemini } = await import('../services/ai/gemini');
+    const { analyzeMarkdownWithGemini } = await import('./ai/gemini');
 
     const metadata = `Hình ảnh: ${fileName}
 Kích thước: ${(fileSize / 1024).toFixed(1)} KB
@@ -265,8 +265,8 @@ async function readPdfFile(file: File): Promise<string> {
 
     return `[File PDF: ${file.name}] - Kích thước: ${(file.size / 1024).toFixed(1)}KB - ${pdf.numPages} trang
 
-📄 **Nội dung PDF:**
-${fullText.substring(0, 1000)}${fullText.length > 1000 ? '...' : ''}
+📄 **Nội dung PDF (đầy đủ):**
+${fullText}
 
 🤖 **Phân tích AI:**
 ${analysis}`;
@@ -289,7 +289,7 @@ async function analyzePDFWithAI(
   fileName: string,
 ): Promise<string> {
   try {
-    const { analyzeMarkdownWithGemini } = await import('../services/ai/gemini');
+    const { analyzeMarkdownWithGemini } = await import('./ai/gemini');
 
     const enhancedContent = `PDF Analysis for: ${fileName}
 
@@ -360,7 +360,7 @@ async function analyzeWordWithAI(
   fileName: string,
 ): Promise<string> {
   try {
-    const { analyzeMarkdownWithGemini } = await import('../services/ai/gemini');
+    const { analyzeMarkdownWithGemini } = await import('./ai/gemini');
 
     const enhancedContent = `Word Document Analysis for: ${fileName}
 
@@ -448,7 +448,7 @@ async function analyzeExcelWithAI(
   fileName: string,
 ): Promise<string> {
   try {
-    const { analyzeJSONWithGemini } = await import('../services/ai/gemini');
+    const { analyzeJSONWithGemini } = await import('./ai/gemini');
 
     const enhancedContent = `Excel Data Analysis for: ${fileName}
 
@@ -511,7 +511,7 @@ async function analyzePowerPointWithAI(
   fileSize: number,
 ): Promise<string> {
   try {
-    const { analyzeMarkdownWithGemini } = await import('../services/ai/gemini');
+    const { analyzeMarkdownWithGemini } = await import('./ai/gemini');
 
     const metadata = `File PowerPoint: ${fileName}
 Kích thước: ${(fileSize / 1024).toFixed(1)} KB
@@ -715,6 +715,42 @@ export function createFilePreviewMessage(
   const fileEmoji = getFileEmoji(fileContent.type, fileContent.name);
 
   let message = `${fileEmoji} **${fileContent.name}** (${(fileContent.size / 1024).toFixed(1)}KB)`;
+
+  // Nicely format a short preview depending on file type for better aesthetics
+  const lowerName = fileContent.name.toLowerCase();
+  const isImage = fileContent.type.startsWith('image/');
+  const isPdf = fileContent.type.includes('pdf') || /\.pdf$/i.test(lowerName);
+  const isWord =
+    fileContent.type.includes('word') || /\.(doc|docx)$/i.test(lowerName);
+  const isExcel =
+    fileContent.type.includes('sheet') || /\.(xlsx|xls|csv)$/i.test(lowerName);
+  const isText =
+    fileContent.type.startsWith('text/') || /\.(txt|md)$/i.test(lowerName);
+  const isCode =
+    /\.(js|ts|jsx|tsx|css|html|json|xml|py|java|cpp|c|php|sql)$/i.test(
+      lowerName,
+    );
+
+  const previewLimit = 800; // characters to preview inside message bubble
+
+  if (isImage) {
+    // Keep compact for images (preview shown separately by UI if needed)
+  } else if (isPdf) {
+    message += `\n\n> PDF attached. I will read and analyze its content.`;
+  } else if (isWord) {
+    message += `\n\n> Word document attached. I will extract and analyze its content.`;
+  } else if (isExcel) {
+    message += `\n\n> Spreadsheet attached. I will parse and analyze its data.`;
+  } else if (isText || isCode) {
+    const lang = getFileLanguage(fileContent.name) || 'text';
+    const snippet = (fileContent.content || '').slice(0, previewLimit);
+    if (snippet.trim()) {
+      message += `\n\nPreview:\n\n\`\`\`${lang}\n${snippet}\n\`\`\``;
+      if ((fileContent.content || '').length > previewLimit) {
+        message += `\n\n… (truncated preview)`;
+      }
+    }
+  }
 
   if (userMessage.trim()) {
     message += `\n\n${userMessage}`;

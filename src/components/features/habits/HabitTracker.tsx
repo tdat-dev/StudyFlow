@@ -89,10 +89,6 @@ export function HabitTracker({ user }: HabitTrackerProps) {
   // Pomodoro integration
   const { habitStats } = useHabitPomodoroIntegration(user);
 
-
-
-
-
   // Định nghĩa hàm loadHabits
   const loadHabits = async () => {
     if (!user.accessToken || !auth.currentUser) {
@@ -134,7 +130,7 @@ export function HabitTracker({ user }: HabitTrackerProps) {
             Smile,
             Star,
           };
-          
+
           return {
             ...habit,
             icon: iconMap[habit.iconName] || BookOpen,
@@ -566,7 +562,6 @@ export function HabitTracker({ user }: HabitTrackerProps) {
 
   return (
     <div className="h-full overflow-y-auto p-6 pb-32 md:pb-24 relative bg-white dark:bg-black">
-
       {/* Header */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -628,9 +623,8 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                       } transition-all duration-200`}
                     >
                       <div
-                        className="flex items-center"
+                        className="flex items-center cursor-pointer"
                         onClick={() => viewHabitDetail(habit)}
-                        style={{ cursor: 'pointer' }}
                       >
                         <div
                           className={`w-8 h-8 rounded-lg ${habit.bgColor} flex items-center justify-center mr-3`}
