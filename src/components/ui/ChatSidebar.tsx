@@ -20,7 +20,7 @@ export function ChatSidebar({
   onNewChat,
   onDeleteSession,
   onRenameSession,
-  className = ''
+  className = '',
 }: ChatSidebarProps) {
   const [editingId, setEditingId] = React.useState<string | null>(null);
   const [editTitle, setEditTitle] = React.useState('');
@@ -52,7 +52,9 @@ export function ChatSidebar({
   };
 
   return (
-    <div className={`bg-white/5 backdrop-blur-md border-r border-white/10 h-full flex flex-col chat-sidebar ${className}`}>
+    <div
+      className={`bg-white/5 backdrop-blur-md border-r border-white/10 h-full flex flex-col chat-sidebar ${className}`}
+    >
       {/* Header */}
       <div className="p-4 border-b border-white/10">
         <div className="flex items-center justify-between mb-4">
@@ -80,7 +82,7 @@ export function ChatSidebar({
           </div>
         ) : (
           <div className="p-2 space-y-1">
-            {sessions.map((session) => (
+            {sessions.map(session => (
               <div
                 key={session.id}
                 className={`group relative rounded-lg p-3 cursor-pointer transition-all duration-200 hover:bg-white/10 ${
@@ -96,7 +98,7 @@ export function ChatSidebar({
                       <input
                         type="text"
                         value={editTitle}
-                        onChange={(e) => setEditTitle(e.target.value)}
+                        onChange={e => setEditTitle(e.target.value)}
                         onKeyDown={handleKeyPress}
                         onBlur={handleSaveEdit}
                         className="w-full bg-transparent text-white text-sm border-none outline-none"
@@ -112,7 +114,7 @@ export function ChatSidebar({
                         day: '2-digit',
                         month: '2-digit',
                         hour: '2-digit',
-                        minute: '2-digit'
+                        minute: '2-digit',
                       })}
                     </p>
                   </div>
@@ -125,7 +127,7 @@ export function ChatSidebar({
                           size="sm"
                           variant="ghost"
                           className="h-6 w-6 p-0 text-white/60 hover:text-white hover:bg-white/10"
-                          onClick={(e) => {
+                          onClick={e => {
                             e.stopPropagation();
                             handleStartEdit(session);
                           }}
@@ -136,7 +138,7 @@ export function ChatSidebar({
                           size="sm"
                           variant="ghost"
                           className="h-6 w-6 p-0 text-white/60 hover:text-red-400 hover:bg-red-500/10"
-                          onClick={(e) => {
+                          onClick={e => {
                             e.stopPropagation();
                             onDeleteSession(session.id);
                           }}

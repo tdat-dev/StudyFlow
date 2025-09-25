@@ -411,11 +411,19 @@ Chỉ trả về MỘT câu ví dụ, không có markdown.`;
       const subjNorm = stripAccents(newDeckSubject);
 
       const isEnglish = /(tieng anh|english|en\b)/.test(subjNorm);
-      const isFrench = /(tieng phap|phap|french|francais|francaise|fr\b)/.test(subjNorm);
-      const isJapanese = /(tieng nhat|nhat|japanese|nihongo|jp\b)/.test(subjNorm);
-      const isChinese = /(tieng trung|trung|hoa|chinese|mandarin|zh\b|han ngu)/.test(subjNorm);
-      const isKorean = /(tieng han|han|korean|hangul|kr\b|han quoc)/.test(subjNorm);
-      const isSpanish = /(tieng tay ban nha|tay ban nha|spanish|espanol|es\b)/.test(subjNorm);
+      const isFrench = /(tieng phap|phap|french|francais|francaise|fr\b)/.test(
+        subjNorm,
+      );
+      const isJapanese = /(tieng nhat|nhat|japanese|nihongo|jp\b)/.test(
+        subjNorm,
+      );
+      const isChinese =
+        /(tieng trung|trung|hoa|chinese|mandarin|zh\b|han ngu)/.test(subjNorm);
+      const isKorean = /(tieng han|han|korean|hangul|kr\b|han quoc)/.test(
+        subjNorm,
+      );
+      const isSpanish =
+        /(tieng tay ban nha|tay ban nha|spanish|espanol|es\b)/.test(subjNorm);
 
       if (isEnglish) {
         frontLanguage = 'tiếng Anh';
@@ -502,7 +510,12 @@ Lưu ý quan trọng:
         const tableMatches = Array.from(aiResponse.matchAll(tableRegex));
 
         const parsedCards: AICard[] = [];
-        const normalize = (s: string) => s.toLowerCase().trim().replace(/[\s\u200B\u200C\u200D\uFEFF]+/g, ' ').replace(/[^\p{L}\p{N}]+/gu, ' ');
+        const normalize = (s: string) =>
+          s
+            .toLowerCase()
+            .trim()
+            .replace(/[\s\u200B\u200C\u200D\uFEFF]+/g, ' ')
+            .replace(/[^\p{L}\p{N}]+/gu, ' ');
         const seenFronts = new Set<string>();
 
         for (const match of tableMatches) {
@@ -513,7 +526,10 @@ Lưu ý quan trọng:
             .filter(r => r && r.includes('|'));
 
           rows.forEach((row, index) => {
-            const columns = row.split('|').map(col => col.trim()).filter(Boolean);
+            const columns = row
+              .split('|')
+              .map(col => col.trim())
+              .filter(Boolean);
 
             // Bỏ qua header/tiêu đề nếu có hoặc hàng phân cách
             const firstCell = (columns[0] || '').toLowerCase();
@@ -529,16 +545,17 @@ Lưu ý quan trọng:
             if (columns.length >= 2) {
               const clean = (v: string) =>
                 v
-                    .replace(/^"(.*)"$/, '$1')
-                    .replace(/\*\*/g, '')
-                    .replace(/\*/g, '')
-                    .replace(/`/g, '')
+                  .replace(/^"(.*)"$/, '$1')
+                  .replace(/\*\*/g, '')
+                  .replace(/\*/g, '')
+                  .replace(/`/g, '')
                   .trim();
 
               const cleanFront = clean(columns[0]);
               const cleanBack = clean(columns[1]);
               const cleanExample = columns.length > 2 ? clean(columns[2]) : '';
-              const cleanExampleTranslation = columns.length > 3 ? clean(columns[3]) : '';
+              const cleanExampleTranslation =
+                columns.length > 3 ? clean(columns[3]) : '';
 
               if (!cleanFront || !cleanBack) return;
 
@@ -548,11 +565,11 @@ Lưu ý quan trọng:
 
               parsedCards.push({
                 id: `ai-card-${Date.now()}-${parsedCards.length}-${index}`,
-                  front: cleanFront,
-                  back: cleanBack,
-                  example: cleanExample,
-                  exampleTranslation: cleanExampleTranslation,
-                  learned: false,
+                front: cleanFront,
+                back: cleanBack,
+                example: cleanExample,
+                exampleTranslation: cleanExampleTranslation,
+                learned: false,
               });
             }
           });
@@ -584,7 +601,12 @@ Lưu ý quan trọng:
         if (cards.length === 0) {
           const lines = aiResponse.split('\n');
           const seen = new Set<string>();
-          const norm = (s: string) => s.toLowerCase().trim().replace(/[\s\u200B\u200C\u200D\uFEFF]+/g, ' ').replace(/[^\p{L}\p{N}]+/gu, ' ');
+          const norm = (s: string) =>
+            s
+              .toLowerCase()
+              .trim()
+              .replace(/[\s\u200B\u200C\u200D\uFEFF]+/g, ' ')
+              .replace(/[^\p{L}\p{N}]+/gu, ' ');
           for (const line of lines) {
             if (line.includes('-') || line.includes(':')) {
               const parts = line.split(/[-:]/).map(part => part.trim());
@@ -594,17 +616,17 @@ Lưu ý quan trọng:
                 const key = norm(front);
                 if (front && back && !seen.has(key)) {
                   seen.add(key);
-                cards.push({
-                  id: `ai-card-${Date.now()}-${cards.length}`,
+                  cards.push({
+                    id: `ai-card-${Date.now()}-${cards.length}`,
                     front,
                     back,
-                  example: '',
-                  exampleTranslation: '',
-                  learned: false,
-                });
+                    example: '',
+                    exampleTranslation: '',
+                    learned: false,
+                  });
+                }
               }
             }
-          }
           }
         }
 
@@ -612,7 +634,12 @@ Lưu ý quan trọng:
         if (cards.length > 0) {
           const unique: AICard[] = [];
           const seen = new Set<string>();
-          const keyOf = (s: string) => s.toLowerCase().trim().replace(/[\s\u200B\u200C\u200D\uFEFF]+/g, ' ').replace(/[^\p{L}\p{N}]+/gu, ' ');
+          const keyOf = (s: string) =>
+            s
+              .toLowerCase()
+              .trim()
+              .replace(/[\s\u200B\u200C\u200D\uFEFF]+/g, ' ')
+              .replace(/[^\p{L}\p{N}]+/gu, ' ');
           for (const c of cards) {
             const k = keyOf(c.front);
             if (!seen.has(k)) {

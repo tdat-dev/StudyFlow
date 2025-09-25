@@ -2,11 +2,15 @@ import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { Input } from './input';
 
-interface PasswordFieldProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
+interface PasswordFieldProps
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
   className?: string;
 }
 
-export function PasswordField({ className = '', ...props }: PasswordFieldProps) {
+export function PasswordField({
+  className = '',
+  ...props
+}: PasswordFieldProps) {
   const [showPassword, setShowPassword] = useState(false);
 
   const togglePasswordVisibility = () => {

@@ -137,8 +137,9 @@ export function CreateHabitForm({
     e.preventDefault();
     if (!title.trim() || !description.trim()) return;
 
-    const colorTheme = COLOR_THEMES[selectedIcon.color as keyof typeof COLOR_THEMES];
-    
+    const colorTheme =
+      COLOR_THEMES[selectedIcon.color as keyof typeof COLOR_THEMES];
+
     onCreateHabit({
       title: title.trim(),
       description: description.trim(),
@@ -172,7 +173,7 @@ Mô tả: [mô tả chi tiết]
 Icon: [loại icon]`;
 
       const response = await generateTutorResponse(prompt, []);
-      
+
       // Parse AI response
       const lines = response.split('\n');
       let aiTitle = '';
@@ -239,24 +240,26 @@ Icon: [loại icon]`;
           <div className="flex space-x-2">
             <Button
               type="button"
-              variant={!showAIForm ? "default" : "outline"}
+              variant={!showAIForm ? 'default' : 'outline'}
               size="sm"
               onClick={() => setShowAIForm(false)}
-              className={`flex-1 font-medium ${!showAIForm 
-                ? 'bg-blue-600 hover:bg-blue-700 text-white border-0' 
-                : 'border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800'
+              className={`flex-1 font-medium ${
+                !showAIForm
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white border-0'
+                  : 'border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800'
               }`}
             >
               Tạo thủ công
             </Button>
             <Button
               type="button"
-              variant={showAIForm ? "default" : "outline"}
+              variant={showAIForm ? 'default' : 'outline'}
               size="sm"
               onClick={() => setShowAIForm(true)}
-              className={`flex-1 font-medium ${showAIForm 
-                ? 'bg-blue-600 hover:bg-blue-700 text-white border-0' 
-                : 'border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800'
+              className={`flex-1 font-medium ${
+                showAIForm
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white border-0'
+                  : 'border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800'
               }`}
             >
               <Sparkles className="h-4 w-4 mr-1" />
@@ -268,11 +271,13 @@ Icon: [loại icon]`;
           {showAIForm && (
             <div className="space-y-4 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg border-2 border-blue-200 dark:border-blue-600">
               <div>
-                <Label htmlFor="ai-prompt">Mô tả mục tiêu học tập của bạn</Label>
+                <Label htmlFor="ai-prompt">
+                  Mô tả mục tiêu học tập của bạn
+                </Label>
                 <Input
                   id="ai-prompt"
                   value={aiPrompt}
-                  onChange={(e) => setAiPrompt(e.target.value)}
+                  onChange={e => setAiPrompt(e.target.value)}
                   placeholder="Ví dụ: Tôi muốn cải thiện kỹ năng nghe tiếng Anh..."
                   className="mt-1 bg-white dark:bg-studyflow-surface border-2 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400"
                 />
@@ -305,7 +310,7 @@ Icon: [loại icon]`;
               <Input
                 id="title"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={e => setTitle(e.target.value)}
                 placeholder="Ví dụ: Học từ vựng mỗi ngày"
                 required
                 maxLength={50}
@@ -322,7 +327,7 @@ Icon: [loại icon]`;
               <Input
                 id="description"
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={e => setDescription(e.target.value)}
                 placeholder="Ví dụ: Học ít nhất 10 từ mới mỗi ngày"
                 required
                 maxLength={100}
@@ -340,8 +345,9 @@ Icon: [loại icon]`;
                 {HABIT_ICONS.map((iconItem, index) => {
                   const Icon = iconItem.icon;
                   const isSelected = selectedIcon.name === iconItem.name;
-                  const colorTheme = COLOR_THEMES[iconItem.color as keyof typeof COLOR_THEMES];
-                  
+                  const colorTheme =
+                    COLOR_THEMES[iconItem.color as keyof typeof COLOR_THEMES];
+
                   return (
                     <button
                       key={index}
@@ -353,12 +359,20 @@ Icon: [loại icon]`;
                           : 'bg-white dark:bg-studyflow-surface border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500'
                       }`}
                     >
-                      <Icon className={`h-6 w-6 mx-auto ${
-                        isSelected ? colorTheme.textColor : 'text-gray-600 dark:text-gray-400'
-                      }`} />
-                      <p className={`text-xs mt-1 ${
-                        isSelected ? colorTheme.textColor : 'text-gray-600 dark:text-gray-400'
-                      }`}>
+                      <Icon
+                        className={`h-6 w-6 mx-auto ${
+                          isSelected
+                            ? colorTheme.textColor
+                            : 'text-gray-600 dark:text-gray-400'
+                        }`}
+                      />
+                      <p
+                        className={`text-xs mt-1 ${
+                          isSelected
+                            ? colorTheme.textColor
+                            : 'text-gray-600 dark:text-gray-400'
+                        }`}
+                      >
                         {iconItem.name}
                       </p>
                     </button>
@@ -374,9 +388,13 @@ Icon: [loại icon]`;
                   Xem trước:
                 </Label>
                 <div className="flex items-center mt-2">
-                  <div className={`w-10 h-10 rounded-lg ${selectedIcon ? COLOR_THEMES[selectedIcon.color as keyof typeof COLOR_THEMES].bgColor : 'bg-gray-200'} flex items-center justify-center mr-3`}>
+                  <div
+                    className={`w-10 h-10 rounded-lg ${selectedIcon ? COLOR_THEMES[selectedIcon.color as keyof typeof COLOR_THEMES].bgColor : 'bg-gray-200'} flex items-center justify-center mr-3`}
+                  >
                     {selectedIcon && (
-                      <selectedIcon.icon className={`h-5 w-5 ${COLOR_THEMES[selectedIcon.color as keyof typeof COLOR_THEMES].textColor}`} />
+                      <selectedIcon.icon
+                        className={`h-5 w-5 ${COLOR_THEMES[selectedIcon.color as keyof typeof COLOR_THEMES].textColor}`}
+                      />
                     )}
                   </div>
                   <div>

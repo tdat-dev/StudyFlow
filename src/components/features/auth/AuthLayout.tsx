@@ -10,19 +10,19 @@ export function AuthLayout({ children, type }: AuthLayoutProps) {
   const benefits = [
     {
       icon: BookOpen,
-      title: "Flashcards AI",
-      description: "Học từ vựng thông minh với AI"
+      title: 'Flashcards AI',
+      description: 'Học từ vựng thông minh với AI',
     },
     {
       icon: MessageCircle,
-      title: "AI Tutor 24/7", 
-      description: "Giải đáp mọi thắc mắc học tập"
+      title: 'AI Tutor 24/7',
+      description: 'Giải đáp mọi thắc mắc học tập',
     },
     {
       icon: Target,
-      title: "Theo dõi tiến độ",
-      description: "Phân tích và cải thiện hiệu quả"
-    }
+      title: 'Theo dõi tiến độ',
+      description: 'Phân tích và cải thiện hiệu quả',
+    },
   ];
 
   return (
@@ -33,7 +33,7 @@ export function AuthLayout({ children, type }: AuthLayoutProps) {
         <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob"></div>
         <div className="absolute top-0 -right-4 w-72 h-72 bg-yellow-300 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob animation-delay-2000"></div>
         <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob animation-delay-4000"></div>
-        
+
         {/* Grid Pattern */}
         <div className="absolute inset-0 opacity-30 pointer-events-none [background:radial-gradient(circle_at_1px_1px,#fff_1px,transparent_1px)] [background-size:24px_24px]"></div>
       </div>
@@ -50,16 +50,17 @@ export function AuthLayout({ children, type }: AuthLayoutProps) {
                     <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center">
                       <BookOpen className="h-6 w-6 text-white" />
                     </div>
-                    <span className="text-3xl font-bold text-white">StudyFlow</span>
+                    <span className="text-3xl font-bold text-white">
+                      StudyFlow
+                    </span>
                   </div>
                   <h1 className="text-4xl font-bold text-white mb-4">
                     Học thông minh hơn mỗi ngày 🚀
                   </h1>
                   <p className="text-white/70 text-lg">
-                    {type === 'login' 
+                    {type === 'login'
                       ? 'Chào mừng trở lại! Tiếp tục hành trình học tập của bạn.'
-                      : 'Tham gia cùng hàng nghìn học sinh đang học tập hiệu quả hơn.'
-                    }
+                      : 'Tham gia cùng hàng nghìn học sinh đang học tập hiệu quả hơn.'}
                   </p>
                 </div>
 
@@ -73,8 +74,12 @@ export function AuthLayout({ children, type }: AuthLayoutProps) {
                           <Icon className="h-5 w-5 text-white" />
                         </div>
                         <div>
-                          <h3 className="text-white font-semibold mb-1 whitespace-normal break-normal">{benefit.title}</h3>
-                          <p className="text-white/60 text-sm whitespace-normal break-normal">{benefit.description}</p>
+                          <h3 className="text-white font-semibold mb-1 whitespace-normal break-normal">
+                            {benefit.title}
+                          </h3>
+                          <p className="text-white/60 text-sm whitespace-normal break-normal">
+                            {benefit.description}
+                          </p>
                         </div>
                       </div>
                     );
@@ -85,9 +90,7 @@ export function AuthLayout({ children, type }: AuthLayoutProps) {
 
             {/* Form Section - Right Panel */}
             <div className="w-full lg:col-span-5 xl:col-span-5 flex items-center justify-start p-6 lg:p-12 pr-8">
-              <div className="w-full max-w-md">
-                {children}
-              </div>
+              <div className="w-full max-w-md">{children}</div>
             </div>
           </div>
         </div>
@@ -96,7 +99,14 @@ export function AuthLayout({ children, type }: AuthLayoutProps) {
       {/* Footer */}
       <div className="absolute inset-x-0 bottom-4 text-center hidden md:block">
         <p className="text-xs text-white/60">
-          © 2025 StudyFlow · <a href="#" className="hover:text-white/60 transition-colors">Help</a> · <a href="#" className="hover:text-white/60 transition-colors">Privacy</a>
+          © 2025 StudyFlow ·{' '}
+          <a href="#" className="hover:text-white/60 transition-colors">
+            Help
+          </a>{' '}
+          ·{' '}
+          <a href="#" className="hover:text-white/60 transition-colors">
+            Privacy
+          </a>
         </p>
       </div>
     </div>

@@ -5,25 +5,29 @@ interface AccessibilityToggleProps {
   className?: string;
 }
 
-export function AccessibilityToggle({ className = '' }: AccessibilityToggleProps) {
+export function AccessibilityToggle({
+  className = '',
+}: AccessibilityToggleProps) {
   const [highContrast, setHighContrast] = useState(false);
 
   useEffect(() => {
     // Check if user prefers high contrast
-    const prefersHighContrast = window.matchMedia('(prefers-contrast: high)').matches;
+    const prefersHighContrast = window.matchMedia(
+      '(prefers-contrast: high)',
+    ).matches;
     setHighContrast(prefersHighContrast);
   }, []);
 
   const toggleHighContrast = () => {
     const newValue = !highContrast;
     setHighContrast(newValue);
-    
+
     if (newValue) {
       document.documentElement.classList.add('high-contrast');
     } else {
       document.documentElement.classList.remove('high-contrast');
     }
-    
+
     // Save preference to localStorage
     localStorage.setItem('highContrast', newValue.toString());
   };
@@ -48,8 +52,12 @@ export function AccessibilityToggle({ className = '' }: AccessibilityToggleProps
           ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
           : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
       } ${className}`}
-      title={highContrast ? 'Tắt chế độ tương phản cao' : 'Bật chế độ tương phản cao'}
-      aria-label={highContrast ? 'Tắt chế độ tương phản cao' : 'Bật chế độ tương phản cao'}
+      title={
+        highContrast ? 'Tắt chế độ tương phản cao' : 'Bật chế độ tương phản cao'
+      }
+      aria-label={
+        highContrast ? 'Tắt chế độ tương phản cao' : 'Bật chế độ tương phản cao'
+      }
     >
       {highContrast ? (
         <EyeOff className="h-4 w-4" />

@@ -13,13 +13,13 @@ export function cn(...inputs: ClassValue[]) {
  */
 export function formatDate(date: string | Date): string {
   if (!date) return '';
-  
+
   const d = typeof date === 'string' ? new Date(date) : date;
-  
+
   return d.toLocaleDateString('vi-VN', {
     day: 'numeric',
     month: 'numeric',
-    year: 'numeric'
+    year: 'numeric',
   });
 }
 
@@ -28,12 +28,12 @@ export function formatDate(date: string | Date): string {
  */
 export function formatTime(date: string | Date): string {
   if (!date) return '';
-  
+
   const d = typeof date === 'string' ? new Date(date) : date;
-  
+
   return d.toLocaleTimeString('vi-VN', {
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   });
 }
 
@@ -57,15 +57,15 @@ export function generateId(prefix: string = 'id'): string {
  */
 export function debounce<T extends (...args: any[]) => any>(
   fn: T,
-  delay: number
+  delay: number,
 ): (...args: Parameters<T>) => void {
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
-  
-  return function(...args: Parameters<T>) {
+
+  return function (...args: Parameters<T>) {
     if (timeoutId) {
       clearTimeout(timeoutId);
     }
-    
+
     timeoutId = setTimeout(() => {
       fn(...args);
       timeoutId = null;

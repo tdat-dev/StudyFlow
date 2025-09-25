@@ -2,7 +2,8 @@ import React from 'react';
 import { Loader2 } from 'lucide-react';
 import Button from './button';
 
-interface LoadingButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface LoadingButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
   children: React.ReactNode;
   variant?: 'default' | 'outline' | 'ghost';
@@ -10,14 +11,14 @@ interface LoadingButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   className?: string;
 }
 
-export function LoadingButton({ 
-  loading = false, 
-  children, 
+export function LoadingButton({
+  loading = false,
+  children,
   variant = 'default',
   size = 'default',
   className = '',
   disabled,
-  ...props 
+  ...props
 }: LoadingButtonProps) {
   return (
     <Button

@@ -1,5 +1,5 @@
-import { type VariantProps } from "class-variance-authority";
-import { buttonVariants } from "./button-variants";
+import { type VariantProps } from 'class-variance-authority';
+import { buttonVariants } from './button-variants';
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
@@ -12,4 +12,4 @@ export interface InputProps
 
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof import("./badge").badgeVariants> {}
+    VariantProps<typeof import('./badge').badgeVariants> {}

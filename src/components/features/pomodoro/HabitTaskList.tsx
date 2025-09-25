@@ -1,13 +1,13 @@
 import React from 'react';
-import { 
-  CheckCircle2, 
-  Circle, 
-  Clock, 
-  Target, 
-  Trash2, 
+import {
+  CheckCircle2,
+  Circle,
+  Clock,
+  Target,
+  Trash2,
   Flag,
   Play,
-  Pause
+  Pause,
 } from 'lucide-react';
 import { HabitBasedTask } from '../../../types/pomodoro-habits';
 import Button from '../../ui/button';
@@ -33,19 +33,27 @@ export function HabitTaskList({
 }: HabitTaskListProps) {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return 'border-l-red-500 bg-red-50 dark:bg-red-900/10';
-      case 'medium': return 'border-l-yellow-500 bg-yellow-50 dark:bg-yellow-900/10';
-      case 'low': return 'border-l-green-500 bg-green-50 dark:bg-green-900/10';
-      default: return 'border-l-gray-500 bg-gray-50 dark:bg-gray-900/10';
+      case 'high':
+        return 'border-l-red-500 bg-red-50 dark:bg-red-900/10';
+      case 'medium':
+        return 'border-l-yellow-500 bg-yellow-50 dark:bg-yellow-900/10';
+      case 'low':
+        return 'border-l-green-500 bg-green-50 dark:bg-green-900/10';
+      default:
+        return 'border-l-gray-500 bg-gray-50 dark:bg-gray-900/10';
     }
   };
 
   const getPriorityIcon = (priority: string) => {
     switch (priority) {
-      case 'high': return '🔴';
-      case 'medium': return '🟡';
-      case 'low': return '🟢';
-      default: return '⚪';
+      case 'high':
+        return '🔴';
+      case 'medium':
+        return '🟡';
+      case 'low':
+        return '🟢';
+      default:
+        return '⚪';
     }
   };
 
@@ -77,7 +85,7 @@ export function HabitTaskList({
             Đang thực hiện ({activeTasks.length})
           </h3>
           <div className="space-y-2">
-            {activeTasks.map((task) => (
+            {activeTasks.map(task => (
               <TaskItem
                 key={task.id}
                 task={task}
@@ -104,7 +112,7 @@ export function HabitTaskList({
             Đã hoàn thành ({completedTasks.length})
           </h3>
           <div className="space-y-2">
-            {completedTasks.slice(0, 5).map((task) => (
+            {completedTasks.slice(0, 5).map(task => (
               <TaskItem
                 key={task.id}
                 task={task}
@@ -178,31 +186,34 @@ function TaskItem({
           {/* Task Header */}
           <div className="flex items-center gap-2 mb-2">
             <button
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 if (!isCompleted) onTaskComplete(task.id);
               }}
               className={`
                 flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors
-                ${isTaskComplete 
-                  ? 'bg-green-500 border-green-500 text-white' 
-                  : 'border-gray-300 dark:border-gray-600 hover:border-green-500'
+                ${
+                  isTaskComplete
+                    ? 'bg-green-500 border-green-500 text-white'
+                    : 'border-gray-300 dark:border-gray-600 hover:border-green-500'
                 }
               `}
             >
               {isTaskComplete && <CheckCircle2 className="w-3 h-3" />}
             </button>
-            
+
             <span className="text-xs px-2 py-1 rounded-full bg-white dark:bg-studyflow-surface border border-gray-200 dark:border-gray-600">
               {getPriorityIcon(task.priority || 'medium')} {task.habitTitle}
             </span>
           </div>
 
           {/* Task Text */}
-          <p className={`
+          <p
+            className={`
             text-sm font-medium mb-2
             ${isTaskComplete ? 'line-through text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-gray-100'}
-          `}>
+          `}
+          >
             {task.text}
           </p>
 
@@ -211,7 +222,9 @@ function TaskItem({
             <div className="mb-2">
               <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 mb-1">
                 <span>Tiến độ</span>
-                <span>{task.pomodoroCount}/{task.estimatedPomodoros} Pomodoro</span>
+                <span>
+                  {task.pomodoroCount}/{task.estimatedPomodoros} Pomodoro
+                </span>
               </div>
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                 <div
@@ -236,7 +249,13 @@ function TaskItem({
             )}
             <div className="flex items-center gap-1">
               <Flag className="w-3 h-3" />
-              <span>{task.priority === 'high' ? 'Cao' : task.priority === 'medium' ? 'TB' : 'Thấp'}</span>
+              <span>
+                {task.priority === 'high'
+                  ? 'Cao'
+                  : task.priority === 'medium'
+                    ? 'TB'
+                    : 'Thấp'}
+              </span>
             </div>
           </div>
         </div>
@@ -246,12 +265,12 @@ function TaskItem({
           <div className="flex items-center gap-2 ml-2">
             {onStartPomodoro && (
               <Button
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   onStartPomodoro(task.id);
                 }}
                 disabled={isTimerActive && isSelected}
-                variant={isTimerActive && isSelected ? "warning" : "default"}
+                variant={isTimerActive && isSelected ? 'warning' : 'default'}
                 size="icon-sm"
                 title="Bắt đầu Pomodoro"
               >
@@ -262,9 +281,9 @@ function TaskItem({
                 )}
               </Button>
             )}
-            
+
             <Button
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 onTaskDelete(task.id);
               }}

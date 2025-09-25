@@ -1,14 +1,14 @@
 import {
   generateGeminiResponse,
   generateLocalAIResponse,
-} from "../gemini/config";
-import { buildTutorPrompt } from "./prompts";
+} from '../gemini/config';
+import { buildTutorPrompt } from './prompts';
 
-export type ChatTurn = { role: "user" | "model"; content: string };
+export type ChatTurn = { role: 'user' | 'model'; content: string };
 
 export async function generateTutorResponse(
   userMessage: string,
-  history: ChatTurn[] = []
+  history: ChatTurn[] = [],
 ): Promise<string> {
   const prompt = buildTutorPrompt(userMessage, history);
   try {

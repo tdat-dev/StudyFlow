@@ -18,12 +18,12 @@ module.exports = {
     // TypeScript specific
     '@typescript-eslint/no-unused-vars': 'warn',
     '@typescript-eslint/no-explicit-any': 'warn',
-    
+
     // React specific
     'react/prop-types': 'off',
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
-    
+
     // General
     'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'warn',
     'prefer-const': 'error',

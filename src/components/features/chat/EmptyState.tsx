@@ -23,7 +23,8 @@ export function EmptyState({
           Khi bạn sẵn sàng là chúng ta có thể bắt đầu.
         </h1>
         <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-          Tôi là AI Tutor của bạn, sẵn sàng giúp bạn học tập và phát triển. Hãy chọn một chủ đề bên dưới hoặc đặt câu hỏi bất kỳ!
+          Tôi là AI Tutor của bạn, sẵn sàng giúp bạn học tập và phát triển. Hãy
+          chọn một chủ đề bên dưới hoặc đặt câu hỏi bất kỳ!
         </p>
       </div>
 
@@ -38,15 +39,21 @@ export function EmptyState({
       {/* Footer hint with better styling */}
       <div className="mt-12 text-center">
         <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-full border border-gray-200 dark:border-gray-700">
-          <span className="text-sm text-gray-600 dark:text-gray-400">💡 Mẹo:</span>
+          <span className="text-sm text-gray-600 dark:text-gray-400">
+            💡 Mẹo:
+          </span>
           <kbd className="px-2 py-1 text-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded">
             Enter
           </kbd>
-          <span className="text-sm text-gray-600 dark:text-gray-400">để gửi</span>
+          <span className="text-sm text-gray-600 dark:text-gray-400">
+            để gửi
+          </span>
           <kbd className="px-2 py-1 text-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded">
             Shift + Enter
           </kbd>
-          <span className="text-sm text-gray-600 dark:text-gray-400">để xuống dòng</span>
+          <span className="text-sm text-gray-600 dark:text-gray-400">
+            để xuống dòng
+          </span>
         </div>
       </div>
     </div>

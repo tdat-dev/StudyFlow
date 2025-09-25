@@ -29,14 +29,14 @@ export interface HabitPomodoroStats {
 export interface PomodoroHabitIntegration {
   // Habit-based task management
   habitTasks: HabitBasedTask[];
-  
+
   // Statistics
   habitStats: HabitPomodoroStats[];
-  
+
   // Current session info
   currentHabitId?: string;
   currentTaskId?: string;
-  
+
   // Settings
   autoCompleteHabitOnTaskComplete: boolean;
   showHabitProgressInPomodoro: boolean;
