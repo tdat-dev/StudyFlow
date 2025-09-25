@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config';
+import { defineConfig, coverageConfigDefaults } from 'vitest/config';
 import { resolve } from 'path';
 
 export default defineConfig({
@@ -6,6 +6,11 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/__tests__/setup.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'lcov'],
+      exclude: [...coverageConfigDefaults.exclude, 'src/__tests__/**'],
+    },
   },
   resolve: {
     alias: {

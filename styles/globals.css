@@ -9,7 +9,7 @@
 /* Import modern theme tokens */
 @import './theme-tokens.css';
 /* Import chat theme */
-@import '../src/styles/chat-theme.css';
+@import './chat-theme.css';
 
 /* Design Tokens */
 @layer base {
