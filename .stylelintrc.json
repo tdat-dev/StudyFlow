@@ -9,14 +9,40 @@
           "apply",
           "variants",
           "responsive",
-          "screen"
+          "screen",
+          "custom-variant",
+          "theme"
         ]
       }
     ],
     "declaration-block-trailing-semicolon": null,
     "no-descending-specificity": null,
-    "declaration-no-important": true,
-    "selector-class-pattern": null
+    "selector-class-pattern": null,
+    "declaration-no-important": null,
+    "property-no-vendor-prefix": null,
+    "selector-no-vendor-prefix": null,
+    "color-function-notation": null,
+    "alpha-value-notation": null,
+    "color-hex-length": null,
+    "hue-degree-notation": null,
+    "media-feature-range-notation": null,
+    "import-notation": null,
+    "keyframes-name-pattern": null,
+    "selector-id-pattern": null,
+    "custom-property-pattern": null,
+    "custom-property-empty-line-before": null,
+    "declaration-empty-line-before": null,
+    "comment-empty-line-before": null,
+    "at-rule-empty-line-before": null,
+    "no-invalid-position-at-import-rule": null,
+    "no-empty-source": null,
+    "font-family-name-quotes": null,
+    "declaration-block-no-duplicate-custom-properties": null,
+    "no-duplicate-selectors": null,
+    "rule-empty-line-before": null,
+    "shorthand-property-no-redundant-values": null,
+    "declaration-block-no-redundant-longhand-properties": null,
+    "property-no-unknown": [true, { "ignoreProperties": ["ring"] }]
   },
   "ignoreFiles": ["node_modules/**/*", ".next/**/*", "out/**/*"]
 }

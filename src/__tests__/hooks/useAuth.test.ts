@@ -11,6 +11,7 @@ vi.mock('@/services/firebase', () => ({
 }));
 
 vi.mock('firebase/auth', () => ({
+  getAuth: vi.fn(() => ({})),
   onAuthStateChanged: vi.fn((_auth, callback) => {
     // Simulate no user logged in
     callback(null);
