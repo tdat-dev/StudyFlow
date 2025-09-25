@@ -16,13 +16,13 @@ import {
   Zap,
   Target,
   TrendingUp,
-  Play,
   Brain,
-  Coffee,
-  Star,
 } from 'lucide-react';
 import { useQuickActions } from '../../../hooks/useDashboardIntegration';
-import { IntegratedProgress } from '../../../services/dashboard/integrationService';
+import {
+  IntegratedProgress,
+  QuickActionResult,
+} from '../../../services/dashboard/integrationService';
 
 interface QuickActionsProps {
   user: any;
@@ -37,7 +37,7 @@ interface QuickAction {
   icon: React.ElementType;
   color: string;
   bgColor: string;
-  action: () => Promise<void>;
+  action: () => Promise<QuickActionResult>;
   disabled?: boolean;
   xpReward?: number;
 }
@@ -103,12 +103,17 @@ export function QuickActions({
       icon: CheckCircle,
       color: 'text-green-500',
       bgColor: 'bg-green-50 dark:bg-green-900/20',
-      action: async () => {
-        // Tìm habit đầu tiên chưa hoàn thành
+      action: async (): Promise<QuickActionResult> => {
         if (progress && progress.totalHabits > 0) {
-          // Giả sử habitId là 'default' - trong thực tế sẽ lấy từ danh sách habits
-          await handleQuickHabitCheck('default');
+          // TODO: thay 'default' bằng habitId thật từ danh sách habits
+          return await handleQuickHabitCheck('default');
         }
+        return {
+          success: false,
+          xpEarned: 0,
+          progressUpdated: false,
+          message: 'Chưa có thói quen để đánh dấu',
+        };
       },
       disabled: !progress || progress.totalHabits === 0,
       xpReward: 15,
@@ -120,9 +125,9 @@ export function QuickActions({
       icon: Brain,
       color: 'text-purple-500',
       bgColor: 'bg-purple-50 dark:bg-purple-900/20',
-      action: async () => {
+      action: async (): Promise<QuickActionResult> => {
         await handleQuickPomodoro(2);
-        await handleQuickFlashcardReview(10);
+        return await handleQuickFlashcardReview(10);
       },
       xpReward: 80,
     },
