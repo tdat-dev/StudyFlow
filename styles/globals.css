@@ -1529,4 +1529,16 @@ img[src*='/images/logo-'] {
   .animate-delay-200 {
     animation-delay: 0.2s;
   }
+
+  /* Boss Mecha Dragon Styles */
+  .boss-3d-container {
+    width: 720px;
+    height: 420px;
+    max-width: 100%;
+  }
+
+  .boss-canvas {
+    max-width: 100%;
+    height: auto;
+  }
 }
