@@ -1,5 +1,12 @@
 import React from 'react';
-import { BookOpen, Calendar, Clock, Home, MessageSquare } from 'lucide-react';
+import {
+  BookOpen,
+  Calendar,
+  Clock,
+  Home,
+  MessageSquare,
+  Swords,
+} from 'lucide-react';
 
 type TabType =
   | 'home'
@@ -7,6 +14,7 @@ type TabType =
   | 'flashcards'
   | 'habits'
   | 'pomodoro'
+  | 'boss'
   | 'profile'
   | 'settings';
 
@@ -26,6 +34,7 @@ const tabs: Array<{
   { id: 'flashcards', label: 'Flashcards', icon: BookOpen },
   { id: 'habits', label: 'Thói quen', icon: Calendar },
   { id: 'pomodoro', label: 'Pomodoro', icon: Clock },
+  { id: 'boss', label: 'Boss', icon: Swords },
 ];
 
 function BottomNav({ activeTab, onTabChange, className = '' }: BottomNavProps) {
@@ -38,7 +47,7 @@ function BottomNav({ activeTab, onTabChange, className = '' }: BottomNavProps) {
       aria-label="Bottom navigation"
     >
       <div className="max-w-screen-xl mx-auto px-2">
-        <ul className="grid grid-cols-5 gap-1">
+        <ul className="grid grid-cols-6 gap-1">
           {tabs.map(({ id, label, icon: Icon }) => {
             const isActive = activeTab === id;
             return (

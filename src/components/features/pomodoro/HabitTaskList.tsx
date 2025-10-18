@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { HabitBasedTask } from '../../../types/pomodoro-habits';
 import Button from '../../ui/button';
+import { Progress } from '../../ui/progress';
 
 interface HabitTaskListProps {
   tasks: HabitBasedTask[];
@@ -226,12 +227,7 @@ function TaskItem({
                   {task.pomodoroCount}/{task.estimatedPomodoros} Pomodoro
                 </span>
               </div>
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                <div
-                  className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${progressPercentage}%` }}
-                />
-              </div>
+              <Progress value={progressPercentage} />
             </div>
           )}
 

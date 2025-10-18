@@ -57,6 +57,12 @@ import {
   AlertDialogTitle,
 } from '../../../components/ui/alert-dialog';
 import { auth, db } from '../../../services/firebase/config';
+import {
+  getUserTimeZone,
+  isSameCalendarDay,
+  getWeekdayIndexMondayFirst,
+  getMonthDayIndexZeroBased,
+} from '../../../utils/date';
 
 interface HabitTrackerProps {
   user: any;
@@ -159,7 +165,85 @@ export function HabitTracker({ user }: HabitTrackerProps) {
         };
       });
 
-      setHabits(habitsWithIcons);
+      // Reset trạng thái hôm nay nếu đã qua ngày mới theo múi giờ người dùng
+      const now = new Date();
+      const tz = getUserTimeZone();
+      const adjustedDayOfWeek = getWeekdayIndexMondayFirst(now, tz);
+      const dayOfMonth = getMonthDayIndexZeroBased(now, tz); // 0-indexed
+
+      const habitsToReset: {
+        id: string;
+        weeklyProgress: boolean[];
+        monthlyProgress: boolean[];
+      }[] = [];
+
+      const normalizedHabits = habitsWithIcons.map(h => {
+        const lastUpdatedRaw = (h as any)?.lastUpdated;
+        const lastUpdatedDate = lastUpdatedRaw?.toDate
+          ? lastUpdatedRaw.toDate()
+          : lastUpdatedRaw
+            ? new Date(lastUpdatedRaw)
+            : null;
+        const isSameDay = lastUpdatedDate
+          ? isSameCalendarDay(lastUpdatedDate, now, tz)
+          : false;
+
+        if (!isSameDay && h.todayCompleted) {
+          const newWeekly = [
+            ...(h.weeklyProgress || [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+            ]),
+          ];
+          newWeekly[adjustedDayOfWeek] = false;
+
+          const newMonthly = [
+            ...(h.monthlyProgress || Array(30).fill(false)),
+          ] as boolean[];
+          newMonthly[dayOfMonth] = false;
+
+          habitsToReset.push({
+            id: h.id,
+            weeklyProgress: newWeekly,
+            monthlyProgress: newMonthly,
+          });
+
+          return {
+            ...h,
+            todayCompleted: false,
+            weeklyProgress: newWeekly,
+            monthlyProgress: newMonthly,
+          } as typeof h;
+        }
+        return h;
+      });
+
+      setHabits(normalizedHabits);
+
+      // Đồng bộ Firestore (không chặn UI)
+      if (habitsToReset.length > 0 && auth.currentUser) {
+        try {
+          await Promise.all(
+            habitsToReset.map(item =>
+              updateDoc(doc(db, 'habits', item.id), {
+                todayCompleted: false,
+                weeklyProgress: item.weeklyProgress,
+                monthlyProgress: item.monthlyProgress,
+                lastUpdated: Timestamp.now(),
+              }),
+            ),
+          );
+        } catch (err) {
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Failed to reset habits for new day:', err);
+          }
+        }
+      }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
         console.error('Failed to load habits:', error);

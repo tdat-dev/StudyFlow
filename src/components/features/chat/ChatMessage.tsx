@@ -35,16 +35,11 @@ export function ChatMessage({ message }: ChatMessageProps) {
         }`}
       >
         <div
-          className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-            message.sender === 'user' ? 'text-white' : ''
+          className={`w-8 h-8 flex items-center justify-center flex-shrink-0 rounded-xl ${
+            message.sender === 'user'
+              ? 'bg-blue-600 text-white'
+              : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
           }`}
-          style={{
-            backgroundColor:
-              message.sender === 'user'
-                ? 'var(--app-primary)'
-                : 'var(--app-surface)',
-            borderRadius: 'var(--app-radius)',
-          }}
         >
           {message.sender === 'user' ? (
             <User className="h-4 w-4" />
@@ -55,21 +50,18 @@ export function ChatMessage({ message }: ChatMessageProps) {
 
         <div className="flex flex-col space-y-1">
           <div
-            className={`px-4 py-3 break-words relative group ${
-              message.sender === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai'
+            className={`px-4 py-3 break-words relative group rounded-2xl ${
+              message.sender === 'user'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
             }`}
-            style={{
-              borderRadius:
-                message.sender === 'user'
-                  ? 'var(--app-radius) var(--app-radius) 6px var(--app-radius)'
-                  : 'var(--app-radius) var(--app-radius) var(--app-radius) 6px',
-            }}
           >
             <p
-              className="whitespace-pre-line text-[15px] leading-6"
-              style={{
-                color: message.sender === 'user' ? 'white' : 'var(--app-text)',
-              }}
+              className={`whitespace-pre-line text-[15px] leading-6 ${
+                message.sender === 'user'
+                  ? 'text-white'
+                  : 'text-gray-900 dark:text-gray-100'
+              }`}
             >
               {message.content}
             </p>
@@ -95,14 +87,10 @@ export function ChatMessage({ message }: ChatMessageProps) {
 
           <p
             className={`text-xs px-2 ${
-              message.sender === 'user' ? 'text-right' : ''
+              message.sender === 'user'
+                ? 'text-right text-blue-500/70'
+                : 'text-gray-500 dark:text-gray-400'
             }`}
-            style={{
-              color:
-                message.sender === 'user'
-                  ? 'rgb(var(--app-blue-rgb) / 0.7)'
-                  : 'var(--app-text-muted)',
-            }}
           >
             {formatTime(message.timestamp)}
           </p>

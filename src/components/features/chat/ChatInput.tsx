@@ -53,12 +53,22 @@ export function ChatInput({
 
   const handleSend = async () => {
     if ((inputMessage.trim() || attachedFile) && !loading && !processingFile) {
-      await onSendMessage(inputMessage);
+      const prevMessage = inputMessage;
+      // Xóa input ngay khi bấm gửi (UX tốt hơn)
       setInputMessage('');
       if (textareaRef.current) {
         textareaRef.current.style.height = '36px';
       }
       onFileAttach(null);
+
+      try {
+        await onSendMessage(prevMessage);
+      } catch (error) {
+        // Nếu gửi thất bại, khôi phục lại nội dung để người dùng thử lại
+        setInputMessage(prevMessage);
+        autoResize();
+        throw error;
+      }
     }
   };
 

@@ -107,17 +107,25 @@ export function PomodoroTimerWithHabits({
     setAccentColors(timerMode);
   }, [timerMode]);
 
-  // Auto-update time when settings change
+  // Auto-update time when mode or settings change, but do NOT reset when pausing mid-session
   useEffect(() => {
-    if (!isActive) {
-      const timeMap = {
-        pomodoro: pomodoroTime * 60,
-        shortBreak: shortBreakTime * 60,
-        longBreak: longBreakTime * 60,
-      };
+    const timeMap = {
+      pomodoro: pomodoroTime * 60,
+      shortBreak: shortBreakTime * 60,
+      longBreak: longBreakTime * 60,
+    };
+    // Chỉ reset đồng hồ khi đang không chạy và không có phiên hiện tại (không phải trạng thái pause)
+    if (!isActive && !currentSession) {
       setTimeLeft(timeMap[timerMode]);
     }
-  }, [pomodoroTime, shortBreakTime, longBreakTime, timerMode, isActive]);
+  }, [
+    pomodoroTime,
+    shortBreakTime,
+    longBreakTime,
+    timerMode,
+    isActive,
+    currentSession,
+  ]);
 
   // Timer logic
   useEffect(() => {
@@ -400,7 +408,7 @@ export function PomodoroTimerWithHabits({
                       strokeWidth="4"
                     />
                     <circle
-                      className={`progress-bar ${timerMode}`}
+                      className={`progress-bar ${timerMode} transition-[stroke-dashoffset] duration-1000 ease-in-out`}
                       cx="60"
                       cy="60"
                       r="54"
@@ -409,9 +417,6 @@ export function PomodoroTimerWithHabits({
                       strokeLinecap="round"
                       strokeDasharray={`${2 * Math.PI * 54}`}
                       strokeDashoffset={`${2 * Math.PI * 54 * (1 - calculateProgress() / 100)}`}
-                      style={{
-                        transition: 'stroke-dashoffset 1s ease-in-out',
-                      }}
                     />
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
