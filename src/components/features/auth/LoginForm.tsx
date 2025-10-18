@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Lock, BookOpen } from 'lucide-react';
+import { Mail, Lock } from 'lucide-react';
 import {
   loginWithEmail,
   loginWithGoogle,
@@ -65,21 +65,29 @@ export function LoginForm({
       {/* Mobile Logo & Header */}
       <div className="lg:hidden text-center mb-8">
         <div className="flex items-center justify-center space-x-3 mb-4">
-          <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center">
-            <BookOpen className="h-6 w-6 text-white" />
+          <div className="w-12 h-12 rounded-xl overflow-hidden">
+            <img
+              src="/images/logo-48.png"
+              alt="StudyFlow Logo"
+              className="w-full h-full object-contain"
+            />
           </div>
           <span className="text-2xl font-bold text-white">StudyFlow</span>
         </div>
-        <h2 className="text-2xl font-bold text-white mb-2">
-          Chào mừng trở lại
-        </h2>
-        <p className="text-white/60">
-          Đăng nhập để tiếp tục hành trình học tập
-        </p>
       </div>
 
       {/* Desktop Header */}
       <div className="hidden lg:block text-center mb-8">
+        <div className="flex items-center justify-center space-x-3 mb-4">
+          <div className="w-12 h-12 rounded-xl overflow-hidden">
+            <img
+              src="/images/logo-48.png"
+              alt="StudyFlow Logo"
+              className="w-full h-full object-contain"
+            />
+          </div>
+          <span className="text-2xl font-bold text-white">StudyFlow</span>
+        </div>
         <h2 className="text-3xl font-bold text-white mb-2">Đăng nhập</h2>
         <p className="text-white/60">Nhập thông tin để truy cập tài khoản</p>
       </div>

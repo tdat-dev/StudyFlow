@@ -3,7 +3,7 @@ import Head from 'next/head';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { MainApp } from './MainApp';
-import { LoginForm, RegisterForm, AuthLayout } from './features/auth';
+import { LandingWrapper } from './features/landing';
 
 // Loading component
 const LoadingScreen = () => (
@@ -19,11 +19,30 @@ const LoadingScreen = () => (
 
 export default function App() {
   const { user, loading, signOut } = useAuth();
-  const [showRegister, setShowRegister] = useState(false);
+  const [showLanding, setShowLanding] = useState(true);
 
   // Show loading screen while checking authentication
   if (loading) {
     return <LoadingScreen />;
+  }
+
+  // Show landing page for new users
+  if (!user && showLanding) {
+    return (
+      <>
+        <Head>
+          <title>StudyFlow - Smart Learning Platform</title>
+          <meta
+            name="description"
+            content="Học tiếng Anh thông minh với AI, Flashcards, Pomodoro Timer và theo dõi thói quen"
+          />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <link rel="icon" href="/favicon.ico" />
+          <meta name="theme-color" content="#4F46E5" />
+        </Head>
+        <LandingWrapper onAuthSuccess={() => setShowLanding(false)} />
+      </>
+    );
   }
 
   return (
@@ -95,23 +114,11 @@ export default function App() {
             user={user}
             onLogout={async () => {
               await signOut();
+              setShowLanding(true); // Show landing page after logout
             }}
           />
         ) : (
-          <AuthLayout type={showRegister ? 'register' : 'login'}>
-            {showRegister ? (
-              <RegisterForm
-                onSuccess={() => setShowRegister(false)}
-                onLogin={() => setShowRegister(false)}
-              />
-            ) : (
-              <LoginForm
-                onSuccess={() => {}}
-                onRegister={() => setShowRegister(true)}
-                onForgotPassword={() => {}}
-              />
-            )}
-          </AuthLayout>
+          <LandingWrapper onAuthSuccess={() => setShowLanding(false)} />
         )}
       </div>
     </>
