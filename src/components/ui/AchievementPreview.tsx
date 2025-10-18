@@ -1,4 +1,5 @@
 import React from 'react';
+import { Progress } from './progress';
 
 interface AchievementPreviewProps {
   achievements?: Array<{
@@ -93,18 +94,15 @@ export function AchievementPreview({
                       : `${achievement.progress}/${achievement.requirement}`}
                   </p>
                 </div>
-                <div className="w-full bg-white/10 rounded-full h-1">
-                  <div
-                    className={`h-1 rounded-full transition-all duration-500 ${
-                      isClose
-                        ? 'bg-gradient-to-r from-yellow-400 to-orange-400'
-                        : 'bg-white/20'
-                    }`}
-                    style={{
-                      width: `${(achievement.progress / achievement.requirement) * 100}%`,
-                    }}
-                  />
-                </div>
+                <Progress
+                  value={(achievement.progress / achievement.requirement) * 100}
+                  className="h-1 bg-white/10"
+                  indicatorClassName={
+                    isClose
+                      ? 'bg-gradient-to-r from-yellow-400 to-orange-400'
+                      : 'bg-white/20'
+                  }
+                />
               </div>
             </div>
           );

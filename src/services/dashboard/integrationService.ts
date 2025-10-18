@@ -16,6 +16,7 @@ import {
   updateXP,
 } from './userProgressService';
 import { completeMissionByType } from './missionsService';
+import { attackBoss } from './bossService';
 
 /**
  * Service tích hợp các tính năng chính của ứng dụng
@@ -64,21 +65,27 @@ export async function updateFlashcardProgress(
   studyTimeMinutes: number = 0,
 ): Promise<QuickActionResult> {
   try {
-    // Cập nhật progress tổng thể
+    // Cập nhật progress tổng thể và stats flashcard
     await updateTodayProgress(userId, wordsLearned, studyTimeMinutes);
-
-    // Hoàn thành mission review nếu có
-    const missionResult = await completeMissionByType(userId, 'review');
-    const xpEarned = missionResult?.xpEarned || 0;
-
-    // Cập nhật stats flashcard riêng biệt
     await updateFlashcardStats(userId, wordsLearned, studyTimeMinutes);
+
+    // Chỉ cộng XP khi thực sự học từ vựng (dựa trên số từ)
+    const perWordXP = 5; // đồng bộ với XP_ACTIONS.COMPLETE_FLASHCARD
+    const earned = Math.max(0, Math.floor(wordsLearned) * perWordXP);
+    if (earned > 0) {
+      await updateXP(userId, earned);
+      // Gây sát thương lên Boss tương ứng XP kiếm được
+      await attackBoss(userId, earned);
+    }
+
+    // Không cộng XP thêm từ mission để tránh cộng chồng
+    await completeMissionByType(userId, 'review');
 
     return {
       success: true,
-      xpEarned,
+      xpEarned: earned,
       progressUpdated: true,
-      message: `Đã học ${wordsLearned} từ vựng mới! +${xpEarned} XP`,
+      message: `Đã học ${wordsLearned} từ vựng mới! +${earned} XP`,
     };
   } catch (error) {
     console.error('Error updating flashcard progress:', error);
@@ -103,19 +110,21 @@ export async function updatePomodoroProgress(
     // Cập nhật stats pomodoro
     await updatePomodoroStats(userId, pomodorosCompleted, focusTimeMinutes);
 
-    // Hoàn thành mission pomodoro
-    const missionResult = await completeMissionByType(userId, 'pomodoro');
-    const xpEarned = missionResult?.xpEarned || 0;
+    // Cộng XP dựa trên số pomodoro (hành động thực tế)
+    const pomodoroXP = Math.max(0, Math.floor(pomodorosCompleted) * 20);
+    if (pomodoroXP > 0) {
+      await updateXP(userId, pomodoroXP);
+      await attackBoss(userId, pomodoroXP);
+    }
 
-    // Cập nhật XP dựa trên số pomodoro hoàn thành
-    const pomodoroXP = pomodorosCompleted * 20; // 20 XP per pomodoro
-    await updateXP(userId, pomodoroXP);
+    // Hoàn thành mission nhưng không cộng thêm XP từ mission
+    await completeMissionByType(userId, 'pomodoro');
 
     return {
       success: true,
-      xpEarned: xpEarned + pomodoroXP,
+      xpEarned: pomodoroXP,
       progressUpdated: true,
-      message: `Hoàn thành ${pomodorosCompleted} Pomodoro! +${pomodoroXP + xpEarned} XP`,
+      message: `Hoàn thành ${pomodorosCompleted} Pomodoro! +${pomodoroXP} XP`,
     };
   } catch (error) {
     console.error('Error updating pomodoro progress:', error);
@@ -140,21 +149,23 @@ export async function updateHabitProgress(
     // Cập nhật habit completion
     await updateHabitCompletion(userId, habitId, completed);
 
-    // Hoàn thành mission habit nếu đây là habit đầu tiên hoàn thành hôm nay
-    const missionResult = await completeMissionByType(userId, 'habit');
-    const xpEarned = missionResult?.xpEarned || 0;
+    // Cộng XP chỉ khi đánh dấu hoàn thành
+    const habitXP = completed ? 10 : 0;
+    if (habitXP > 0) {
+      await updateXP(userId, habitXP);
+      await attackBoss(userId, habitXP);
+    }
 
-    // Cập nhật XP cho habit completion
-    const habitXP = completed ? 10 : -5; // Reward completion, small penalty for unchecking
-    await updateXP(userId, habitXP);
+    // Hoàn thành mission nhưng không cộng XP từ mission
+    await completeMissionByType(userId, 'habit');
 
     return {
       success: true,
-      xpEarned: xpEarned + habitXP,
+      xpEarned: habitXP,
       progressUpdated: true,
       message: completed
-        ? `Hoàn thành thói quen! +${habitXP + xpEarned} XP`
-        : `Bỏ đánh dấu thói quen. ${habitXP} XP`,
+        ? `Hoàn thành thói quen! +${habitXP} XP`
+        : `Đã bỏ đánh dấu thói quen`,
     };
   } catch (error) {
     console.error('Error updating habit progress:', error);

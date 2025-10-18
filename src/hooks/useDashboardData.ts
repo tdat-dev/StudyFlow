@@ -167,31 +167,14 @@ export function useDashboardData(user: User): DashboardData & DashboardActions {
       if (!user?.uid) return { xpEarned: 0 };
 
       try {
-        const { missions, xpEarned } = await completeMission(
+        const { missions, xpEarned: _xpEarned } = await completeMission(
           user.uid,
           missionId,
         );
         setDailyMissions(missions);
-
-        // Update XP
-        if (xpEarned > 0) {
-          const updatedProgress = await updateXP(user.uid, xpEarned);
-          setUserProgress(updatedProgress);
-
-          // Update achievement progress
-          const { unlockedAchievements, totalXPEarned } =
-            await updateAchievementProgress(user.uid, 'missions', 1);
-
-          if (unlockedAchievements.length > 0) {
-            const finalProgress = await updateXP(user.uid, totalXPEarned);
-            setUserProgress(finalProgress);
-
-            const newUpcoming = await getUpcomingAchievements(user.uid, 4);
-            setUpcomingAchievements(newUpcoming);
-          }
-        }
-
-        return { xpEarned };
+        // Không cộng XP tại đây để tránh "cộng chay" khi chỉ tick nhiệm vụ từ UI
+        // XP sẽ chỉ được cộng trong các luồng hành động hợp lệ (flashcard/pomodoro/habit)
+        return { xpEarned: 0 };
       } catch (err) {
         console.error('Error completing mission:', err);
         setError(
@@ -212,27 +195,9 @@ export function useDashboardData(user: User): DashboardData & DashboardActions {
         const result = await completeMissionByType(user.uid, type);
         if (result) {
           setDailyMissions(result.missions);
-
-          // Update XP
-          if (result.xpEarned > 0) {
-            const updatedProgress = await updateXP(user.uid, result.xpEarned);
-            setUserProgress(updatedProgress);
-
-            // Update achievement progress
-            const { unlockedAchievements, totalXPEarned } =
-              await updateAchievementProgress(user.uid, 'missions', 1);
-
-            if (unlockedAchievements.length > 0) {
-              const finalProgress = await updateXP(user.uid, totalXPEarned);
-              setUserProgress(finalProgress);
-
-              const newUpcoming = await getUpcomingAchievements(user.uid, 4);
-              setUpcomingAchievements(newUpcoming);
-            }
-          }
         }
-
-        return result;
+        // Không cộng XP ở đây; để các service tích hợp xử lý khi có hành động thực sự
+        return result ? { ...result, xpEarned: 0 } : result;
       } catch (err) {
         console.error('Error completing mission by type:', err);
         setError(

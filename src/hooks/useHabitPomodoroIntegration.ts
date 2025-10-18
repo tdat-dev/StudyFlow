@@ -11,6 +11,7 @@ import {
   query,
   where,
   getDocs,
+  getDoc,
   addDoc,
   updateDoc,
   deleteDoc,
@@ -28,11 +29,12 @@ export function useHabitPomodoroIntegration(user: User) {
 
   // Load available habits for task creation
   const loadHabitOptions = useCallback(async () => {
-    if (!auth.currentUser?.uid) return;
+    const uid = user?.uid || auth.currentUser?.uid;
+    if (!uid) return;
 
     try {
       const habitsRef = collection(db, 'habits');
-      const q = query(habitsRef, where('userId', '==', auth.currentUser.uid));
+      const q = query(habitsRef, where('userId', '==', uid));
       const querySnapshot = await getDocs(q);
 
       const habits: HabitOption[] = querySnapshot.docs.map(doc => {
@@ -51,16 +53,17 @@ export function useHabitPomodoroIntegration(user: User) {
     } catch (error) {
       console.error('Failed to load habit options:', error);
     }
-  }, []);
+  }, [user?.uid]);
 
   // Load habit-based tasks
   const loadHabitTasks = useCallback(async () => {
-    if (!auth.currentUser?.uid) return;
+    const uid = user?.uid || auth.currentUser?.uid;
+    if (!uid) return;
 
     setLoading(true);
     try {
       const tasksRef = collection(db, 'pomodoro_habit_tasks');
-      const q = query(tasksRef, where('userId', '==', auth.currentUser.uid));
+      const q = query(tasksRef, where('userId', '==', uid));
       const querySnapshot = await getDocs(q);
 
       const tasks: HabitBasedTask[] = querySnapshot.docs.map(doc => {
@@ -95,22 +98,39 @@ export function useHabitPomodoroIntegration(user: User) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user?.uid]);
 
   // Create a new habit-based task
   const createHabitTask = async (
     taskData: CreateHabitTaskData,
   ): Promise<string | null> => {
-    if (!auth.currentUser?.uid) return null;
+    const uid = user?.uid || auth.currentUser?.uid;
+    if (!uid) return null;
 
     try {
       // Find habit details
-      const habit = habitOptions.find(h => h.id === taskData.habitId);
+      let habit = habitOptions.find(h => h.id === taskData.habitId);
+      if (!habit) {
+        // Fallback chắc chắn: đọc trực tiếp document theo id
+        const habitRef = doc(db, 'habits', taskData.habitId);
+        const snap = await getDoc(habitRef);
+        if (snap.exists()) {
+          const data = snap.data() as any;
+          habit = {
+            id: taskData.habitId,
+            title: data.title || 'Habit',
+            color: data.color,
+            bgColor: data.bgColor,
+            textColor: data.textColor,
+            icon: data.iconName,
+          } as HabitOption;
+        }
+      }
       if (!habit) throw new Error('Habit not found');
 
       const tasksRef = collection(db, 'pomodoro_habit_tasks');
       const newTask = {
-        userId: auth.currentUser.uid,
+        userId: uid,
         text: taskData.text,
         completed: false,
         pomodoroCount: 0,

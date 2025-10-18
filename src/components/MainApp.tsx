@@ -8,6 +8,7 @@ import ProfileScreen from './features/profile/ProfileScreen';
 import { User } from '../types/chat';
 import { Header } from './common/layout/Header';
 import BottomNav from './common/layout/BottomNav';
+import { BossScreen } from './features/home/boss/BossScreen';
 
 type TabType =
   | 'home'
@@ -15,6 +16,7 @@ type TabType =
   | 'flashcards'
   | 'habits'
   | 'pomodoro'
+  | 'boss'
   | 'profile';
 
 interface MainAppProps {
@@ -52,6 +54,10 @@ export function MainApp({ user, onLogout }: MainAppProps) {
         return <HabitTracker user={currentUser} />;
       case 'pomodoro':
         return <PomodoroTimerWithHabits user={currentUser} />;
+      case 'boss':
+        return (
+          <BossScreen user={currentUser} onBack={() => setActiveTab('home')} />
+        );
       case 'profile':
         return <ProfileScreen user={currentUser} onLogout={onLogout} />;
       default:

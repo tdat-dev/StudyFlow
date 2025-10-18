@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from '../../../components/ui/card';
+import { Progress } from '../../../components/ui/progress';
 import { Badge } from '../../../components/ui/badge';
 import {
   ArrowLeft,
@@ -78,6 +79,10 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
   const [loading, setLoading] = useState(false);
   const [generatingExample, setGeneratingExample] = useState(false);
   const { addUserXP, updateStats, userStats } = useLevel();
+  const [pendingDecision, setPendingDecision] = useState<null | {
+    learned: boolean;
+  }>(null);
+  const [isMarking, setIsMarking] = useState(false);
 
   // State cho AI Flashcard Creator
   const [aiDialogOpen, setAiDialogOpen] = useState(false);
@@ -165,11 +170,13 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
     }
   };
 
-  const markCardAsLearned = async (learned: boolean) => {
+  const doMarkCardAsLearned = async (learned: boolean) => {
     if (!selectedDeck || !selectedDeck.cards) return;
 
     const card = selectedDeck.cards[currentCardIndex];
     if (!card) return;
+    if (isMarking) return;
+    setIsMarking(true);
 
     // Update card in state
     const updatedDecks = decks.map(deck => {
@@ -224,9 +231,16 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
             : selectedDeck.learned - (card.learned ? 1 : 0),
         });
       } catch (error) {
-        console.error('Failed to update card status:', error);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Failed to update card status:', error);
+        }
       }
     }
+    setIsMarking(false);
+  };
+
+  const markCardAsLearned = (learned: boolean) => {
+    setPendingDecision({ learned });
   };
 
   const generateNewExample = async () => {
@@ -505,149 +519,170 @@ Lưu ý quan trọng:
 
       // Xử lý phản hồi từ AI để tạo flashcards
       try {
-        // Tìm tất cả bảng Markdown trong phản hồi (nếu có nhiều)
-        const tableRegex = /\|.*\|.*\|[\s\S]*?\n([\s\S]*?)(?:\n\n|$)/g;
-        const tableMatches = Array.from(aiResponse.matchAll(tableRegex));
-
-        const parsedCards: AICard[] = [];
-        const normalize = (s: string) =>
-          s
-            .toLowerCase()
-            .trim()
-            .replace(/[\s\u200B\u200C\u200D\uFEFF]+/g, ' ')
-            .replace(/[^\p{L}\p{N}]+/gu, ' ');
-        const seenFronts = new Set<string>();
-
-        for (const match of tableMatches) {
-          const body = match[1] || '';
-          const rows = body
-            .split('\n')
-            .map(r => r.trim())
-            .filter(r => r && r.includes('|'));
-
-          rows.forEach((row, index) => {
-            const columns = row
-              .split('|')
-              .map(col => col.trim())
-              .filter(Boolean);
-
-            // Bỏ qua header/tiêu đề nếu có hoặc hàng phân cách
-            const firstCell = (columns[0] || '').toLowerCase();
-            if (
-              firstCell === 'front' ||
-              firstCell === 'từ' ||
-              /^-+$/.test(columns[0] || '') ||
-              /^-+$/.test(columns[1] || '')
-            ) {
-              return;
-            }
-
-            if (columns.length >= 2) {
-              const clean = (v: string) =>
-                v
-                  .replace(/^"(.*)"$/, '$1')
-                  .replace(/\*\*/g, '')
-                  .replace(/\*/g, '')
-                  .replace(/`/g, '')
-                  .trim();
-
-              const cleanFront = clean(columns[0]);
-              const cleanBack = clean(columns[1]);
-              const cleanExample = columns.length > 2 ? clean(columns[2]) : '';
-              const cleanExampleTranslation =
-                columns.length > 3 ? clean(columns[3]) : '';
-
-              if (!cleanFront || !cleanBack) return;
-
-              const normFront = normalize(cleanFront);
-              if (seenFronts.has(normFront)) return; // loại trùng theo mặt trước
-              seenFronts.add(normFront);
-
-              parsedCards.push({
-                id: `ai-card-${Date.now()}-${parsedCards.length}-${index}`,
-                front: cleanFront,
-                back: cleanBack,
-                example: cleanExample,
-                exampleTranslation: cleanExampleTranslation,
-                learned: false,
-              });
-            }
-          });
+        // 1) Thử parse JSON fallback dạng { flashcards: [...] }
+        try {
+          const asJson = JSON.parse(aiResponse);
+          if (asJson && Array.isArray(asJson.flashcards)) {
+            cards = asJson.flashcards.map((it: any, idx: number) => ({
+              id: `${Date.now()}_${idx}`,
+              front: String(it.front ?? ''),
+              back: String(it.back ?? ''),
+              example: String(it.example ?? ''),
+              exampleTranslation: String(it.exampleTranslation ?? ''),
+              learned: false,
+            }));
+          }
+        } catch {
+          // Không phải JSON, tiếp tục parse Markdown phía dưới
         }
 
-        cards = parsedCards;
-
-        // Loại các từ đã từng xuất hiện trong các deck trước để tránh lặp giữa các lần tạo
-        if (existingFrontsUnique.length > 0) {
-          const existingSet = new Set(existingFrontsUnique);
-          const normalize = (s: string) =>
-            (s || '')
-              .toLowerCase()
-              .trim()
-              .replace(/[\s\u200B\u200C\u200D\uFEFF]+/g, ' ')
-              .replace(/[^\p{L}\p{N}]+/gu, ' ');
-          cards = cards.filter(c => !existingSet.has(normalize(c.front)));
-        }
-
-        // Xáo trộn ngẫu nhiên để tăng đa dạng trước khi cắt số lượng
-        if (cards.length > 1) {
-          cards = cards
-            .map(c => ({ c, r: Math.random() }))
-            .sort((a, b) => a.r - b.r)
-            .map(({ c }) => c);
-        }
-
-        // Nếu không tìm thấy bảng hoặc không có cards hợp lệ, fallback: tìm cặp từ-nghĩa dạng "a - b" hoặc "a: b"
+        // 2) Nếu chưa có cards từ JSON, parse bảng Markdown
         if (cards.length === 0) {
-          const lines = aiResponse.split('\n');
-          const seen = new Set<string>();
-          const norm = (s: string) =>
+          // Tìm tất cả bảng Markdown trong phản hồi (nếu có nhiều)
+          const tableRegex = /\|.*\|.*\|[\s\S]*?\n([\s\S]*?)(?:\n\n|$)/g;
+          const tableMatches = Array.from(aiResponse.matchAll(tableRegex));
+
+          const parsedCards: AICard[] = [];
+          const normalize = (s: string) =>
             s
               .toLowerCase()
               .trim()
               .replace(/[\s\u200B\u200C\u200D\uFEFF]+/g, ' ')
               .replace(/[^\p{L}\p{N}]+/gu, ' ');
-          for (const line of lines) {
-            if (line.includes('-') || line.includes(':')) {
-              const parts = line.split(/[-:]/).map(part => part.trim());
-              if (parts.length >= 2) {
-                const front = parts[0].replace(/^"(.*)"$/, '$1');
-                const back = parts[1];
-                const key = norm(front);
-                if (front && back && !seen.has(key)) {
-                  seen.add(key);
-                  cards.push({
-                    id: `ai-card-${Date.now()}-${cards.length}`,
-                    front,
-                    back,
-                    example: '',
-                    exampleTranslation: '',
-                    learned: false,
-                  });
+          const seenFronts = new Set<string>();
+
+          for (const match of tableMatches) {
+            const body = match[1] || '';
+            const rows = body
+              .split('\n')
+              .map(r => r.trim())
+              .filter(r => r && r.includes('|'));
+
+            rows.forEach((row, index) => {
+              const columns = row
+                .split('|')
+                .map(col => col.trim())
+                .filter(Boolean);
+
+              // Bỏ qua header/tiêu đề nếu có hoặc hàng phân cách
+              const firstCell = (columns[0] || '').toLowerCase();
+              if (
+                firstCell === 'front' ||
+                firstCell === 'từ' ||
+                /^-+$/.test(columns[0] || '') ||
+                /^-+$/.test(columns[1] || '')
+              ) {
+                return;
+              }
+
+              if (columns.length >= 2) {
+                const clean = (v: string) =>
+                  v
+                    .replace(/^"(.*)"$/, '$1')
+                    .replace(/\*\*/g, '')
+                    .replace(/\*/g, '')
+                    .replace(/`/g, '')
+                    .trim();
+
+                const cleanFront = clean(columns[0]);
+                const cleanBack = clean(columns[1]);
+                const cleanExample =
+                  columns.length > 2 ? clean(columns[2]) : '';
+                const cleanExampleTranslation =
+                  columns.length > 3 ? clean(columns[3]) : '';
+
+                if (!cleanFront || !cleanBack) return;
+
+                const normFront = normalize(cleanFront);
+                if (seenFronts.has(normFront)) return; // loại trùng theo mặt trước
+                seenFronts.add(normFront);
+
+                parsedCards.push({
+                  id: `ai-card-${Date.now()}-${parsedCards.length}-${index}`,
+                  front: cleanFront,
+                  back: cleanBack,
+                  example: cleanExample,
+                  exampleTranslation: cleanExampleTranslation,
+                  learned: false,
+                });
+              }
+            });
+          }
+
+          cards = parsedCards;
+
+          // Loại các từ đã từng xuất hiện trong các deck trước để tránh lặp giữa các lần tạo
+          if (existingFrontsUnique.length > 0) {
+            const existingSet = new Set(existingFrontsUnique);
+            const normalize = (s: string) =>
+              (s || '')
+                .toLowerCase()
+                .trim()
+                .replace(/[\s\u200B\u200C\u200D\uFEFF]+/g, ' ')
+                .replace(/[^\p{L}\p{N}]+/gu, ' ');
+            cards = cards.filter(c => !existingSet.has(normalize(c.front)));
+          }
+
+          // Xáo trộn ngẫu nhiên để tăng đa dạng trước khi cắt số lượng
+          if (cards.length > 1) {
+            cards = cards
+              .map(c => ({ c, r: Math.random() }))
+              .sort((a, b) => a.r - b.r)
+              .map(({ c }) => c);
+          }
+
+          // 3) Nếu không tìm thấy bảng hoặc không có cards hợp lệ, fallback: tìm cặp từ-nghĩa dạng "a - b" hoặc "a: b"
+          if (cards.length === 0) {
+            const lines = aiResponse.split('\n');
+            const seen = new Set<string>();
+            const norm = (s: string) =>
+              s
+                .toLowerCase()
+                .trim()
+                .replace(/[\s\u200B\u200C\u200D\uFEFF]+/g, ' ')
+                .replace(/[^\p{L}\p{N}]+/gu, ' ');
+            for (const line of lines) {
+              if (line.includes('-') || line.includes(':')) {
+                const parts = line.split(/[-:]/).map(part => part.trim());
+                if (parts.length >= 2) {
+                  const front = parts[0].replace(/^"(.*)"$/, '$1');
+                  const back = parts[1];
+                  const key = norm(front);
+                  if (front && back && !seen.has(key)) {
+                    seen.add(key);
+                    cards.push({
+                      id: `ai-card-${Date.now()}-${cards.length}`,
+                      front,
+                      back,
+                      example: '',
+                      exampleTranslation: '',
+                      learned: false,
+                    });
+                  }
                 }
               }
             }
           }
-        }
 
-        // Đảm bảo duy nhất theo front và giới hạn số lượng theo cardCount
-        if (cards.length > 0) {
-          const unique: AICard[] = [];
-          const seen = new Set<string>();
-          const keyOf = (s: string) =>
-            s
-              .toLowerCase()
-              .trim()
-              .replace(/[\s\u200B\u200C\u200D\uFEFF]+/g, ' ')
-              .replace(/[^\p{L}\p{N}]+/gu, ' ');
-          for (const c of cards) {
-            const k = keyOf(c.front);
-            if (!seen.has(k)) {
-              seen.add(k);
-              unique.push(c);
+          // Đảm bảo duy nhất theo front và giới hạn số lượng theo cardCount
+          if (cards.length > 0) {
+            const unique: AICard[] = [];
+            const seen = new Set<string>();
+            const keyOf = (s: string) =>
+              s
+                .toLowerCase()
+                .trim()
+                .replace(/[\s\u200B\u200C\u200D\uFEFF]+/g, ' ')
+                .replace(/[^\p{L}\p{N}]+/gu, ' ');
+            for (const c of cards) {
+              const k = keyOf(c.front);
+              if (!seen.has(k)) {
+                seen.add(k);
+                unique.push(c);
+              }
             }
+            cards = unique.slice(0, Math.max(1, cardCount));
           }
-          cards = unique.slice(0, Math.max(1, cardCount));
         }
       } catch (parseError) {
         console.error('Error parsing AI response:', parseError);
@@ -713,6 +748,7 @@ Lưu ý quan trọng:
                 exampleTranslation={currentCard.exampleTranslation}
                 onSwipeLeft={() => markCardAsLearned(false)}
                 onSwipeRight={() => markCardAsLearned(true)}
+                disabled={isMarking}
               />
             ) : (
               <div className="text-center text-[var(--muted)]">
@@ -746,22 +782,7 @@ Lưu ý quan trọng:
                 </Button>
               </div>
 
-              <div className="flex space-x-2 md:space-x-3">
-                <Button
-                  variant="outline"
-                  className="flex-1 bg-[var(--surface)] border-[var(--border)] text-[var(--danger)] hover:bg-[rgb(239_68_68/0.06)] focus-visible:ring-2 focus-visible:ring-[var(--ring)] rounded-xl text-xs md:text-sm min-w-0"
-                  onClick={() => markCardAsLearned(false)}
-                >
-                  <span className="truncate">Chưa nhớ</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="flex-1 bg-[var(--surface)] border-[var(--border)] text-[var(--success)] hover:bg-[rgb(34_197_94/0.08)] focus-visible:ring-2 focus-visible:ring-[var(--ring)] rounded-xl text-xs md:text-sm min-w-0"
-                  onClick={() => markCardAsLearned(true)}
-                >
-                  <span className="truncate">Đã nhớ</span>
-                </Button>
-              </div>
+              {/* Removed bottom action buttons as requested; keep swipe to mark */}
             </div>
           )}
         </div>
@@ -931,12 +952,7 @@ Lưu ý quan trọng:
                         {Math.round(progress)}%
                       </span>
                     </div>
-                    <div className="w-full bg-[rgba(0,0,0,.08)] dark:bg-[rgba(255,255,255,.08)] rounded-full h-2">
-                      <div
-                        className="h-2 rounded-full bg-[color:rgb(37_99_235_/_0.8)]"
-                        style={{ width: `${progress}%` }}
-                      />
-                    </div>
+                    <Progress value={progress} />
                   </div>
 
                   <Button
@@ -1088,6 +1104,45 @@ Lưu ý quan trọng:
               onClick={() => handleDeleteDeck()}
             >
               Xóa
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Dialog xác nhận cập nhật tiến độ học thẻ */}
+      <AlertDialog
+        open={!!pendingDecision}
+        onOpenChange={open => {
+          if (!open) setPendingDecision(null);
+        }}
+      >
+        <AlertDialogContent className="bg-[var(--surface)] border-[var(--border)] shadow-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-[var(--text)]">
+              Xác nhận cập nhật tiến độ
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[var(--muted)]">
+              {pendingDecision?.learned
+                ? 'Đánh dấu thẻ này là ĐÃ NHỚ?'
+                : 'Đánh dấu thẻ này là CHƯA NHỚ?'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="text-[var(--text)] bg-[var(--surface)] border-[var(--border)] hover:bg-[var(--surface)]/80">
+              Hủy
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-white font-medium focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+              onClick={() => {
+                const decision = pendingDecision;
+                setPendingDecision(null);
+                if (decision) {
+                  void doMarkCardAsLearned(decision.learned);
+                }
+              }}
+              disabled={isMarking}
+            >
+              Xác nhận
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

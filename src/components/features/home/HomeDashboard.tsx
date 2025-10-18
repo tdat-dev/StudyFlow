@@ -10,6 +10,7 @@ import {
 } from '../../../hooks/useDashboardIntegration';
 import { QuickActions } from './QuickActions';
 import { WeeklyProgress } from './WeeklyProgress';
+import { WeeklyBoss } from './WeeklyBoss';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { Badge } from '../../ui/badge';
 import { Progress } from '../../ui/progress';
@@ -123,15 +124,15 @@ export function HomeDashboard({ user, onTabChange }: HomeDashboardProps) {
   };
 
   return (
-    <div className="h-full w-full bg-gradient-to-b from-slate-950 to-slate-900 p-1 xl:p-2 flex flex-col overflow-y-auto scrollbar-glass">
+    <div className="h-full w-full bg-[var(--bg)] p-1 xl:p-2 flex flex-col overflow-y-auto scrollbar-glass text-[var(--text)]">
       {/* Header - Compact */}
       <div className="mb-2 xl:mb-3 flex-shrink-0">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-lg xl:text-xl font-bold text-white mb-1 max-w-xl">
+            <h1 className="text-lg xl:text-xl font-bold text-[var(--text)] mb-1 max-w-xl">
               Chào {profile.name}! 👋
             </h1>
-            <p className="text-xs xl:text-sm text-white/70 max-w-xl">
+            <p className="text-xs xl:text-sm text-[var(--muted)] max-w-xl">
               Hôm nay bạn muốn học gì?
             </p>
           </div>
@@ -174,6 +175,9 @@ export function HomeDashboard({ user, onTabChange }: HomeDashboardProps) {
 
           {/* Weekly Progress - New integrated component */}
           <WeeklyProgress progress={integratedProgress} />
+
+          {/* Weekly Boss - New gamified challenge */}
+          {user?.uid && <WeeklyBoss userId={user.uid} />}
 
           {/* Stats Cards - CSS Grid responsive: 1 col <480px, 2 cols <768px, 4 cols >=768px */}
           <div className="w-full grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-3 xl:gap-4">
@@ -254,10 +258,10 @@ export function HomeDashboard({ user, onTabChange }: HomeDashboardProps) {
             <CardContent className="p-4">
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
                 <div className="flex-1">
-                  <h3 className="text-base xl:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                  <h3 className="text-base xl:text-lg font-semibold text-[var(--text)] mb-1">
                     Tiếp tục học nào! 🚀
                   </h3>
-                  <p className="text-xs xl:text-sm text-gray-600 dark:text-gray-100">
+                  <p className="text-xs xl:text-sm text-[var(--muted)]">
                     Hoàn thành mục tiêu hôm nay để duy trì streak
                   </p>
                 </div>
@@ -276,11 +280,8 @@ export function HomeDashboard({ user, onTabChange }: HomeDashboardProps) {
           {/* Daily Missions Card */}
           <Card className="card-glass overflow-hidden">
             <CardHeader className="pb-2 p-4">
-              <CardTitle className="text-base xl:text-lg text-white flex items-center">
-                <Target
-                  className="text-blue-400 mr-2"
-                  style={{ width: '16px', height: '16px' }}
-                />
+              <CardTitle className="text-base xl:text-lg text-[var(--text)] flex items-center">
+                <Target className="text-blue-400 mr-2 h-4 w-4" />
                 Nhiệm vụ hôm nay
               </CardTitle>
             </CardHeader>
@@ -288,16 +289,16 @@ export function HomeDashboard({ user, onTabChange }: HomeDashboardProps) {
               {/* Mission Progress */}
               <div className="mb-4">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-white/70">
+                  <span className="text-sm text-[var(--muted)]">
                     Tiến trình nhiệm vụ
                   </span>
-                  <span className="text-sm text-white/70">
+                  <span className="text-sm text-[var(--muted)]">
                     {completedMissions}/5 hoàn thành
                   </span>
                 </div>
                 <Progress
                   value={Math.min((completedMissions / 5) * 100, 100)}
-                  className="h-2 bg-white/10"
+                  className="h-2"
                 />
               </div>
 
@@ -327,8 +328,8 @@ export function HomeDashboard({ user, onTabChange }: HomeDashboardProps) {
                     <span
                       className={`text-sm transition-all duration-200 break-words ${
                         mission.completed
-                          ? 'text-green-300 line-through'
-                          : 'text-white/80'
+                          ? 'text-green-600 dark:text-green-300 line-through'
+                          : 'text-[var(--text)]'
                       }`}
                     >
                       {mission.text}
@@ -362,7 +363,7 @@ export function HomeDashboard({ user, onTabChange }: HomeDashboardProps) {
           </Card>
 
           {/* Divider */}
-          <div className="h-px bg-white/10 my-6" />
+          <div className="h-px bg-[var(--border)] my-6" />
 
           {/* Daily Tip Card */}
           <DailyTipCard />

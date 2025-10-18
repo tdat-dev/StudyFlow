@@ -8,6 +8,7 @@ interface SwipeableFlashcardProps {
   exampleTranslation?: string;
   onSwipeLeft: () => void;
   onSwipeRight: () => void;
+  disabled?: boolean;
 }
 
 export function SwipeableFlashcard({
@@ -17,6 +18,7 @@ export function SwipeableFlashcard({
   exampleTranslation,
   onSwipeLeft,
   onSwipeRight,
+  disabled = false,
 }: SwipeableFlashcardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [dragStartX, setDragStartX] = useState<number | null>(null);
@@ -59,14 +61,17 @@ export function SwipeableFlashcard({
   }, [isFlipped]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    if (disabled) return;
     setDragStartX(e.touches[0].clientX);
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    if (disabled) return;
     setDragStartX(e.clientX);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
+    if (disabled) return;
     if (dragStartX === null) return;
     const currentX = e.touches[0].clientX;
     const newOffset = currentX - dragStartX;
@@ -74,6 +79,7 @@ export function SwipeableFlashcard({
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
+    if (disabled) return;
     if (dragStartX === null) return;
     const currentX = e.clientX;
     const newOffset = currentX - dragStartX;
@@ -98,6 +104,7 @@ export function SwipeableFlashcard({
   };
 
   const handleDragEnd = () => {
+    if (disabled) return;
     if (dragStartX === null) return;
 
     // If dragged far enough, trigger the appropriate action
@@ -115,11 +122,23 @@ export function SwipeableFlashcard({
   };
 
   const handleClick = () => {
+    if (disabled) return;
     // Only flip if not dragging
     if (Math.abs(dragOffset) < 5) {
       setIsFlipped(!isFlipped);
     }
   };
+
+  // Tạo lớp transform theo bậc để tránh inline style
+  const dragClass = (() => {
+    if (dragOffset > 100) return 'translate-x-24 rotate-3 drop-shadow-lg';
+    if (dragOffset > 60) return 'translate-x-16 rotate-2 drop-shadow';
+    if (dragOffset > 20) return 'translate-x-8 rotate-1';
+    if (dragOffset < -100) return '-translate-x-24 -rotate-3 drop-shadow-lg';
+    if (dragOffset < -60) return '-translate-x-16 -rotate-2 drop-shadow';
+    if (dragOffset < -20) return '-translate-x-8 -rotate-1';
+    return 'translate-x-0 rotate-0';
+  })();
 
   return (
     <div className="relative w-full max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl aspect-[4/3] perspective-1000 select-none mx-auto">
@@ -147,19 +166,14 @@ export function SwipeableFlashcard({
       {/* Card with enhanced drag effects */}
       <div
         ref={cardRef}
-        className={`relative w-full h-full transition-all duration-500 ${
+        className={`relative w-full h-full transition-all duration-300 ${
           dragOffset !== 0 ? 'z-20' : 'z-10'
-        }`}
-        style={{
-          transform: `translateX(${dragOffset}px) rotateZ(${dragOffset * 0.1}deg)`,
-          filter: `drop-shadow(0 ${Math.abs(dragOffset) * 0.3}px ${Math.abs(dragOffset) * 0.5}px rgba(0,0,0,0.3))`,
-        }}
+        } ${dragClass}`}
       >
         <div
-          className="relative w-full h-full transform-style-preserve-3d transition-transform duration-500"
-          style={{
-            transform: `rotateY(${isFlipped ? '180deg' : '0deg'})`,
-          }}
+          className={`relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] ${
+            isFlipped ? '[transform:rotateY(180deg)]' : ''
+          }`}
           onClick={handleClick}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
@@ -170,7 +184,7 @@ export function SwipeableFlashcard({
           onMouseLeave={handleDragEnd}
         >
           {/* Front - English only */}
-          <div className="absolute inset-0 backface-hidden flashcard-enhanced">
+          <div className="absolute inset-0 [backface-visibility:hidden] flashcard-enhanced">
             <div className="flex flex-col h-full min-h-0">
               <div className="flashcard-label flex-shrink-0">English</div>
               <div className="flex-grow flex items-center justify-center min-h-0 py-4">
@@ -192,7 +206,7 @@ export function SwipeableFlashcard({
           </div>
 
           {/* Back - Vietnamese only */}
-          <div className="absolute inset-0 backface-hidden flashcard-enhanced rotate-y-180">
+          <div className="absolute inset-0 [backface-visibility:hidden] flashcard-enhanced [transform:rotateY(180deg)]">
             <div className="flex flex-col h-full min-h-0">
               <div className="flashcard-label flex-shrink-0">Vietnamese</div>
               <div className="flex-grow flex items-center justify-center min-h-0 py-4">
@@ -218,43 +232,31 @@ export function SwipeableFlashcard({
       {/* Control buttons below flashcard */}
       <div className="flex justify-center gap-4 mt-6">
         <button
-          onClick={onSwipeLeft}
+          onClick={() => !disabled && onSwipeLeft()}
           className="flex items-center gap-2 px-6 py-3 bg-red-500/20 hover:bg-red-500/30 
                      border border-red-500/30 rounded-xl transition-all duration-200
                      backdrop-blur-sm hover:scale-105 hover:shadow-[0_0_20px_rgba(239,68,68,0.3)]
-                     text-red-300 font-medium"
+                     text-red-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={disabled}
         >
           <span className="text-xl">✖</span>
           <span>Chưa nhớ</span>
         </button>
 
         <button
-          onClick={onSwipeRight}
+          onClick={() => !disabled && onSwipeRight()}
           className="flex items-center gap-2 px-6 py-3 bg-green-500/20 hover:bg-green-500/30 
                      border border-green-500/30 rounded-xl transition-all duration-200
                      backdrop-blur-sm hover:scale-105 hover:shadow-[0_0_20px_rgba(34,197,94,0.3)]
-                     text-green-300 font-medium"
+                     text-green-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={disabled}
         >
           <span className="text-xl">✓</span>
           <span>Đã nhớ</span>
         </button>
       </div>
 
-      <style jsx>{`
-        .perspective-1000 {
-          perspective: 1000px;
-        }
-        .transform-style-preserve-3d {
-          transform-style: preserve-3d;
-        }
-        .backface-hidden {
-          backface-visibility: hidden;
-          -webkit-backface-visibility: hidden;
-        }
-        .rotate-y-180 {
-          transform: rotateY(180deg);
-        }
-      `}</style>
+      {/* Tailwind arbitrary properties are used instead of styled-jsx */}
     </div>
   );
 }

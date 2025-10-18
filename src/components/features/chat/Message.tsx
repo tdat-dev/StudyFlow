@@ -82,14 +82,13 @@ export function Message({
 
           {/* Message bubble with improved styling */}
           <div
-            className={`relative break-words ${
+            className={`relative break-words max-w-none ${
               groupedWithNext ? 'mb-1' : 'mb-0'
             } ${groupedWithPrev ? '-mt-1' : ''} ${
               isUser
                 ? 'bg-blue-600 text-white'
                 : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
             } rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200`}
-            style={{ maxWidth: 'none' }}
           >
             {/* Message content padding */}
             <div className="px-4 py-3">
