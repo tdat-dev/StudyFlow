@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { DemoSection } from './DemoSection';
 
 interface SimpleLandingPageProps {
@@ -18,9 +19,11 @@ export function SimpleLandingPage({
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 rounded-lg overflow-hidden">
-                <img
+                <Image
                   src="/images/logo-32.png"
                   alt="StudyFlow Logo"
+                  width={32}
+                  height={32}
                   className="w-full h-full object-contain"
                 />
               </div>
@@ -45,9 +48,11 @@ export function SimpleLandingPage({
             {/* Logo Section */}
             <div className="flex justify-center mb-8">
               <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-lg">
-                <img
+                <Image
                   src="/images/logo-120.png"
                   alt="StudyFlow Logo"
+                  width={120}
+                  height={120}
                   className="w-full h-full object-contain"
                 />
               </div>
@@ -209,9 +214,11 @@ export function SimpleLandingPage({
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center space-x-2 mb-4">
                 <div className="w-8 h-8 rounded-lg overflow-hidden">
-                  <img
+                  <Image
                     src="/images/logo-32.png"
                     alt="StudyFlow Logo"
+                    width={32}
+                    height={32}
                     className="w-full h-full object-contain"
                   />
                 </div>

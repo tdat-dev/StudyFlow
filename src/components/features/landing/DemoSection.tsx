@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Image from 'next/image';
 
 interface DemoItem {
   id: string;
@@ -48,9 +49,11 @@ export function DemoSection() {
       case 'gif':
         return (
           <div className="relative">
-            <img
-              src={demo.src}
+            <Image
+              src={demo.src || '/images/placeholder.png'}
               alt={`${demo.title} Demo`}
+              width={800}
+              height={600}
               className="w-full h-auto rounded-lg shadow-lg"
             />
             <div className="absolute inset-0 bg-black bg-opacity-20 rounded-lg flex items-center justify-center">

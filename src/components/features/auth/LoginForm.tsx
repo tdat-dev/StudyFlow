@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Lock } from 'lucide-react';
+import Image from 'next/image';
 import {
   loginWithEmail,
   loginWithGoogle,
@@ -66,9 +67,11 @@ export function LoginForm({
       <div className="lg:hidden text-center mb-8">
         <div className="flex items-center justify-center space-x-3 mb-4">
           <div className="w-12 h-12 rounded-xl overflow-hidden">
-            <img
+            <Image
               src="/images/logo-48.png"
               alt="StudyFlow Logo"
+              width={48}
+              height={48}
               className="w-full h-full object-contain"
             />
           </div>
@@ -80,9 +83,11 @@ export function LoginForm({
       <div className="hidden lg:block text-center mb-8">
         <div className="flex items-center justify-center space-x-3 mb-4">
           <div className="w-12 h-12 rounded-xl overflow-hidden">
-            <img
+            <Image
               src="/images/logo-48.png"
               alt="StudyFlow Logo"
+              width={48}
+              height={48}
               className="w-full h-full object-contain"
             />
           </div>

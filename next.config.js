@@ -3,7 +3,6 @@ const path = require('path');
 
 const nextConfig = {
   reactStrictMode: false, // Tắt Strict Mode để tránh double rendering
-  swcMinify: true,
   output: 'export', // Enable static HTML export
   trailingSlash: true, // Add trailing slash for better compatibility
 
@@ -29,12 +28,6 @@ const nextConfig = {
     ],
   },
 
-  // Webpack config for path aliases
-  webpack: config => {
-    config.resolve.alias['@'] = path.join(__dirname, 'src');
-    return config;
-  },
-
   // Cải thiện Fast Refresh
   onDemandEntries: {
     maxInactiveAge: 25 * 1000,
@@ -43,18 +36,25 @@ const nextConfig = {
 
   experimental: {
     optimizePackageImports: ['lucide-react'],
-    esmExternals: 'loose',
   },
 
+  // Webpack configuration for Three.js and optimizations
   webpack: (config, { isServer, dev }) => {
+    // Path aliases
+    config.resolve.alias['@'] = path.join(__dirname, 'src');
+
+    // Handle Three.js modules
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      path: false,
+      crypto: false,
+    };
+
+    // Don't externalize Three.js - let it be bundled
+
     if (dev && !isServer) {
       // Cải thiện Fast Refresh performance
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-      };
-
-      // Giảm kích thước bundle để Fast Refresh nhanh hơn
       config.optimization = {
         ...config.optimization,
         moduleIds: 'named',

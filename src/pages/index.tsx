@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MainApp } from '../components/MainApp';
-import {
-  RegisterForm,
-  LandingPage,
-  AuthLayout,
-} from '../components/features/auth';
+import { RegisterForm, AuthLayout } from '../components/features/auth';
+import { LandingPage } from '../components/features/landing';
 import { LoadingScreen } from '../components/ui/LoadingScreen';
 import { useAuth } from '../contexts/AuthContext';
 import { getCurrentAccessToken } from '../utils/auth-helpers';
@@ -61,8 +58,8 @@ export default function Home() {
         </AuthLayout>
       ) : (
         <LandingPage
-          onShowLogin={() => setShowRegister(false)}
-          onShowRegister={() => setShowRegister(true)}
+          onGetStarted={() => setShowRegister(false)}
+          onLogin={() => setShowRegister(false)}
         />
       )}
     </div>

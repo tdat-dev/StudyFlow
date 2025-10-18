@@ -7,7 +7,6 @@ import {
   AcademicCapIcon,
   SparklesIcon,
   ArrowRightIcon,
-  CheckIcon,
   StarIcon,
 } from '@heroicons/react/24/outline';
 
@@ -235,7 +234,7 @@ export function LandingPage({ onGetStarted, onLogin }: LandingPageProps) {
                   ))}
                 </div>
                 <p className="text-gray-600 dark:text-gray-300 mb-6 italic">
-                  "{testimonial.content}"
+                  &ldquo;{testimonial.content}&rdquo;
                 </p>
                 <div className="flex items-center">
                   <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-2xl mr-4">
