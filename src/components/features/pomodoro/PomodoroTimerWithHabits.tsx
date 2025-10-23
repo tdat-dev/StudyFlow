@@ -529,21 +529,21 @@ export function PomodoroTimerWithHabits({
                     />
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center px-4">
+                    <div className="text-center px-4 timer-display-content">
                       <div className="text-5xl font-bold text-gray-900 dark:text-gray-100">
                         {formatTime(timeLeft)}
                       </div>
                       {currentTaskInfo && (
-                        <div className="mt-2 text-xs text-gray-600 dark:text-gray-400 max-w-56">
+                        <div className="mt-3 text-xs text-gray-600 dark:text-gray-400 px-3 py-2">
                           {currentTaskInfo.habitTitle && (
                             <div
-                              className="text-xs text-blue-600 dark:text-blue-400 truncate"
+                              className="text-xs text-blue-600 dark:text-blue-400 truncate leading-relaxed"
                               title={currentTaskInfo.habitTitle}
                             >
                               {currentTaskInfo.habitTitle}
                             </div>
                           )}
-                          <div className="text-xs text-gray-500 dark:text-gray-500 truncate">
+                          <div className="text-xs text-gray-500 dark:text-gray-500 truncate leading-relaxed">
                             {currentTaskInfo.pomodoroCount}
                             {currentTaskInfo.estimatedPomodoros &&
                               `/${currentTaskInfo.estimatedPomodoros}`}{' '}
