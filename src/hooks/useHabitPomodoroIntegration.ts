@@ -89,14 +89,8 @@ export function useHabitPomodoroIntegration(user: User) {
         };
       });
 
-      // Filter out tasks related to PHP
-      const filteredTasks = tasks.filter(task => 
-        !task.text.toLowerCase().includes('php') && 
-        !task.habitTitle?.toLowerCase().includes('php')
-      );
-
       setHabitTasks(
-        filteredTasks.sort(
+        tasks.sort(
           (a, b) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         ),
