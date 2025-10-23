@@ -1,5 +1,7 @@
 import type { AppProps } from 'next/app';
 import '../styles/globals.css';
+import '../styles/theme-tokens.css';
+import '../styles/components.css';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from 'sonner';
 import { ErrorBoundary } from '../src/components/ui/error-boundary';

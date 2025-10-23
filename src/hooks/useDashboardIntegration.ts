@@ -64,12 +64,12 @@ export function useDashboardIntegration(
       setLoading(true);
       setError(null);
 
-      // Reset weekly habits nếu cần
-      await resetWeeklyHabits(user.uid);
-
-      // Load integrated progress
+      // Load integrated progress trước
       const integratedProgress = await getIntegratedProgress(user.uid);
       setProgress(integratedProgress);
+
+      // Reset weekly habits nếu cần (chỉ khi thực sự cần)
+      await resetWeeklyHabits(user.uid);
     } catch (err) {
       console.error('Error loading integrated progress:', err);
       setError(err instanceof Error ? err.message : 'Failed to load progress');

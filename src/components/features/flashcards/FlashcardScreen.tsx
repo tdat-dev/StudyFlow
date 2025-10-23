@@ -21,6 +21,9 @@ import {
   Minus,
   Edit,
   Save,
+  RotateCcw,
+  CheckCircle,
+  XCircle,
 } from 'lucide-react';
 import {
   collection,
@@ -43,6 +46,7 @@ import {
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
 import { SwipeableFlashcard } from './SwipeableFlashcard';
+import { QuickReview } from './QuickReview';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -59,6 +63,9 @@ import { useLevel } from '../../../contexts/LevelContext';
 
 interface FlashcardsScreenProps {
   user: any;
+  onTabChange?: (tab: string) => void;
+  startQuickReview?: boolean;
+  onMarkQuickReviewUsed?: () => void;
 }
 
 interface Deck {
@@ -71,8 +78,15 @@ interface Deck {
   learned: number;
 }
 
-export function FlashcardScreen({ user }: FlashcardsScreenProps) {
-  const [currentView, setCurrentView] = useState<'list' | 'player'>('list');
+export function FlashcardScreen({
+  user,
+  onTabChange,
+  startQuickReview,
+  onMarkQuickReviewUsed,
+}: FlashcardsScreenProps) {
+  const [currentView, setCurrentView] = useState<'list' | 'player' | 'review'>(
+    'list',
+  );
   const [decks, setDecks] = useState<Deck[]>([]);
   const [selectedDeck, setSelectedDeck] = useState<Deck | null>(null);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
@@ -148,9 +162,39 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
     }
   }, [user?.accessToken]);
 
+  // Lấy tất cả các từ đã học từ tất cả decks
+  const getAllLearnedCards = useCallback(() => {
+    const learnedCards: any[] = [];
+    decks.forEach(deck => {
+      if (deck.cards && Array.isArray(deck.cards)) {
+        deck.cards.forEach(card => {
+          if (card.learned) {
+            learnedCards.push({
+              ...card,
+              deckTitle: deck.title,
+              deckId: deck.id,
+            });
+          }
+        });
+      }
+    });
+    return learnedCards;
+  }, [decks]);
+
   useEffect(() => {
     loadFlashcards();
   }, [loadFlashcards]);
+
+  // Xử lý khi startQuickReview được set từ bên ngoài
+  useEffect(() => {
+    if (startQuickReview && getAllLearnedCards().length > 0) {
+      setCurrentView('review');
+      // Reset prop sau khi đã sử dụng
+      if (onTabChange) {
+        onTabChange('flashcards');
+      }
+    }
+  }, [startQuickReview, getAllLearnedCards, onTabChange]);
 
   const startDeck = (deck: Deck) => {
     setSelectedDeck(deck);
@@ -173,16 +217,18 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
   const doMarkCardAsLearned = async (learned: boolean) => {
     if (!selectedDeck || !selectedDeck.cards) return;
 
-    const card = selectedDeck.cards[currentCardIndex];
+    // Chụp chỉ số thẻ hiện tại để dùng nhất quán
+    const cardIndex = currentCardIndex;
+    const card = selectedDeck.cards[cardIndex];
     if (!card) return;
     if (isMarking) return;
     setIsMarking(true);
 
-    // Update card in state
+    // Update card trong state theo chỉ số đã chụp
     const updatedDecks = decks.map(deck => {
       if (deck.id === selectedDeck.id) {
         const updatedCards = deck.cards.map((c, idx) => {
-          if (idx === currentCardIndex) {
+          if (idx === cardIndex) {
             return { ...c, learned };
           }
           return c;
@@ -207,16 +253,13 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
       setSelectedDeck(updatedDeck);
     }
 
-    // Award XP for studying flashcard
+    // Award XP cho thẻ mới được đánh dấu là đã nhớ
     if (learned && !card.learned) {
       await addUserXP('COMPLETE_FLASHCARD');
       await updateStats({ flashcardsStudied: userStats.flashcardsStudied + 1 });
     }
 
-    // Move to next card
-    nextCard();
-
-    // Update in Firestore (if not using mock data)
+    // Update Firestore trước khi chuyển thẻ để đảm bảo chỉ số đúng
     if (
       auth.currentUser &&
       selectedDeck.id &&
@@ -225,7 +268,7 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
       try {
         const deckRef = doc(db, 'flashcard_decks', selectedDeck.id);
         await updateDoc(deckRef, {
-          [`cards.${currentCardIndex}.learned`]: learned,
+          [`cards.${cardIndex}.learned`]: learned,
           learned: learned
             ? selectedDeck.learned + (card.learned ? 0 : 1)
             : selectedDeck.learned - (card.learned ? 1 : 0),
@@ -236,12 +279,78 @@ export function FlashcardScreen({ user }: FlashcardsScreenProps) {
         }
       }
     }
+
+    // Chuyển sang thẻ tiếp theo sau khi cập nhật xong
+    nextCard();
     setIsMarking(false);
   };
 
   const markCardAsLearned = (learned: boolean) => {
     setPendingDecision({ learned });
   };
+
+  // Bắt đầu ôn tập
+  const handleStartQuickReview = useCallback(() => {
+    setCurrentView('review');
+  }, []);
+
+  // Xử lý khi hoàn thành ôn tập
+  const handleReviewComplete = useCallback(
+    async (correctCount: number, totalCount: number) => {
+      // Award XP based on performance
+      const accuracy = correctCount / totalCount;
+      if (accuracy >= 0.8) {
+        await addUserXP('COMPLETE_FLASHCARD');
+      } else if (accuracy >= 0.6) {
+        await addUserXP('COMPLETE_FLASHCARD');
+      } else {
+        await addUserXP('COMPLETE_FLASHCARD');
+      }
+
+      // Update stats
+      await updateStats({
+        flashcardsStudied: userStats.flashcardsStudied + totalCount,
+      });
+
+      // Complete mission "Ôn tập 5 từ vựng đã học" nếu đủ điều kiện
+      if (totalCount >= 5 && user?.uid) {
+        try {
+          // Gọi completeMissionByType để hoàn thành mission
+          const { completeMissionByType } = await import(
+            '../../../services/dashboard/missionsService'
+          );
+          const result = await completeMissionByType(user.uid, 'review');
+          if (result) {
+            console.log(
+              'Mission "Ôn tập 5 từ vựng đã học" đã hoàn thành!',
+              result,
+            );
+            // Mark quick review as used today
+            if (onMarkQuickReviewUsed) {
+              onMarkQuickReviewUsed();
+            }
+          }
+        } catch (error) {
+          console.error('Error completing mission:', error);
+        }
+      }
+
+      // Quay lại danh sách
+      setCurrentView('list');
+    },
+    [
+      addUserXP,
+      updateStats,
+      userStats.flashcardsStudied,
+      onMarkQuickReviewUsed,
+      user?.uid,
+    ],
+  );
+
+  // Quay lại từ ôn tập
+  const handleBackFromReview = useCallback(() => {
+    setCurrentView('list');
+  }, []);
 
   const generateNewExample = async () => {
     if (!selectedDeck || !selectedDeck.cards) return;
@@ -814,546 +923,709 @@ Lưu ý quan trọng:
 
   return (
     <div className="min-h-dvh bg-[var(--bg)] text-[var(--text)] overflow-y-auto p-6 pb-20">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-[var(--text)] mb-2">Flashcards</h1>
-          <p className="text-[var(--muted)]">Chọn bộ thẻ để bắt đầu học</p>
-        </div>
-        <div className="flex space-x-2">
-          <Button
-            onClick={() => {
-              setNewDeckTitle('');
-              setNewDeckTopic('');
-              setNewDeckSubject('');
-              setGeneratedCards([
-                {
-                  id: `manual-card-${Date.now()}-0`,
-                  front: '',
-                  back: '',
-                  example: '',
-                  exampleTranslation: '',
-                  learned: false,
-                },
-              ]);
-              setShowEditDialog(true);
-            }}
-            className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center focus-visible:ring-2 focus-visible:ring-blue-500/40"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Tạo thủ công
-          </Button>
-          <Button
-            onClick={() => setAiDialogOpen(true)}
-            className="bg-[var(--warning)] hover:bg-[var(--warning)]/90 text-white rounded-xl flex items-center focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
-          >
-            <BrainCircuit className="h-4 w-4 mr-2" />
-            Tạo với AI
-          </Button>
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="flex justify-center items-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-[var(--primary)]" />
-        </div>
-      ) : decks.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <div className="bg-gray-100 dark:bg-gray-800 rounded-full p-6 mb-4">
-            <BrainCircuit className="h-12 w-12 text-[var(--muted)]" />
-          </div>
-          <h3 className="text-lg font-medium text-[var(--text)] mb-2">
-            Chưa có flashcard nào
-          </h3>
-          <p className="text-[var(--muted)] mb-6 max-w-sm">
-            Tạo bộ flashcard đầu tiên để bắt đầu học từ vựng hiệu quả
-          </p>
-          <div className="flex space-x-3">
-            <Button
-              onClick={() => {
-                setNewDeckTitle('');
-                setNewDeckTopic('');
-                setNewDeckSubject('');
-                setGeneratedCards([
-                  {
-                    id: `manual-card-${Date.now()}-0`,
-                    front: '',
-                    back: '',
-                    example: '',
-                    exampleTranslation: '',
-                    learned: false,
-                  },
-                ]);
-                setShowEditDialog(true);
-              }}
-              className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center focus-visible:ring-2 focus-visible:ring-blue-500/40"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Tạo thủ công
-            </Button>
-            <Button
-              onClick={() => setAiDialogOpen(true)}
-              className="bg-[var(--warning)] hover:bg-[var(--warning)]/90 text-white rounded-xl flex items-center focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
-            >
-              <BrainCircuit className="h-4 w-4 mr-2" />
-              Tạo với AI
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {decks.map(deck => {
-            const progress =
-              deck.total > 0 ? (deck.learned / deck.total) * 100 : 0;
-
-            return (
-              <Card
-                key={deck.id}
-                className="bg-[var(--card)] border-[var(--border)] hover:shadow-lg transition-shadow cursor-pointer"
-                onClick={() => startDeck(deck)}
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center">
-                      <div
-                        className={`w-4 h-4 rounded-full ${deck.color} mr-3`}
-                      />
-                      <div>
-                        <CardTitle className="text-[var(--text)]">
-                          {deck.title}
-                        </CardTitle>
-                        <CardDescription>{deck.description}</CardDescription>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Badge variant="secondary">
-                        {deck.learned}/{deck.total}
-                      </Badge>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-[var(--danger)] hover:text-[var(--danger)] hover:bg-[rgb(239_68_68/0.06)] focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
-                        onClick={e => {
-                          e.stopPropagation();
-                          setDeckToDelete(deck);
-                          setDeleteDialogOpen(true);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-
-                <CardContent>
-                  <div className="mb-3">
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-[var(--muted)]">Tiến trình</span>
-                      <span className="text-[var(--muted)]">
-                        {Math.round(progress)}%
-                      </span>
-                    </div>
-                    <Progress value={progress} />
-                  </div>
-
-                  <Button
-                    onClick={e => {
-                      e.stopPropagation();
-                      startDeck(deck);
-                    }}
-                    className="h-11 w-full rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-500/40"
-                    disabled={!deck.cards || deck.cards.length === 0}
-                  >
-                    {deck.cards?.length > 0 ? 'Bắt đầu học' : 'Chưa có thẻ'}
-                  </Button>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+      {/* Quick Review Mode */}
+      {currentView === 'review' && (
+        <QuickReview
+          learnedCards={getAllLearnedCards()}
+          onComplete={handleReviewComplete}
+          onBack={handleBackFromReview}
+        />
       )}
 
-      {/* Dialog tạo flashcards bằng AI */}
-      <Dialog open={aiDialogOpen} onOpenChange={setAiDialogOpen}>
-        <DialogContent className="sm:max-w-[425px] bg-[var(--surface)] border-[var(--border)] shadow-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-[var(--text)]">
-              Tạo flashcards bằng AI
-            </DialogTitle>
-            <DialogDescription className="text-[var(--muted)]">
-              Nhập thông tin để AI tạo bộ flashcards mới cho bạn
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label
-                htmlFor="subject"
-                className="text-right text-[var(--text)] font-medium"
-              >
-                Môn học
-              </Label>
-              <Input
-                id="subject"
-                value={newDeckSubject}
-                onChange={e => setNewDeckSubject(e.target.value)}
-                placeholder="Ví dụ: Tiếng Anh, Toán học, Vật lý..."
-                className="col-span-3"
-              />
+      {/* List Mode */}
+      {currentView === 'list' && (
+        <>
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h1 className="text-[var(--text)] mb-2">Flashcards</h1>
+              <p className="text-[var(--muted)]">Chọn bộ thẻ để bắt đầu học</p>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label
-                htmlFor="topic"
-                className="text-right text-[var(--text)] font-medium"
+            <div className="flex space-x-2">
+              <Button
+                onClick={handleStartQuickReview}
+                disabled={getAllLearnedCards().length === 0}
+                className="bg-green-600 hover:bg-green-700 text-white rounded-xl flex items-center focus-visible:ring-2 focus-visible:ring-green-500/40"
               >
-                Chủ đề
-              </Label>
-              <Input
-                id="topic"
-                value={newDeckTopic}
-                onChange={e => setNewDeckTopic(e.target.value)}
-                className="col-span-3"
-                placeholder="Từ vựng học thuật, Ngữ pháp cơ bản..."
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label
-                htmlFor="title"
-                className="text-right text-[var(--text)] font-medium"
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Ôn tập nhanh ({getAllLearnedCards().length})
+              </Button>
+              <Button
+                onClick={() => {
+                  setNewDeckTitle('');
+                  setNewDeckTopic('');
+                  setNewDeckSubject('');
+                  setGeneratedCards([
+                    {
+                      id: `manual-card-${Date.now()}-0`,
+                      front: '',
+                      back: '',
+                      example: '',
+                      exampleTranslation: '',
+                      learned: false,
+                    },
+                  ]);
+                  setShowEditDialog(true);
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center focus-visible:ring-2 focus-visible:ring-blue-500/40"
               >
-                Tiêu đề
-              </Label>
-              <Input
-                id="title"
-                value={newDeckTitle}
-                onChange={e => setNewDeckTitle(e.target.value)}
-                className="col-span-3"
-                placeholder="Tiêu đề cho bộ flashcards"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label
-                htmlFor="cardCount"
-                className="text-right text-[var(--text)] font-medium"
+                <Plus className="h-4 w-4 mr-2" />
+                Tạo thủ công
+              </Button>
+              <Button
+                onClick={() => setAiDialogOpen(true)}
+                className="bg-[var(--warning)] hover:bg-[var(--warning)]/90 text-white rounded-xl flex items-center focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
               >
-                Số lượng thẻ
-              </Label>
-              <div className="flex items-center col-span-3">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setCardCount(Math.max(1, cardCount - 1))}
-                  className="h-8 w-8"
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                <span className="w-10 text-center">{cardCount}</span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setCardCount(Math.min(20, cardCount + 1))}
-                  className="h-8 w-8"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
+                <BrainCircuit className="h-4 w-4 mr-2" />
+                Tạo với AI
+              </Button>
             </div>
           </div>
-          <DialogFooter>
-            <Button
-              onClick={createAIFlashcards}
-              disabled={
-                creatingDeck || !newDeckTitle.trim() || !newDeckTopic.trim()
-              }
-              className="bg-[var(--warning)] hover:bg-[var(--warning)]/90 text-white font-medium focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
-            >
-              {creatingDeck ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Đang tạo...
-                </>
-              ) : (
-                <>
+
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-[var(--primary)]" />
+            </div>
+          ) : decks.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="bg-gray-100 dark:bg-gray-800 rounded-full p-6 mb-4">
+                <BrainCircuit className="h-12 w-12 text-[var(--muted)]" />
+              </div>
+              <h3 className="text-lg font-medium text-[var(--text)] mb-2">
+                Chưa có flashcard nào
+              </h3>
+              <p className="text-[var(--muted)] mb-6 max-w-sm">
+                Tạo bộ flashcard đầu tiên để bắt đầu học từ vựng hiệu quả
+              </p>
+              <div className="flex space-x-3">
+                <Button
+                  onClick={() => {
+                    // Kiểm tra đăng nhập trước khi tạo flashcards
+                    if (!auth.currentUser) {
+                      alert(
+                        'Vui lòng đăng nhập để tạo flashcards và lưu vào database!',
+                      );
+                      return;
+                    }
+
+                    setNewDeckTitle('');
+                    setNewDeckTopic('');
+                    setNewDeckSubject('');
+                    setGeneratedCards([
+                      {
+                        id: `manual-card-${Date.now()}-0`,
+                        front: '',
+                        back: '',
+                        example: '',
+                        exampleTranslation: '',
+                        learned: false,
+                      },
+                    ]);
+                    setShowEditDialog(true);
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center focus-visible:ring-2 focus-visible:ring-blue-500/40"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Tạo thủ công
+                </Button>
+                <Button
+                  onClick={() => {
+                    // Kiểm tra đăng nhập trước khi tạo flashcards
+                    if (!auth.currentUser) {
+                      alert(
+                        'Vui lòng đăng nhập để tạo flashcards và lưu vào database!',
+                      );
+                      return;
+                    }
+                    setAiDialogOpen(true);
+                  }}
+                  className="bg-[var(--warning)] hover:bg-[var(--warning)]/90 text-white rounded-xl flex items-center focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+                >
                   <BrainCircuit className="h-4 w-4 mr-2" />
-                  Tạo flashcards
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+                  Tạo với AI
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {decks.map(deck => {
+                const progress =
+                  deck.total > 0 ? (deck.learned / deck.total) * 100 : 0;
 
-      {/* Dialog xác nhận xóa flashcard */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className="bg-[var(--surface)] border-[var(--border)] shadow-2xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center text-[var(--text)]">
-              <AlertTriangle className="h-5 w-5 text-[var(--danger)] mr-2" />
-              Xác nhận xóa
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-[var(--muted)]">
-              Bạn có chắc chắn muốn xóa bộ flashcard &quot;{deckToDelete?.title}
-              &quot;? Hành động này không thể hoàn tác và tất cả các thẻ trong
-              bộ này sẽ bị mất.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="text-[var(--text)] bg-[var(--surface)] border-[var(--border)] hover:bg-[var(--surface)]/80">
-              Hủy
-            </AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-[var(--danger)] hover:bg-[var(--danger)]/90 text-white font-medium focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
-              onClick={() => handleDeleteDeck()}
-            >
-              Xóa
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+                return (
+                  <Card
+                    key={deck.id}
+                    className="bg-[var(--card)] border-[var(--border)] hover:shadow-lg transition-shadow cursor-pointer"
+                    onClick={() => startDeck(deck)}
+                  >
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center">
+                          <div
+                            className={`w-4 h-4 rounded-full ${deck.color} mr-3`}
+                          />
+                          <div>
+                            <CardTitle className="text-[var(--text)]">
+                              {deck.title}
+                            </CardTitle>
+                            <CardDescription>
+                              {deck.description}
+                            </CardDescription>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Badge variant="secondary">
+                            {deck.learned}/{deck.total}
+                          </Badge>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-[var(--danger)] hover:text-[var(--danger)] hover:bg-[rgb(239_68_68/0.06)] focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+                            onClick={e => {
+                              e.stopPropagation();
+                              setDeckToDelete(deck);
+                              setDeleteDialogOpen(true);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardHeader>
 
-      {/* Dialog xác nhận cập nhật tiến độ học thẻ */}
-      <AlertDialog
-        open={!!pendingDecision}
-        onOpenChange={open => {
-          if (!open) setPendingDecision(null);
-        }}
-      >
-        <AlertDialogContent className="bg-[var(--surface)] border-[var(--border)] shadow-2xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-[var(--text)]">
-              Xác nhận cập nhật tiến độ
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-[var(--muted)]">
-              {pendingDecision?.learned
-                ? 'Đánh dấu thẻ này là ĐÃ NHỚ?'
-                : 'Đánh dấu thẻ này là CHƯA NHỚ?'}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="text-[var(--text)] bg-[var(--surface)] border-[var(--border)] hover:bg-[var(--surface)]/80">
-              Hủy
-            </AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-white font-medium focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
-              onClick={() => {
-                const decision = pendingDecision;
-                setPendingDecision(null);
-                if (decision) {
-                  void doMarkCardAsLearned(decision.learned);
-                }
-              }}
-              disabled={isMarking}
-            >
-              Xác nhận
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+                    <CardContent>
+                      <div className="mb-3">
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="text-[var(--muted)]">
+                            Tiến trình
+                          </span>
+                          <span className="text-[var(--muted)]">
+                            {Math.round(progress)}%
+                          </span>
+                        </div>
+                        <Progress value={progress} />
+                      </div>
 
-      {/* Dialog chỉnh sửa flashcards */}
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto bg-[var(--surface)] border-[var(--border)] shadow-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-[var(--text)]">
-              Chỉnh sửa flashcards
-            </DialogTitle>
-            <DialogDescription className="text-gray-600 dark:text-gray-400">
-              Chỉnh sửa các flashcard trước khi lưu vào bộ sưu tập của bạn
-            </DialogDescription>
-          </DialogHeader>
+                      <Button
+                        onClick={e => {
+                          e.stopPropagation();
+                          startDeck(deck);
+                        }}
+                        className="h-11 w-full rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-500/40"
+                        disabled={!deck.cards || deck.cards.length === 0}
+                      >
+                        {deck.cards?.length > 0 ? 'Bắt đầu học' : 'Chưa có thẻ'}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
 
-          <div className="space-y-6 py-4">
-            {generatedCards.map((card, index) => (
-              <div key={card.id} className="border rounded-lg p-4 space-y-3">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-medium">Thẻ #{index + 1}</h3>
-                  <div className="flex items-center space-x-2">
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Edit className="h-4 w-4" />
-                    </Button>
+          {/* Dialog tạo flashcards bằng AI */}
+          <Dialog open={aiDialogOpen} onOpenChange={setAiDialogOpen}>
+            <DialogContent className="sm:max-w-[425px] bg-[var(--surface)] border-[var(--border)] shadow-2xl">
+              <DialogHeader>
+                <DialogTitle className="text-[var(--text)]">
+                  Tạo flashcards bằng AI
+                </DialogTitle>
+                <DialogDescription className="text-[var(--muted)]">
+                  Nhập thông tin để AI tạo bộ flashcards mới cho bạn
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label
+                    htmlFor="subject"
+                    className="text-right text-[var(--text)] font-medium"
+                  >
+                    Môn học
+                  </Label>
+                  <Input
+                    id="subject"
+                    value={newDeckSubject}
+                    onChange={e => setNewDeckSubject(e.target.value)}
+                    placeholder="Ví dụ: Tiếng Anh, Toán học, Vật lý..."
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label
+                    htmlFor="topic"
+                    className="text-right text-[var(--text)] font-medium"
+                  >
+                    Chủ đề
+                  </Label>
+                  <Input
+                    id="topic"
+                    value={newDeckTopic}
+                    onChange={e => setNewDeckTopic(e.target.value)}
+                    className="col-span-3"
+                    placeholder="Từ vựng học thuật, Ngữ pháp cơ bản..."
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label
+                    htmlFor="title"
+                    className="text-right text-[var(--text)] font-medium"
+                  >
+                    Tiêu đề
+                  </Label>
+                  <Input
+                    id="title"
+                    value={newDeckTitle}
+                    onChange={e => setNewDeckTitle(e.target.value)}
+                    className="col-span-3"
+                    placeholder="Tiêu đề cho bộ flashcards"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label
+                    htmlFor="cardCount"
+                    className="text-right text-[var(--text)] font-medium"
+                  >
+                    Số lượng thẻ
+                  </Label>
+                  <div className="flex items-center col-span-3">
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="icon"
-                      className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                      onClick={() => {
-                        const updatedCards = generatedCards.filter(
-                          (_, i) => i !== index,
-                        );
-                        setGeneratedCards(updatedCards);
-                      }}
-                      disabled={generatedCards.length <= 1}
+                      onClick={() => setCardCount(Math.max(1, cardCount - 1))}
+                      className="h-8 w-8"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Minus className="h-4 w-4" />
                     </Button>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor={`front-${index}`}>Mặt trước</Label>
-                    <Input
-                      id={`front-${index}`}
-                      value={card.front}
-                      onChange={e => {
-                        const updatedCards = [...generatedCards];
-                        updatedCards[index].front = e.target.value;
-                        setGeneratedCards(updatedCards);
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor={`back-${index}`}>Mặt sau</Label>
-                    <Input
-                      id={`back-${index}`}
-                      value={card.back}
-                      onChange={e => {
-                        const updatedCards = [...generatedCards];
-                        updatedCards[index].back = e.target.value;
-                        setGeneratedCards(updatedCards);
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor={`example-${index}`}>
-                      Ví dụ (mặt trước)
-                    </Label>
-                    <Input
-                      id={`example-${index}`}
-                      value={card.example}
-                      onChange={e => {
-                        const updatedCards = [...generatedCards];
-                        updatedCards[index].example = e.target.value;
-                        setGeneratedCards(updatedCards);
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor={`exampleTranslation-${index}`}>
-                      Ví dụ (mặt sau)
-                    </Label>
-                    <Input
-                      id={`exampleTranslation-${index}`}
-                      value={card.exampleTranslation || ''}
-                      onChange={e => {
-                        const updatedCards = [...generatedCards];
-                        updatedCards[index].exampleTranslation = e.target.value;
-                        setGeneratedCards(updatedCards);
-                      }}
-                    />
+                    <span className="w-10 text-center">{cardCount}</span>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setCardCount(Math.min(20, cardCount + 1))}
+                      className="h-8 w-8"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </div>
-            ))}
+              <DialogFooter>
+                <Button
+                  onClick={createAIFlashcards}
+                  disabled={
+                    creatingDeck || !newDeckTitle.trim() || !newDeckTopic.trim()
+                  }
+                  className="bg-[var(--warning)] hover:bg-[var(--warning)]/90 text-white font-medium focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+                >
+                  {creatingDeck ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Đang tạo...
+                    </>
+                  ) : (
+                    <>
+                      <BrainCircuit className="h-4 w-4 mr-2" />
+                      Tạo flashcards
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Dialog xác nhận xóa flashcard */}
+          <AlertDialog
+            open={deleteDialogOpen}
+            onOpenChange={setDeleteDialogOpen}
+          >
+            <AlertDialogContent className="bg-[var(--surface)] border-[var(--border)] shadow-2xl">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="flex items-center text-[var(--text)]">
+                  <AlertTriangle className="h-5 w-5 text-[var(--danger)] mr-2" />
+                  Xác nhận xóa
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-[var(--muted)]">
+                  Bạn có chắc chắn muốn xóa bộ flashcard &quot;
+                  {deckToDelete?.title}
+                  &quot;? Hành động này không thể hoàn tác và tất cả các thẻ
+                  trong bộ này sẽ bị mất.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="text-[var(--text)] bg-[var(--surface)] border-[var(--border)] hover:bg-[var(--surface)]/80">
+                  Hủy
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-[var(--danger)] hover:bg-[var(--danger)]/90 text-white font-medium focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+                  onClick={() => handleDeleteDeck()}
+                >
+                  Xóa
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          {/* Dialog xác nhận cập nhật tiến độ học thẻ */}
+          <AlertDialog
+            open={!!pendingDecision}
+            onOpenChange={open => {
+              if (!open) setPendingDecision(null);
+            }}
+          >
+            <AlertDialogContent className="bg-[var(--surface)] border-[var(--border)] shadow-2xl">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-[var(--text)]">
+                  Xác nhận cập nhật tiến độ
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-[var(--muted)]">
+                  {pendingDecision?.learned
+                    ? 'Đánh dấu thẻ này là ĐÃ NHỚ?'
+                    : 'Đánh dấu thẻ này là CHƯA NHỚ?'}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="text-[var(--text)] bg-[var(--surface)] border-[var(--border)] hover:bg-[var(--surface)]/80">
+                  Hủy
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-white font-medium focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+                  onClick={() => {
+                    const decision = pendingDecision;
+                    setPendingDecision(null);
+                    if (decision) {
+                      void doMarkCardAsLearned(decision.learned);
+                    }
+                  }}
+                  disabled={isMarking}
+                >
+                  Xác nhận
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          {/* Dialog chỉnh sửa flashcards */}
+          <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+            <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto bg-[var(--surface)] border-[var(--border)] shadow-2xl">
+              <DialogHeader>
+                <DialogTitle className="text-[var(--text)]">
+                  Chỉnh sửa flashcards
+                </DialogTitle>
+                <DialogDescription className="text-gray-600 dark:text-gray-400">
+                  Chỉnh sửa các flashcard trước khi lưu vào bộ sưu tập của bạn
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-6 py-4">
+                {generatedCards.map((card, index) => (
+                  <div
+                    key={card.id}
+                    className="border rounded-lg p-4 space-y-3"
+                  >
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-lg font-medium">Thẻ #{index + 1}</h3>
+                      <div className="flex items-center space-x-2">
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => {
+                            const updatedCards = generatedCards.filter(
+                              (_, i) => i !== index,
+                            );
+                            setGeneratedCards(updatedCards);
+                          }}
+                          disabled={generatedCards.length <= 1}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor={`front-${index}`}>Mặt trước</Label>
+                        <Input
+                          id={`front-${index}`}
+                          value={card.front}
+                          onChange={e => {
+                            const updatedCards = [...generatedCards];
+                            updatedCards[index].front = e.target.value;
+                            setGeneratedCards(updatedCards);
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`back-${index}`}>Mặt sau</Label>
+                        <Input
+                          id={`back-${index}`}
+                          value={card.back}
+                          onChange={e => {
+                            const updatedCards = [...generatedCards];
+                            updatedCards[index].back = e.target.value;
+                            setGeneratedCards(updatedCards);
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor={`example-${index}`}>
+                          Ví dụ (mặt trước)
+                        </Label>
+                        <Input
+                          id={`example-${index}`}
+                          value={card.example}
+                          onChange={e => {
+                            const updatedCards = [...generatedCards];
+                            updatedCards[index].example = e.target.value;
+                            setGeneratedCards(updatedCards);
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`exampleTranslation-${index}`}>
+                          Ví dụ (mặt sau)
+                        </Label>
+                        <Input
+                          id={`exampleTranslation-${index}`}
+                          value={card.exampleTranslation || ''}
+                          onChange={e => {
+                            const updatedCards = [...generatedCards];
+                            updatedCards[index].exampleTranslation =
+                              e.target.value;
+                            setGeneratedCards(updatedCards);
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-between mt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setGeneratedCards([
+                      ...generatedCards,
+                      {
+                        id: `ai-card-${Date.now()}-${generatedCards.length}`,
+                        front: '',
+                        back: '',
+                        example: '',
+                        exampleTranslation: '',
+                        learned: false,
+                      },
+                    ]);
+                  }}
+                >
+                  <Plus className="h-4 w-4 mr-2" /> Thêm thẻ mới
+                </Button>
+
+                <Button
+                  onClick={async () => {
+                    // Kiểm tra đăng nhập trước khi tạo flashcards
+                    if (!auth.currentUser) {
+                      alert(
+                        'Vui lòng đăng nhập để tạo flashcards và lưu vào database!',
+                      );
+                      return;
+                    }
+
+                    // Làm sạch và khử trùng lặp trước khi lưu
+                    const normalize = (s: string) =>
+                      (s || '')
+                        .toLowerCase()
+                        .trim()
+                        .replace(/[\s\u200B\u200C\u200D\uFEFF]+/g, ' ')
+                        .replace(/[^\p{L}\p{N}]+/gu, ' ');
+                    const uniqueCards: typeof generatedCards = [];
+                    const seen = new Set<string>();
+                    for (const c of generatedCards) {
+                      const front = (c.front || '').trim();
+                      const back = (c.back || '').trim();
+                      if (!front || !back) continue;
+                      const key = normalize(front);
+                      if (!seen.has(key)) {
+                        seen.add(key);
+                        uniqueCards.push({
+                          ...c,
+                          front,
+                          back,
+                          example: (c.example || '').trim(),
+                          exampleTranslation: (
+                            c.exampleTranslation || ''
+                          ).trim(),
+                          learned: !!c.learned,
+                        });
+                      }
+                    }
+                    const finalCards = uniqueCards.slice(
+                      0,
+                      Math.max(1, cardCount),
+                    );
+
+                    // Tạo deck mới
+                    const newDeck = {
+                      title: newDeckTitle,
+                      description: `${newDeckSubject} - ${newDeckTopic}`,
+                      userId: auth.currentUser
+                        ? auth.currentUser.uid
+                        : 'local-user',
+                      cards: finalCards,
+                      total: finalCards.length,
+                      learned: 0,
+                      createdAt: new Date(),
+                    };
+
+                    // Tạo ID và color cho deck mới
+                    let deckId = `local-${Date.now()}`;
+                    const randomColor = [
+                      'blue',
+                      'green',
+                      'purple',
+                      'pink',
+                      'yellow',
+                    ][Math.floor(Math.random() * 5)];
+
+                    // Lưu vào Firestore nếu người dùng đã đăng nhập
+                    if (auth.currentUser) {
+                      try {
+                        const docRef = await addDoc(
+                          collection(db, 'flashcard_decks'),
+                          newDeck,
+                        );
+                        deckId = docRef.id;
+                      } catch (dbError) {
+                        console.error('Error saving to database:', dbError);
+                        // Nếu lưu Firestore thất bại, vẫn tạo deck local với ID tạm
+                        deckId = `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                      }
+                    } else {
+                      // Nếu chưa đăng nhập, tạo deck local với ID tạm
+                      deckId = `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                    }
+
+                    // Thêm deck mới vào state
+                    const deckWithColor = {
+                      ...newDeck,
+                      id: deckId,
+                      color: `bg-${randomColor}-500`,
+                    };
+
+                    setDecks([...decks, deckWithColor]);
+
+                    // Reset form và đóng dialog
+                    setNewDeckTitle('');
+                    setNewDeckTopic('');
+                    setShowEditDialog(false);
+                  }}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <Save className="h-4 w-4 mr-2" /> Lưu bộ thẻ
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
+
+      {/* Player Mode */}
+      {currentView === 'player' && selectedDeck && (
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              onClick={() => setCurrentView('list')}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Quay lại
+            </Button>
+            <Badge variant="secondary" className="flex items-center gap-1">
+              <BrainCircuit className="h-3 w-3" />
+              {selectedDeck.title}
+            </Badge>
           </div>
 
-          <div className="flex justify-between mt-4">
+          {/* Progress */}
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>Tiến độ học tập</span>
+              <span>
+                {currentCardIndex + 1} / {selectedDeck.cards.length}
+              </span>
+            </div>
+            <Progress
+              value={((currentCardIndex + 1) / selectedDeck.cards.length) * 100}
+              className="h-2"
+            />
+          </div>
+
+          {/* Flashcard */}
+          <div className="flex justify-center">
+            <div className="w-full max-w-md">
+              <SwipeableFlashcard
+                front={selectedDeck.cards[currentCardIndex]?.front || ''}
+                back={selectedDeck.cards[currentCardIndex]?.back || ''}
+                example={selectedDeck.cards[currentCardIndex]?.example || ''}
+                exampleTranslation={
+                  selectedDeck.cards[currentCardIndex]?.exampleTranslation || ''
+                }
+                onSwipeLeft={() => markCardAsLearned(false)}
+                onSwipeRight={() => markCardAsLearned(true)}
+                disabled={isMarking}
+              />
+            </div>
+          </div>
+
+          {/* Controls */}
+          <div className="flex justify-center gap-4">
             <Button
               variant="outline"
-              onClick={() => {
-                setGeneratedCards([
-                  ...generatedCards,
-                  {
-                    id: `ai-card-${Date.now()}-${generatedCards.length}`,
-                    front: '',
-                    back: '',
-                    example: '',
-                    exampleTranslation: '',
-                    learned: false,
-                  },
-                ]);
-              }}
+              onClick={prevCard}
+              disabled={currentCardIndex === 0}
             >
-              <Plus className="h-4 w-4 mr-2" /> Thêm thẻ mới
+              <ChevronLeft className="h-4 w-4" />
+              Trước
             </Button>
-
             <Button
-              onClick={async () => {
-                // Làm sạch và khử trùng lặp trước khi lưu
-                const normalize = (s: string) =>
-                  (s || '')
-                    .toLowerCase()
-                    .trim()
-                    .replace(/[\s\u200B\u200C\u200D\uFEFF]+/g, ' ')
-                    .replace(/[^\p{L}\p{N}]+/gu, ' ');
-                const uniqueCards: typeof generatedCards = [];
-                const seen = new Set<string>();
-                for (const c of generatedCards) {
-                  const front = (c.front || '').trim();
-                  const back = (c.back || '').trim();
-                  if (!front || !back) continue;
-                  const key = normalize(front);
-                  if (!seen.has(key)) {
-                    seen.add(key);
-                    uniqueCards.push({
-                      ...c,
-                      front,
-                      back,
-                      example: (c.example || '').trim(),
-                      exampleTranslation: (c.exampleTranslation || '').trim(),
-                      learned: !!c.learned,
-                    });
-                  }
-                }
-                const finalCards = uniqueCards.slice(0, Math.max(1, cardCount));
-
-                // Tạo deck mới
-                const newDeck = {
-                  title: newDeckTitle,
-                  description: `${newDeckSubject} - ${newDeckTopic}`,
-                  userId: auth.currentUser
-                    ? auth.currentUser.uid
-                    : 'local-user',
-                  cards: finalCards,
-                  total: finalCards.length,
-                  learned: 0,
-                  createdAt: new Date(),
-                };
-
-                // Tạo ID và color cho deck mới
-                let deckId = `local-${Date.now()}`;
-                const randomColor = [
-                  'blue',
-                  'green',
-                  'purple',
-                  'pink',
-                  'yellow',
-                ][Math.floor(Math.random() * 5)];
-
-                // Lưu vào Firestore nếu người dùng đã đăng nhập
-                if (auth.currentUser) {
-                  try {
-                    const docRef = await addDoc(
-                      collection(db, 'flashcard_decks'),
-                      newDeck,
-                    );
-                    deckId = docRef.id;
-                  } catch (dbError) {
-                    console.error('Error saving to database:', dbError);
-                  }
-                }
-
-                // Thêm deck mới vào state
-                const deckWithColor = {
-                  ...newDeck,
-                  id: deckId,
-                  color: `bg-${randomColor}-500`,
-                };
-
-                setDecks([...decks, deckWithColor]);
-
-                // Reset form và đóng dialog
-                setNewDeckTitle('');
-                setNewDeckTopic('');
-                setShowEditDialog(false);
-              }}
-              className="bg-green-600 hover:bg-green-700"
+              variant="outline"
+              onClick={nextCard}
+              disabled={currentCardIndex === selectedDeck.cards.length - 1}
             >
-              <Save className="h-4 w-4 mr-2" /> Lưu bộ thẻ
+              Sau
+              <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
-        </DialogContent>
-      </Dialog>
+
+          {/* Decision Buttons */}
+          <div className="flex justify-center gap-4">
+            <Button
+              variant="destructive"
+              onClick={() => markCardAsLearned(false)}
+              disabled={isMarking}
+              className="flex items-center gap-2"
+            >
+              <XCircle className="h-4 w-4" />
+              Chưa thuộc
+            </Button>
+            <Button
+              variant="default"
+              onClick={() => markCardAsLearned(true)}
+              disabled={isMarking}
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+            >
+              <CheckCircle className="h-4 w-4" />
+              Đã thuộc
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -43,20 +43,62 @@ export interface WeeklyStats {
   averageDailyWords: number;
 }
 
+// Helper: wrap a promise with a timeout and return a discriminated result
+interface WithTimeoutSuccess<T> {
+  ok: true;
+  value: T;
+}
+interface WithTimeoutTimeout {
+  ok: false;
+  reason: 'timeout';
+}
+type WithTimeoutResult<T> = WithTimeoutSuccess<T> | WithTimeoutTimeout;
+
+async function withTimeout<T>(
+  promise: Promise<T>,
+  ms: number,
+): Promise<WithTimeoutResult<T>> {
+  let timer: NodeJS.Timeout | undefined;
+  try {
+    const value = await Promise.race<T | '___timeout___'>([
+      promise,
+      new Promise<'___timeout___'>(resolve => {
+        timer = setTimeout(() => resolve('___timeout___'), ms);
+      }),
+    ]);
+    if (value === '___timeout___') {
+      return { ok: false, reason: 'timeout' };
+    }
+    return { ok: true, value };
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 // Lấy hoặc tạo user progress
 export async function getUserProgress(userId: string): Promise<UserProgress> {
   try {
     // Timeout wrapper for Firestore operations
     const progressRef = doc(db, 'user_progress', userId);
 
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('Operation timeout')), 10000);
-    });
-
-    const progressSnap = await Promise.race([
-      getDoc(progressRef),
-      timeoutPromise,
-    ]);
+    const progressResult = await withTimeout(getDoc(progressRef), 8000);
+    if (!progressResult.ok) {
+      // Graceful fallback on timeout
+      return {
+        id: userId,
+        userId,
+        todayProgress: 0,
+        dailyGoal: 20,
+        totalWordsLearned: 0,
+        streak: 0,
+        level: 1,
+        xp: 0,
+        lastActiveDate: new Date().toISOString().split('T')[0],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+    }
+    const progressSnap = progressResult.value;
 
     if (progressSnap.exists()) {
       return progressSnap.data() as UserProgress;
@@ -76,7 +118,14 @@ export async function getUserProgress(userId: string): Promise<UserProgress> {
         updatedAt: new Date().toISOString(),
       };
 
-      await Promise.race([setDoc(progressRef, newProgress), timeoutPromise]);
+      const createResult = await withTimeout(
+        setDoc(progressRef, newProgress),
+        8000,
+      );
+      if (!createResult.ok) {
+        // Still return newly created default in memory; backend will catch up later
+        return newProgress;
+      }
       return newProgress;
     }
   } catch (error: any) {
@@ -226,11 +275,20 @@ export async function getWeeklyStats(userId: string): Promise<WeeklyStats> {
       where('date', '<=', weekEnd.toISOString().split('T')[0]),
     );
 
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('Operation timeout')), 10000);
-    });
-
-    const statsSnap = await Promise.race([getDocs(statsQuery), timeoutPromise]);
+    const statsResult = await withTimeout(getDocs(statsQuery), 8000);
+    if (!statsResult.ok) {
+      // Graceful default on timeout
+      return {
+        weekStart: weekStart.toISOString().split('T')[0],
+        weekEnd: weekEnd.toISOString().split('T')[0],
+        totalWords: 0,
+        totalStudyTime: 0,
+        totalMissions: 0,
+        totalXP: 0,
+        averageDailyWords: 0,
+      };
+    }
+    const statsSnap = statsResult.value;
 
     let totalWords = 0;
     let totalStudyTime = 0;

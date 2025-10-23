@@ -35,10 +35,30 @@ export function LoginForm({
       await loginWithEmail(loginInput, password);
       onSuccess();
     } catch (error: any) {
-      if (error.code === 'auth/invalid-credential') {
+      console.error('Login error:', error);
+
+      if (error.message === 'auth/invalid-credential') {
         setError('Tên đăng nhập/Email hoặc mật khẩu không chính xác');
       } else if (error.message === 'auth/user-not-found') {
         setError('Tên đăng nhập không tồn tại');
+      } else if (error.message === 'auth/invalid-email') {
+        setError('Định dạng email không hợp lệ');
+      } else if (error.message === 'auth/user-disabled') {
+        setError('Tài khoản đã bị vô hiệu hóa');
+      } else if (error.message === 'auth/too-many-requests') {
+        setError('Quá nhiều lần thử đăng nhập. Vui lòng thử lại sau ít phút');
+      } else if (error.code === 'auth/invalid-credential') {
+        setError('Tên đăng nhập/Email hoặc mật khẩu không chính xác');
+      } else if (error.code === 'auth/user-not-found') {
+        setError('Tên đăng nhập không tồn tại');
+      } else if (error.code === 'auth/wrong-password') {
+        setError('Mật khẩu không chính xác');
+      } else if (error.code === 'auth/invalid-email') {
+        setError('Định dạng email không hợp lệ');
+      } else if (error.code === 'auth/user-disabled') {
+        setError('Tài khoản đã bị vô hiệu hóa');
+      } else if (error.code === 'auth/too-many-requests') {
+        setError('Quá nhiều lần thử đăng nhập. Vui lòng thử lại sau ít phút');
       } else {
         setError('Đã xảy ra lỗi khi đăng nhập. Vui lòng thử lại sau.');
       }

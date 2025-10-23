@@ -18,16 +18,17 @@ import {
   TrendingUp,
   Brain,
 } from 'lucide-react';
-import { useQuickActions } from '../../../hooks/useDashboardIntegration';
+// Removed useQuickActions import since we now use direct navigation
 import {
   IntegratedProgress,
   QuickActionResult,
 } from '../../../services/dashboard/integrationService';
 
 interface QuickActionsProps {
-  user: any;
   progress: IntegratedProgress | null;
   onTabChange?: (tab: string) => void;
+  onStartQuickReview?: () => void;
+  onMarkQuickReviewUsed?: () => void;
 }
 
 interface QuickAction {
@@ -43,17 +44,32 @@ interface QuickAction {
 }
 
 export function QuickActions({
-  user,
   progress,
   onTabChange,
+  onStartQuickReview,
+  onMarkQuickReviewUsed,
 }: QuickActionsProps) {
-  const {
-    handleQuickFlashcardReview,
-    handleQuickPomodoro,
-    handleQuickHabitCheck,
-  } = useQuickActions(user);
+  // Removed unused handlers since we now use direct navigation
   const [loading, setLoading] = useState<string | null>(null);
   const [lastActionResult, setLastActionResult] = useState<string | null>(null);
+
+  // Track if quick review has been used today
+  const [quickReviewUsedToday, setQuickReviewUsedToday] = useState(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const usedToday = localStorage.getItem(`quickReviewUsed_${today}`);
+    return usedToday === 'true';
+  });
+
+  // Function to mark quick review as used today
+  const markQuickReviewUsed = () => {
+    const today = new Date().toISOString().split('T')[0];
+    localStorage.setItem(`quickReviewUsed_${today}`, 'true');
+    setQuickReviewUsedToday(true);
+    // Call parent function if provided
+    if (onMarkQuickReviewUsed) {
+      onMarkQuickReviewUsed();
+    }
+  };
 
   const handleAction = async (action: () => Promise<any>, actionId: string) => {
     try {
@@ -83,7 +99,21 @@ export function QuickActions({
       icon: BookOpen,
       color: 'text-blue-500',
       bgColor: 'bg-blue-50 dark:bg-blue-900/20',
-      action: () => handleQuickFlashcardReview(5),
+      action: async (): Promise<QuickActionResult> => {
+        // Chuyển sang tab flashcards và mở chế độ ôn tập
+        if (onStartQuickReview) {
+          onStartQuickReview();
+        }
+        // Mark as used when starting (will be confirmed when completed)
+        markQuickReviewUsed();
+        return {
+          success: true,
+          xpEarned: 25,
+          progressUpdated: false,
+          message: 'Chuyển sang ôn tập nhanh',
+        };
+      },
+      disabled: quickReviewUsedToday,
       xpReward: 25,
     },
     {
@@ -93,26 +123,35 @@ export function QuickActions({
       icon: Clock,
       color: 'text-red-500',
       bgColor: 'bg-red-50 dark:bg-red-900/20',
-      action: () => handleQuickPomodoro(1),
+      action: async (): Promise<QuickActionResult> => {
+        // Chuyển sang tab pomodoro
+        if (onTabChange) {
+          onTabChange('pomodoro');
+        }
+        return {
+          success: true,
+          xpEarned: 40,
+          progressUpdated: false,
+          message: 'Chuyển sang Pomodoro Timer',
+        };
+      },
       xpReward: 40,
     },
     {
       id: 'habit-check',
       title: 'Đánh dấu thói quen',
-      description: 'Hoàn thành thói quen hôm nay',
+      description: 'Hoàn thành qua Pomodoro',
       icon: CheckCircle,
       color: 'text-green-500',
       bgColor: 'bg-green-50 dark:bg-green-900/20',
       action: async (): Promise<QuickActionResult> => {
-        if (progress && progress.totalHabits > 0) {
-          // TODO: thay 'default' bằng habitId thật từ danh sách habits
-          return await handleQuickHabitCheck('default');
-        }
+        // Điều hướng sang Pomodoro vì thói quen chỉ hoàn thành khi xong Pomodoro
+        onTabChange?.('pomodoro');
         return {
-          success: false,
-          xpEarned: 0,
+          success: true,
+          xpEarned: 15,
           progressUpdated: false,
-          message: 'Chưa có thói quen để đánh dấu',
+          message: 'Mở Pomodoro để hoàn thành thói quen',
         };
       },
       disabled: !progress || progress.totalHabits === 0,
@@ -126,8 +165,16 @@ export function QuickActions({
       color: 'text-purple-500',
       bgColor: 'bg-purple-50 dark:bg-purple-900/20',
       action: async (): Promise<QuickActionResult> => {
-        await handleQuickPomodoro(2);
-        return await handleQuickFlashcardReview(10);
+        // Chuyển sang tab flashcards để học từ vựng
+        if (onTabChange) {
+          onTabChange('flashcards');
+        }
+        return {
+          success: true,
+          xpEarned: 80,
+          progressUpdated: false,
+          message: 'Chuyển sang Flashcards để học tập chuyên sâu',
+        };
       },
       xpReward: 80,
     },

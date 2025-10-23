@@ -10,7 +10,6 @@ import {
 } from '../../../hooks/useDashboardIntegration';
 import { QuickActions } from './QuickActions';
 import { WeeklyProgress } from './WeeklyProgress';
-import { WeeklyBoss } from './WeeklyBoss';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { Badge } from '../../ui/badge';
 import { Progress } from '../../ui/progress';
@@ -44,9 +43,16 @@ interface HomeDashboardProps {
   user: User;
   onUpdateUser: (updatedUser: User) => void;
   onTabChange?: (tab: string) => void;
+  onStartQuickReview?: () => void;
+  onMarkQuickReviewUsed?: () => void;
 }
 
-export function HomeDashboard({ user, onTabChange }: HomeDashboardProps) {
+export function HomeDashboard({
+  user,
+  onTabChange,
+  onStartQuickReview,
+  onMarkQuickReviewUsed,
+}: HomeDashboardProps) {
   // Use integrated dashboard data
   const {
     progress: integratedProgress,
@@ -168,16 +174,17 @@ export function HomeDashboard({ user, onTabChange }: HomeDashboardProps) {
         <div className="space-y-3 xl:space-y-4 max-w-full pb-6">
           {/* Quick Actions - New integrated component */}
           <QuickActions
-            user={user}
             progress={integratedProgress}
             onTabChange={onTabChange}
+            onStartQuickReview={onStartQuickReview}
+            onMarkQuickReviewUsed={onMarkQuickReviewUsed}
           />
 
           {/* Weekly Progress - New integrated component */}
           <WeeklyProgress progress={integratedProgress} />
 
           {/* Weekly Boss - New gamified challenge */}
-          {user?.uid && <WeeklyBoss userId={user.uid} />}
+          {/* WeeklyBoss component removed */}
 
           {/* Stats Cards - CSS Grid responsive: 1 col <480px, 2 cols <768px, 4 cols >=768px */}
           <div className="w-full grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-3 xl:gap-4">

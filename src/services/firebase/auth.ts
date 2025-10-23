@@ -46,20 +46,44 @@ export async function loginWithEmail(
   password: string,
 ): Promise<any> {
   try {
+    // Validate input
+    if (!loginInput || !password) {
+      throw new Error('auth/invalid-credential');
+    }
+
+    // Trim whitespace
+    const trimmedInput = loginInput.trim();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedInput || !trimmedPassword) {
+      throw new Error('auth/invalid-credential');
+    }
+
     // Kiểm tra xem input có phải là email không (chứa @)
-    const isEmail = loginInput.includes('@');
+    const isEmail = trimmedInput.includes('@');
 
     if (isEmail) {
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(trimmedInput)) {
+        throw new Error('auth/invalid-email');
+      }
+
       // Nếu là email, đăng nhập trực tiếp
       const userCredential = await signInWithEmailAndPassword(
         auth,
-        loginInput,
-        password,
+        trimmedInput,
+        trimmedPassword,
       );
       return userCredential.user;
     } else {
+      // Validate username format
+      if (trimmedInput.length < 3) {
+        throw new Error('auth/invalid-credential');
+      }
+
       // Nếu là username, tìm email tương ứng
-      const email = await getEmailFromUsername(loginInput);
+      const email = await getEmailFromUsername(trimmedInput);
 
       if (!email) {
         throw new Error('auth/user-not-found');
@@ -69,13 +93,29 @@ export async function loginWithEmail(
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
-        password,
+        trimmedPassword,
       );
       return userCredential.user;
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error logging in with email/username:', error);
-    throw error;
+
+    // Map Firebase error codes to user-friendly messages
+    if (error.code === 'auth/invalid-credential') {
+      throw new Error('auth/invalid-credential');
+    } else if (error.code === 'auth/user-not-found') {
+      throw new Error('auth/user-not-found');
+    } else if (error.code === 'auth/wrong-password') {
+      throw new Error('auth/invalid-credential');
+    } else if (error.code === 'auth/invalid-email') {
+      throw new Error('auth/invalid-email');
+    } else if (error.code === 'auth/user-disabled') {
+      throw new Error('auth/user-disabled');
+    } else if (error.code === 'auth/too-many-requests') {
+      throw new Error('auth/too-many-requests');
+    } else {
+      throw error;
+    }
   }
 }
 

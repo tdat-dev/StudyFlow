@@ -1,15 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
 @import 'highlight.js/styles/github.css';
+@import './components.css';
+@import './theme-tokens.css';
+@import './chat-theme.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Import component styles */
-@import './components.css';
-/* Import modern theme tokens */
-@import './theme-tokens.css';
-/* Import chat theme */
-@import './chat-theme.css';
 
 /* Design Tokens */
 @layer base {

@@ -249,8 +249,9 @@
 }
 
 .control-ghost {
-  height: 44px;
-  width: 44px;
+  height: 48px;
+  min-width: 80px;
+  padding: 0 16px;
   background: transparent;
   border: 1px solid var(--app-border);
   border-radius: 12px;

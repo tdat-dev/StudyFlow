@@ -16,7 +16,6 @@ import {
   updateXP,
 } from './userProgressService';
 import { completeMissionByType } from './missionsService';
-import { attackBoss } from './bossService';
 
 /**
  * Service tích hợp các tính năng chính của ứng dụng
@@ -75,7 +74,7 @@ export async function updateFlashcardProgress(
     if (earned > 0) {
       await updateXP(userId, earned);
       // Gây sát thương lên Boss tương ứng XP kiếm được
-      await attackBoss(userId, earned);
+      // Boss attack removed
     }
 
     // Không cộng XP thêm từ mission để tránh cộng chồng
@@ -114,7 +113,7 @@ export async function updatePomodoroProgress(
     const pomodoroXP = Math.max(0, Math.floor(pomodorosCompleted) * 20);
     if (pomodoroXP > 0) {
       await updateXP(userId, pomodoroXP);
-      await attackBoss(userId, pomodoroXP);
+      // Boss attack removed
     }
 
     // Hoàn thành mission nhưng không cộng thêm XP từ mission
@@ -153,7 +152,7 @@ export async function updateHabitProgress(
     const habitXP = completed ? 10 : 0;
     if (habitXP > 0) {
       await updateXP(userId, habitXP);
-      await attackBoss(userId, habitXP);
+      // Boss attack removed
     }
 
     // Hoàn thành mission nhưng không cộng XP từ mission

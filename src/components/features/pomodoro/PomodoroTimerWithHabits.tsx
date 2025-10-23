@@ -11,10 +11,12 @@ import {
   TrendingUp,
   CheckCircle2,
   Trash2,
+  Settings,
 } from 'lucide-react';
 import { useHabitPomodoroIntegration } from '../../../hooks/useHabitPomodoroIntegration';
 import { HabitTaskCreator } from './HabitTaskCreator';
 import { HabitTaskList } from './HabitTaskList';
+import { PomodoroSettings } from './PomodoroSettings';
 import { User } from '../../../types/chat';
 import Button from '../../ui/button';
 
@@ -43,6 +45,18 @@ interface PomodoroTimerWithHabitsProps {
 export function PomodoroTimerWithHabits({
   user,
 }: PomodoroTimerWithHabitsProps) {
+  // Settings
+  const [showSettings, setShowSettings] = useState(false);
+  const [settings, setSettings] = useState({
+    pomodoroTime: 25,
+    shortBreakTime: 5,
+    longBreakTime: 15,
+    soundEnabled: true,
+    autoStartBreaks: false,
+    autoStartPomodoros: false,
+    notificationsEnabled: true,
+  });
+
   // Habit integration
   const {
     habitTasks,
@@ -54,20 +68,22 @@ export function PomodoroTimerWithHabits({
     completeTask,
     deleteTask,
     getActiveTasks,
+    // newly added API
+    markHabitCompletedToday,
   } = useHabitPomodoroIntegration(user);
 
   // Timer state
   const [timerMode, setTimerMode] = useState<TimerMode>('pomodoro');
-  const [timeLeft, setTimeLeft] = useState(25 * 60); // 25 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(settings.pomodoroTime * 60); // Use settings
   const [isActive, setIsActive] = useState(false);
   const [currentSession, setCurrentSession] = useState<PomodoroSession | null>(
     null,
   );
 
-  // Settings (read-only for now)
-  const pomodoroTime = 25;
-  const shortBreakTime = 5;
-  const longBreakTime = 15;
+  // Use settings for timer durations
+  const pomodoroTime = settings.pomodoroTime;
+  const shortBreakTime = settings.shortBreakTime;
+  const longBreakTime = settings.longBreakTime;
 
   // Traditional tasks (keeping for backward compatibility)
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -85,6 +101,23 @@ export function PomodoroTimerWithHabits({
   const [pomodoroCount, setPomodoroCount] = useState(0);
   const [, setSessionsCompleted] = useState(0);
   const [, setTotalFocusTime] = useState(0);
+
+  // Update timer when settings change
+  useEffect(() => {
+    if (!isActive) {
+      switch (timerMode) {
+        case 'pomodoro':
+          setTimeLeft(settings.pomodoroTime * 60);
+          break;
+        case 'shortBreak':
+          setTimeLeft(settings.shortBreakTime * 60);
+          break;
+        case 'longBreak':
+          setTimeLeft(settings.longBreakTime * 60);
+          break;
+      }
+    }
+  }, [settings, timerMode, isActive]);
 
   // Set dynamic accent colors based on timer mode
   const setAccentColors = (mode: TimerMode) => {
@@ -216,6 +249,10 @@ export function PomodoroTimerWithHabits({
         const habitTask = habitTasks.find(t => t.id === currentTaskId);
         if (habitTask) {
           await updateTaskPomodoroCount(currentTaskId, 1);
+          // Auto mark the related habit as completed for today
+          if (habitTask.habitId) {
+            await markHabitCompletedToday(habitTask.habitId);
+          }
         } else {
           // Update traditional task
           setTasks(prev =>
@@ -231,15 +268,77 @@ export function PomodoroTimerWithHabits({
 
     setCurrentSession(null);
 
+    // Play sound if enabled
+    if (settings.soundEnabled) {
+      // Create audio context and play notification sound
+      const audioContext = new (window.AudioContext ||
+        (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+      oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 0.2);
+
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(
+        0.01,
+        audioContext.currentTime + 0.5,
+      );
+
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.5);
+    }
+
+    // Show notification if enabled
+    if (settings.notificationsEnabled && 'Notification' in window) {
+      if (Notification.permission === 'granted') {
+        new Notification('Pomodoro Timer', {
+          body:
+            timerMode === 'pomodoro' ? 'Thời gian nghỉ!' : 'Bắt đầu Pomodoro!',
+          icon: '/favicon.ico',
+        });
+      } else if (Notification.permission !== 'denied') {
+        Notification.requestPermission().then(permission => {
+          if (permission === 'granted') {
+            new Notification('Pomodoro Timer', {
+              body:
+                timerMode === 'pomodoro'
+                  ? 'Thời gian nghỉ!'
+                  : 'Bắt đầu Pomodoro!',
+              icon: '/favicon.ico',
+            });
+          }
+        });
+      }
+    }
+
     // Auto-switch to appropriate break or work mode
     if (timerMode === 'pomodoro') {
       if ((pomodoroCount + 1) % 4 === 0) {
         switchToLongBreak();
+        // Auto-start break if enabled
+        if (settings.autoStartBreaks) {
+          startSession();
+        }
       } else {
         switchToShortBreak();
+        // Auto-start break if enabled
+        if (settings.autoStartBreaks) {
+          startSession();
+        }
       }
     } else {
-      switchToPomodoro();
+      // Auto-start next session based on settings
+      if (settings.autoStartPomodoros) {
+        switchToPomodoro();
+        startSession();
+      } else {
+        switchToPomodoro();
+      }
     }
   };
 
@@ -320,32 +419,6 @@ export function PomodoroTimerWithHabits({
     }
   };
 
-  // Get current task info for display
-  const getCurrentTaskInfo = () => {
-    if (!currentTaskId) return null;
-
-    const habitTask = habitTasks.find(t => t.id === currentTaskId);
-    if (habitTask) {
-      return {
-        text: habitTask.text,
-        habitTitle: habitTask.habitTitle,
-        pomodoroCount: habitTask.pomodoroCount,
-        estimatedPomodoros: habitTask.estimatedPomodoros,
-      };
-    }
-
-    const traditionalTask = tasks.find(t => t.id === currentTaskId);
-    if (traditionalTask) {
-      return {
-        text: traditionalTask.text,
-        pomodoroCount: traditionalTask.pomodoroCount,
-      };
-    }
-
-    return null;
-  };
-
-  const currentTaskInfo = getCurrentTaskInfo();
   const activeTasks = getActiveTasks();
 
   return (
@@ -356,7 +429,7 @@ export function PomodoroTimerWithHabits({
           <div className="lg:col-span-1 min-w-0">
             <div className="timer-card bg-white dark:bg-studyflow-surface dark:card-elevated rounded-2xl shadow-lg p-8">
               {/* Timer Tabs */}
-              <div className="timer-tabs flex justify-center mb-8">
+              <div className="timer-tabs flex justify-center items-center mb-8">
                 <div className="flex bg-gray-100 dark:bg-studyflow-surface rounded-xl p-1">
                   <button
                     onClick={switchToPomodoro}
@@ -389,13 +462,20 @@ export function PomodoroTimerWithHabits({
                     Nghỉ dài
                   </button>
                 </div>
+                <button
+                  onClick={() => setShowSettings(true)}
+                  className="ml-4 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  title="Cài đặt"
+                >
+                  <Settings className="w-5 h-5" />
+                </button>
               </div>
 
               {/* Timer Display */}
               <div className="timer-display text-center mb-8">
                 <div className="relative inline-block">
                   <svg
-                    className="progress-ring w-64 h-64 transform -rotate-90"
+                    className="progress-ring w-72 h-72 transform -rotate-90"
                     viewBox="0 0 120 120"
                   >
                     <circle
@@ -420,21 +500,21 @@ export function PomodoroTimerWithHabits({
                     />
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="text-5xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                    <div className="text-center px-4">
+                      <div className="text-5xl font-bold text-gray-900 dark:text-gray-100">
                         {formatTime(timeLeft)}
                       </div>
                       {currentTaskInfo && (
-                        <div className="text-sm text-gray-600 dark:text-gray-400 max-w-48">
-                          <div className="font-medium truncate">
-                            {currentTaskInfo.text}
-                          </div>
+                        <div className="mt-2 text-xs text-gray-600 dark:text-gray-400 max-w-56">
                           {currentTaskInfo.habitTitle && (
-                            <div className="text-xs text-blue-600 dark:text-blue-400">
+                            <div
+                              className="text-xs text-blue-600 dark:text-blue-400 truncate"
+                              title={currentTaskInfo.habitTitle}
+                            >
                               {currentTaskInfo.habitTitle}
                             </div>
                           )}
-                          <div className="text-xs mt-1">
+                          <div className="text-xs text-gray-500 dark:text-gray-500 truncate">
                             {currentTaskInfo.pomodoroCount}
                             {currentTaskInfo.estimatedPomodoros &&
                               `/${currentTaskInfo.estimatedPomodoros}`}{' '}
@@ -725,6 +805,14 @@ export function PomodoroTimerWithHabits({
           </div>
         </div>
       </div>
+
+      {/* Settings Modal */}
+      <PomodoroSettings
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        settings={settings}
+        onSettingsChange={setSettings}
+      />
     </div>
   );
 }

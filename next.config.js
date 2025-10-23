@@ -6,6 +6,8 @@ const nextConfig = {
   output: 'export', // Enable static HTML export
   trailingSlash: true, // Add trailing slash for better compatibility
 
+  // SVG handling moved to webpack config
+
   // ESLint configuration
   eslint: {
     ignoreDuringBuilds: false,
