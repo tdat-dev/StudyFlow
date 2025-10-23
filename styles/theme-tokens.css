@@ -185,6 +185,11 @@
   letter-spacing: 0.01em;
 }
 
+.timer-mode-label {
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
+}
+
 /* Progress Ring */
 .progress-ring {
   width: 100%;

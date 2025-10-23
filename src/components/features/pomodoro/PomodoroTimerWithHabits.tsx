@@ -533,6 +533,12 @@ export function PomodoroTimerWithHabits({
                       <div className="text-5xl font-bold text-gray-900 dark:text-gray-100">
                         {formatTime(timeLeft)}
                       </div>
+                      {/* Mode Label */}
+                      <div className="timer-mode-label mt-2 text-sm font-medium text-gray-600 dark:text-gray-400 tracking-normal">
+                        {timerMode === 'pomodoro' && 'Pomodoro'}
+                        {timerMode === 'shortBreak' && 'Nghỉ ngắn'}
+                        {timerMode === 'longBreak' && 'Nghỉ dài'}
+                      </div>
                       {currentTaskInfo && (
                         <div className="mt-3 text-xs text-gray-600 dark:text-gray-400 px-3 py-2">
                           {currentTaskInfo.habitTitle && (
