@@ -335,10 +335,10 @@ export function PomodoroTimerWithHabits({
 
             {/* Timer Display */}
             <div className="timer-display">
-              <div className="relative w-64 h-64 mx-auto">
+              <div className="relative w-80 h-80 mx-auto">
                 {/* Progress Ring */}
                 <svg
-                  className="w-64 h-64 transform -rotate-90"
+                  className="w-80 h-80 transform -rotate-90"
                   viewBox="0 0 100 100"
                 >
                   <circle
@@ -356,11 +356,11 @@ export function PomodoroTimerWithHabits({
                 {/* Timer Text */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <div
-                    className={`text-4xl font-mono font-bold ${getModeColor()}`}
+                    className={`text-6xl md:text-7xl font-mono font-bold leading-tight ${getModeColor()}`}
                   >
                     {formattedTime}
                   </div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  <div className="text-base md:text-lg text-gray-500 dark:text-gray-400 mt-2 w-full text-center">
                     {getModeText()}
                   </div>
                   {/* Task text removed to keep timer circle clean */}
@@ -371,7 +371,7 @@ export function PomodoroTimerWithHabits({
             {/* Current Task Display */}
             {pomodoroState.currentTaskText && (
               <div className="mt-4 text-center">
-                <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-lg px-4 py-2 max-w-md mx-auto">
+                <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-lg px-4 py-2 max-w-2xl w-full mx-auto break-words">
                   <div className="font-medium text-gray-900 dark:text-gray-100">
                     {pomodoroState.currentTaskText}
                   </div>

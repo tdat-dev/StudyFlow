@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Play,
   Pause,
@@ -34,6 +34,12 @@ interface PomodoroSession {
   duration: number;
   completedAt: string;
   type: 'focus' | 'break';
+}
+
+interface CurrentTaskSummary {
+  habitTitle?: string;
+  pomodoroCount: number;
+  estimatedPomodoros?: number | null;
 }
 
 type TimerMode = 'pomodoro' | 'shortBreak' | 'longBreak';
@@ -420,6 +426,29 @@ export function PomodoroTimerWithHabits({
   };
 
   const activeTasks = getActiveTasks();
+  const currentTaskInfo = useMemo<CurrentTaskSummary | null>(() => {
+    if (!currentTaskId) return null;
+
+    const habitTask = habitTasks.find(task => task.id === currentTaskId);
+    if (habitTask) {
+      return {
+        habitTitle: habitTask.habitTitle || habitTask.text,
+        pomodoroCount: habitTask.pomodoroCount,
+        estimatedPomodoros: habitTask.estimatedPomodoros ?? null,
+      };
+    }
+
+    const regularTask = tasks.find(task => task.id === currentTaskId);
+    if (regularTask) {
+      return {
+        habitTitle: regularTask.text,
+        pomodoroCount: regularTask.pomodoroCount,
+        estimatedPomodoros: null,
+      };
+    }
+
+    return null;
+  }, [currentTaskId, habitTasks, tasks]);
 
   return (
     <div className="pomodoro-page min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-studyflow-bg dark:to-studyflow-surface">

@@ -15,6 +15,7 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
     "export": "next build",
     "deploy": "npm run export && npx --yes firebase-tools deploy --only hosting",
     "deploy:safe": "npm run export && npx --yes firebase-tools deploy --only hosting --except functions",
@@ -85,6 +86,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.56.1",
     "@testing-library/jest-dom": "^6.1.0",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
