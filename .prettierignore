@@ -1,3 +1,17 @@
+# Generated artifacts
+node_modules/
+.next/
+coverage/
+playwright-report/
+blob-report/
+**/dist/
+**/build/
+
+# Playwright outputs
+test-results/
+
+# Firebase cache
+.firebase/
 # Dependencies
 node_modules/
 .pnp
