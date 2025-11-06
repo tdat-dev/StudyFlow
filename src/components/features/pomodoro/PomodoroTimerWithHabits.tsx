@@ -239,7 +239,10 @@ export function PomodoroTimerWithHabits({
   };
 
   const skipSession = () => {
+    // Kết thúc phiên ngay lập tức và chuyển mode phù hợp
+    setIsActive(false);
     setTimeLeft(0);
+    handleTimerComplete();
   };
 
   const handleTimerComplete = async () => {
@@ -325,13 +328,13 @@ export function PomodoroTimerWithHabits({
     // Auto-switch to appropriate break or work mode
     if (timerMode === 'pomodoro') {
       if ((pomodoroCount + 1) % 4 === 0) {
-        switchToLongBreak();
+        switchToLongBreak(true);
         // Auto-start break if enabled
         if (settings.autoStartBreaks) {
           startSession();
         }
       } else {
-        switchToShortBreak();
+        switchToShortBreak(true);
         // Auto-start break if enabled
         if (settings.autoStartBreaks) {
           startSession();
@@ -340,34 +343,31 @@ export function PomodoroTimerWithHabits({
     } else {
       // Auto-start next session based on settings
       if (settings.autoStartPomodoros) {
-        switchToPomodoro();
+        switchToPomodoro(true);
         startSession();
       } else {
-        switchToPomodoro();
+        switchToPomodoro(true);
       }
     }
   };
 
   // Mode switching
-  const switchToPomodoro = () => {
-    if (!isActive) {
-      setTimerMode('pomodoro');
-      setTimeLeft(pomodoroTime * 60);
-    }
+  const switchToPomodoro = (force = false) => {
+    if (isActive && !force) return;
+    setTimerMode('pomodoro');
+    setTimeLeft(pomodoroTime * 60);
   };
 
-  const switchToShortBreak = () => {
-    if (!isActive) {
-      setTimerMode('shortBreak');
-      setTimeLeft(shortBreakTime * 60);
-    }
+  const switchToShortBreak = (force = false) => {
+    if (isActive && !force) return;
+    setTimerMode('shortBreak');
+    setTimeLeft(shortBreakTime * 60);
   };
 
-  const switchToLongBreak = () => {
-    if (!isActive) {
-      setTimerMode('longBreak');
-      setTimeLeft(longBreakTime * 60);
-    }
+  const switchToLongBreak = (force = false) => {
+    if (isActive && !force) return;
+    setTimerMode('longBreak');
+    setTimeLeft(longBreakTime * 60);
   };
 
   // Traditional task management (keeping for backward compatibility)
@@ -458,11 +458,11 @@ export function PomodoroTimerWithHabits({
           <div className="lg:col-span-1 min-w-0">
             <div className="timer-card bg-white dark:bg-studyflow-surface dark:card-elevated rounded-2xl shadow-lg p-8">
               {/* Timer Tabs */}
-              <div className="timer-tabs flex justify-center items-center mb-8">
-                <div className="flex bg-gray-100 dark:bg-studyflow-surface rounded-xl p-1">
+              <div className="pomodoro-tabs relative mb-8 flex justify-center items-center bg-transparent">
+                <div className="inline-flex mx-auto w-fit bg-gray-100 dark:bg-studyflow-surface rounded-xl p-1 gap-1">
                   <button
                     onClick={switchToPomodoro}
-                    className={`timer-tab px-6 py-3 rounded-lg font-medium transition-all ${
+                    className={`timer-tab w-28 py-3 text-center rounded-lg font-medium transition-all ${
                       timerMode === 'pomodoro'
                         ? 'active work bg-red-500 text-white shadow-md'
                         : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100'
@@ -472,7 +472,7 @@ export function PomodoroTimerWithHabits({
                   </button>
                   <button
                     onClick={switchToShortBreak}
-                    className={`timer-tab px-6 py-3 rounded-lg font-medium transition-all ${
+                    className={`timer-tab w-28 py-3 text-center rounded-lg font-medium transition-all ${
                       timerMode === 'shortBreak'
                         ? 'active short bg-green-500 text-white shadow-md'
                         : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100'
@@ -482,7 +482,7 @@ export function PomodoroTimerWithHabits({
                   </button>
                   <button
                     onClick={switchToLongBreak}
-                    className={`timer-tab px-6 py-3 rounded-lg font-medium transition-all ${
+                    className={`timer-tab w-28 py-3 text-center rounded-lg font-medium transition-all ${
                       timerMode === 'longBreak'
                         ? 'active long bg-cyan-500 text-white shadow-md'
                         : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100'
@@ -493,7 +493,7 @@ export function PomodoroTimerWithHabits({
                 </div>
                 <button
                   onClick={() => setShowSettings(true)}
-                  className="ml-4 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  className="absolute right-0 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                   title="Cài đặt"
                 >
                   <Settings className="w-5 h-5" />

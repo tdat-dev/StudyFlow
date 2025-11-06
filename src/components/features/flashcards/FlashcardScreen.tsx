@@ -114,9 +114,16 @@ export function FlashcardScreen({
 
   // Định nghĩa hàm loadFlashcards
   const loadFlashcards = useCallback(async () => {
-    if (!user.accessToken || !auth.currentUser) {
-      // Nếu không có người dùng, không hiển thị dữ liệu gì
-      setDecks([]);
+    // Đợi auth.currentUser sẵn sàng (không set decks = [] ngay khi chưa có user)
+    if (!auth.currentUser) {
+      // Nếu chưa có user, chỉ skip load (không xóa decks hiện tại)
+      setLoading(false);
+      return;
+    }
+
+    // Kiểm tra user.accessToken (có thể null khi đang load)
+    if (!user?.accessToken) {
+      // Nếu user chưa có accessToken, đợi một chút rồi thử lại
       setLoading(false);
       return;
     }
@@ -181,9 +188,13 @@ export function FlashcardScreen({
     return learnedCards;
   }, [decks]);
 
+  // Load flashcards khi user hoặc auth.currentUser thay đổi
   useEffect(() => {
-    loadFlashcards();
-  }, [loadFlashcards]);
+    // Chỉ load khi đã có user và auth.currentUser
+    if (user?.accessToken && auth.currentUser) {
+      loadFlashcards();
+    }
+  }, [user?.accessToken, auth.currentUser?.uid, loadFlashcards]);
 
   // Xử lý khi startQuickReview được set từ bên ngoài
   useEffect(() => {
@@ -286,6 +297,12 @@ export function FlashcardScreen({
   };
 
   const markCardAsLearned = (learned: boolean) => {
+    // Trong chế độ player: cập nhật ngay để không chặn flow học
+    if (currentView === 'player') {
+      void doMarkCardAsLearned(learned);
+      return;
+    }
+    // Ở các view khác (list/review) mới yêu cầu xác nhận
     setPendingDecision({ learned });
   };
 
@@ -1263,45 +1280,6 @@ Lưu ý quan trọng:
             </AlertDialogContent>
           </AlertDialog>
 
-          {/* Dialog xác nhận cập nhật tiến độ học thẻ */}
-          <AlertDialog
-            open={!!pendingDecision}
-            onOpenChange={open => {
-              if (!open) setPendingDecision(null);
-            }}
-          >
-            <AlertDialogContent className="bg-[var(--surface)] border-[var(--border)] shadow-2xl">
-              <AlertDialogHeader>
-                <AlertDialogTitle className="text-[var(--text)]">
-                  Xác nhận cập nhật tiến độ
-                </AlertDialogTitle>
-                <AlertDialogDescription className="text-[var(--muted)]">
-                  {pendingDecision?.learned
-                    ? 'Đánh dấu thẻ này là ĐÃ NHỚ?'
-                    : 'Đánh dấu thẻ này là CHƯA NHỚ?'}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel className="text-[var(--text)] bg-[var(--surface)] border-[var(--border)] hover:bg-[var(--surface)]/80">
-                  Hủy
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  className="bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-white font-medium focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
-                  onClick={() => {
-                    const decision = pendingDecision;
-                    setPendingDecision(null);
-                    if (decision) {
-                      void doMarkCardAsLearned(decision.learned);
-                    }
-                  }}
-                  disabled={isMarking}
-                >
-                  Xác nhận
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-
           {/* Dialog chỉnh sửa flashcards */}
           <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
             <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto bg-[var(--surface)] border-[var(--border)] shadow-2xl">
@@ -1626,6 +1604,44 @@ Lưu ý quan trọng:
           </div>
         </div>
       )}
+      {/* AlertDialog xác nhận cập nhật tiến độ – đặt ngoài để dùng chung cho mọi view */}
+      <AlertDialog
+        open={!!pendingDecision}
+        onOpenChange={open => {
+          if (!open) setPendingDecision(null);
+        }}
+      >
+        <AlertDialogContent className="bg-[var(--surface)] border-[var(--border)] shadow-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-[var(--text)]">
+              Xác nhận cập nhật tiến độ
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[var(--muted)]">
+              {pendingDecision?.learned
+                ? 'Đánh dấu thẻ này là ĐÃ NHỚ?'
+                : 'Đánh dấu thẻ này là CHƯA NHỚ?'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="text-[var(--text)] bg-[var(--surface)] border-[var(--border)] hover:bg-[var(--surface)]/80">
+              Hủy
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-white font-medium focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+              onClick={() => {
+                const decision = pendingDecision;
+                setPendingDecision(null);
+                if (decision) {
+                  void doMarkCardAsLearned(decision.learned);
+                }
+              }}
+              disabled={isMarking}
+            >
+              Xác nhận
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

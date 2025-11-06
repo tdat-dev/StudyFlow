@@ -35,28 +35,26 @@ export function SwipeableFlashcard({
     setSwipeIndicator(null);
   }, [front, back]);
 
-  // Ensure only one side is visible at a time
+  // Đảm bảo chỉ mặt đang hiển thị nhận tương tác chuột (tránh giật do hover chồng lớp)
   useEffect(() => {
-    const flipContainer = cardRef.current?.querySelector(
-      '.transform-style-preserve-3d',
-    );
-    if (flipContainer) {
-      const frontCard = flipContainer.querySelector(
-        '.backface-hidden:not(.rotate-y-180)',
-      );
-      const backCard = flipContainer.querySelector(
-        '.backface-hidden.rotate-y-180',
-      );
+    const frontEl = cardRef.current?.querySelector(
+      '.card-face-front',
+    ) as HTMLElement | null;
+    const backEl = cardRef.current?.querySelector(
+      '.card-face-back',
+    ) as HTMLElement | null;
+    if (!frontEl || !backEl) return;
 
-      if (frontCard && backCard) {
-        if (isFlipped) {
-          (frontCard as HTMLElement).style.visibility = 'hidden';
-          (backCard as HTMLElement).style.visibility = 'visible';
-        } else {
-          (frontCard as HTMLElement).style.visibility = 'visible';
-          (backCard as HTMLElement).style.visibility = 'hidden';
-        }
-      }
+    if (isFlipped) {
+      frontEl.style.pointerEvents = 'none';
+      frontEl.setAttribute('aria-hidden', 'true');
+      backEl.style.pointerEvents = 'auto';
+      backEl.removeAttribute('aria-hidden');
+    } else {
+      backEl.style.pointerEvents = 'none';
+      backEl.setAttribute('aria-hidden', 'true');
+      frontEl.style.pointerEvents = 'auto';
+      frontEl.removeAttribute('aria-hidden');
     }
   }, [isFlipped]);
 
@@ -171,7 +169,7 @@ export function SwipeableFlashcard({
         } ${dragClass}`}
       >
         <div
-          className={`relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] ${
+          className={`relative w-full h-full transition-transform duration-500 will-change-transform [transform-style:preserve-3d] ${
             isFlipped ? '[transform:rotateY(180deg)]' : ''
           }`}
           onClick={handleClick}
@@ -184,7 +182,7 @@ export function SwipeableFlashcard({
           onMouseLeave={handleDragEnd}
         >
           {/* Front - English only */}
-          <div className="absolute inset-0 [backface-visibility:hidden] flashcard-enhanced">
+          <div className="card-face-front absolute inset-0 [backface-visibility:hidden] flashcard-enhanced">
             <div className="flex flex-col h-full min-h-0">
               <div className="flashcard-label flex-shrink-0">English</div>
               <div className="flex-grow flex items-center justify-center min-h-0 py-4">
@@ -206,7 +204,7 @@ export function SwipeableFlashcard({
           </div>
 
           {/* Back - Vietnamese only */}
-          <div className="absolute inset-0 [backface-visibility:hidden] flashcard-enhanced [transform:rotateY(180deg)]">
+          <div className="card-face-back absolute inset-0 [backface-visibility:hidden] flashcard-enhanced [transform:rotateY(180deg)]">
             <div className="flex flex-col h-full min-h-0">
               <div className="flashcard-label flex-shrink-0">Vietnamese</div>
               <div className="flex-grow flex items-center justify-center min-h-0 py-4">

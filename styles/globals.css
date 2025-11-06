@@ -1268,6 +1268,27 @@ img[src*='/images/logo-'] {
   }
 }
 
+/* Pomodoro: force center for legacy .timer-tabs still in cache */
+.timer-tabs {
+  background: transparent !important;
+  border: none !important;
+  display: flex !important;
+  justify-content: center !important;
+  width: fit-content !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding: 0 !important;
+}
+
+/* Pomodoro: force center for current component class */
+.pomodoro-tabs {
+  background: transparent !important;
+  border: none !important;
+  display: flex !important;
+  justify-content: center !important;
+  width: 100% !important; /* allow container to take full width */
+}
+
 /* Custom Scrollbar Styling */
 @layer utilities {
   /* Modern scrollbar design */

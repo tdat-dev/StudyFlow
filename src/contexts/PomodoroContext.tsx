@@ -113,6 +113,25 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
     localStorage.setItem('pomodoro-state', JSON.stringify(state));
   }, [state]);
 
+  // Đảm bảo timeLeft luôn có giá trị hợp lệ khi không chạy
+  useEffect(() => {
+    if (!state.isActive && state.timeLeft === 0) {
+      const duration = ((): number => {
+        switch (state.mode) {
+          case 'pomodoro':
+            return settings.pomodoroTime * 60;
+          case 'shortBreak':
+            return settings.shortBreakTime * 60;
+          case 'longBreak':
+            return settings.longBreakTime * 60;
+          default:
+            return 25 * 60;
+        }
+      })();
+      setState(prev => ({ ...prev, timeLeft: duration }));
+    }
+  }, [state.isActive, state.mode, state.timeLeft, settings]);
+
   // Timer effect
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -123,13 +142,10 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
           const newTimeLeft = prev.timeLeft - 1;
 
           if (newTimeLeft <= 0) {
-            // Timer completed
+            // Timer completed -> chuyển mode trong handleTimerComplete
             handleTimerComplete();
-            return {
-              ...prev,
-              timeLeft: 0,
-              isActive: false,
-            };
+            // Không ghi đè state ở đây, để handleTimerComplete quyết định
+            return prev;
           }
 
           return {
@@ -198,16 +214,41 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
       }
     }
 
-    // Update completed pomodoros
-    if (state.mode === 'pomodoro') {
-      setState(prev => ({
-        ...prev,
-        completedPomodoros: prev.completedPomodoros + 1,
-      }));
-    }
+    // Chuyển mode tự động sau khi hoàn thành/skip
+    setState(prev => {
+      const wasPomodoro = prev.mode === 'pomodoro';
+      const newCompleted = wasPomodoro
+        ? prev.completedPomodoros + 1
+        : prev.completedPomodoros;
 
-    // Timer completed - user needs to manually switch mode
-  }, [state.mode, settings.soundEnabled, settings.notificationsEnabled]);
+      // Quy tắc: sau mỗi 4 Pomodoro thì nghỉ dài
+      const nextMode: 'pomodoro' | 'shortBreak' | 'longBreak' = wasPomodoro
+        ? newCompleted % 4 === 0
+          ? 'longBreak'
+          : 'shortBreak'
+        : 'pomodoro';
+
+      const nextTimeLeft =
+        nextMode === 'pomodoro'
+          ? settings.pomodoroTime * 60
+          : nextMode === 'shortBreak'
+            ? settings.shortBreakTime * 60
+            : settings.longBreakTime * 60;
+
+      const shouldAutoStart =
+        nextMode === 'pomodoro'
+          ? settings.autoStartPomodoros
+          : settings.autoStartBreaks;
+
+      return {
+        ...prev,
+        completedPomodoros: newCompleted,
+        mode: nextMode,
+        timeLeft: nextTimeLeft,
+        isActive: shouldAutoStart,
+      };
+    });
+  }, [state.mode, settings.soundEnabled, settings.notificationsEnabled, settings.pomodoroTime, settings.shortBreakTime, settings.longBreakTime, settings.autoStartBreaks, settings.autoStartPomodoros]);
 
   const getCurrentDuration = useCallback(() => {
     switch (state.mode) {
@@ -240,8 +281,10 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
   }, [getCurrentDuration]);
 
   const skipTimer = useCallback(() => {
-    setState(prev => ({ ...prev, timeLeft: 0 }));
-  }, []);
+    // Dừng ngay lập tức rồi chuyển mode để tránh race condition với interval
+    setState(prev => ({ ...prev, isActive: false }));
+    handleTimerComplete();
+  }, [handleTimerComplete]);
 
   const switchMode = useCallback(
     (mode: 'pomodoro' | 'shortBreak' | 'longBreak') => {

@@ -1,0 +1,87 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e4]:
+      - banner [ref=e5]:
+        - generic [ref=e7]:
+          - img "StudyFlow Logo" [ref=e8]
+          - generic [ref=e9]: StudyFlow
+        - button "T" [ref=e12] [cursor=pointer]:
+          - generic [ref=e14]: T
+      - main [ref=e15]:
+        - generic [ref=e17]:
+          - generic [ref=e18]:
+            - generic [ref=e19]:
+              - button "Quay lại" [ref=e20] [cursor=pointer]:
+                - img [ref=e21]
+                - text: Quay lại
+              - generic [ref=e23]: 1/0
+            - heading "Greetings deck" [level=2] [ref=e24]
+          - generic [ref=e25]:
+            - generic [ref=e27]:
+              - img [ref=e29]
+              - img [ref=e33]
+              - generic [ref=e36]:
+                - generic [ref=e38] [cursor=pointer]:
+                  - generic [ref=e39]: English
+                  - generic [ref=e40]:
+                    - heading [level=2]
+                  - generic [ref=e41]: Tap to see Vietnamese meaning
+                - generic [ref=e43] [cursor=pointer]:
+                  - generic [ref=e44]: Vietnamese
+                  - generic [ref=e45]:
+                    - heading [level=2]
+                  - generic [ref=e46]: Tap to see English word
+              - generic [ref=e47]:
+                - button "✖ Chưa nhớ" [ref=e48] [cursor=pointer]:
+                  - generic [ref=e49]: ✖
+                  - generic [ref=e50]: Chưa nhớ
+                - button "✓ Đã nhớ" [ref=e51] [cursor=pointer]:
+                  - generic [ref=e52]: ✓
+                  - generic [ref=e53]: Đã nhớ
+            - generic [ref=e55]:
+              - button [disabled]:
+                - img
+              - button [ref=e56] [cursor=pointer]:
+                - img [ref=e57]
+          - button "✨ Tạo câu ví dụ khác với AI" [ref=e61] [cursor=pointer]
+      - navigation "Bottom navigation" [ref=e62]:
+        - list [ref=e64]:
+          - listitem [ref=e65]:
+            - button "Trang chủ" [ref=e66] [cursor=pointer]:
+              - img [ref=e68]
+              - generic [ref=e71]: Trang chủ
+          - listitem [ref=e72]:
+            - button "Trợ lý AI" [ref=e73] [cursor=pointer]:
+              - img [ref=e75]
+              - generic [ref=e77]: Trợ lý AI
+          - listitem [ref=e78]:
+            - button "Flashcards" [ref=e79] [cursor=pointer]:
+              - img [ref=e81]
+              - generic [ref=e83]: Flashcards
+          - listitem [ref=e84]:
+            - button "Thói quen" [ref=e85] [cursor=pointer]:
+              - img [ref=e87]
+              - generic [ref=e89]: Thói quen
+          - listitem [ref=e90]:
+            - button "Pomodoro" [ref=e91] [cursor=pointer]:
+              - img [ref=e93]
+              - generic [ref=e96]: Pomodoro
+    - region "Notifications alt+T"
+  - generic [ref=e101] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e102]:
+      - img [ref=e103]
+    - generic [ref=e106]:
+      - button "Open issues overlay" [ref=e107]:
+        - generic [ref=e108]:
+          - generic [ref=e109]: "0"
+          - generic [ref=e110]: "1"
+        - generic [ref=e111]: Issue
+      - button "Collapse issues badge" [ref=e112]:
+        - img [ref=e113]
+  - alert [ref=e115]
+  - iframe [ref=e116]:
+    
+```
