@@ -132,37 +132,6 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
     }
   }, [state.isActive, state.mode, state.timeLeft, settings]);
 
-  // Timer effect
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-
-    if (state.isActive && state.timeLeft > 0) {
-      interval = setInterval(() => {
-        setState(prev => {
-          const newTimeLeft = prev.timeLeft - 1;
-
-          if (newTimeLeft <= 0) {
-            // Timer completed -> chuyển mode trong handleTimerComplete
-            handleTimerComplete();
-            // Không ghi đè state ở đây, để handleTimerComplete quyết định
-            return prev;
-          }
-
-          return {
-            ...prev,
-            timeLeft: newTimeLeft,
-          };
-        });
-      }, 1000);
-    }
-
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
-    };
-  }, [state.isActive, state.timeLeft]);
-
   const handleTimerComplete = useCallback(() => {
     // Play sound if enabled
     if (settings.soundEnabled) {
@@ -249,6 +218,37 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
       };
     });
   }, [state.mode, settings.soundEnabled, settings.notificationsEnabled, settings.pomodoroTime, settings.shortBreakTime, settings.longBreakTime, settings.autoStartBreaks, settings.autoStartPomodoros]);
+
+  // Timer effect
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+
+    if (state.isActive && state.timeLeft > 0) {
+      interval = setInterval(() => {
+        setState(prev => {
+          const newTimeLeft = prev.timeLeft - 1;
+
+          if (newTimeLeft <= 0) {
+            // Timer completed -> chuyển mode trong handleTimerComplete
+            handleTimerComplete();
+            // Không ghi đè state ở đây, để handleTimerComplete quyết định
+            return prev;
+          }
+
+          return {
+            ...prev,
+            timeLeft: newTimeLeft,
+          };
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [state.isActive, state.timeLeft, handleTimerComplete]);
 
   const getCurrentDuration = useCallback(() => {
     switch (state.mode) {

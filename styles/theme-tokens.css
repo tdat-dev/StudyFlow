@@ -241,12 +241,16 @@
   margin: 0 auto;
 }
 
+/* Track mờ tinh tế */
 .progress-track {
   stroke: var(--timer-track-light);
+  stroke-width: 10px;
+  opacity: 0.35;
 }
 
 .dark .progress-track {
   stroke: var(--timer-track-dark);
+  opacity: 0.45;
 }
 
 .dark .timer-track-light {
@@ -254,11 +258,12 @@
 }
 
 .progress-bar {
-  stroke-width: 12px;
+  stroke-width: 10px;
   fill: none;
-  transition: stroke-dasharray 0.3s ease;
+  transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Fallback màu (khi gradient chưa apply) */
 .progress-bar.work {
   stroke: var(--accent-work);
 }
@@ -268,6 +273,8 @@
 .progress-bar.long {
   stroke: var(--accent-long);
 }
+
+/* Nâng cấp hiển thị */
 
 /* Control Buttons */
 .timer-controls {

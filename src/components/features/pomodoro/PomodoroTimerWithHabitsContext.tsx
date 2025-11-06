@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Play,
   Pause,
@@ -25,35 +25,57 @@ interface ProgressRingProps {
 }
 
 function ProgressRing({ progress, mode }: ProgressRingProps) {
+  // Vòng tròn mượt với bo tròn đầu và gradient
   const radius = 45;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference * (1 - progress / 100);
 
-  const getModeClass = () => {
+  const gradientId = `ringGradient-${mode}`;
+  const glowId = `ringGlow-${mode}`;
+
+  const getStops = () => {
     switch (mode) {
-      case 'pomodoro':
-        return 'work';
       case 'shortBreak':
-        return 'short';
+        return { from: 'var(--accent-short)', to: 'rgba(34,197,94,0.7)' };
       case 'longBreak':
-        return 'long';
+        return { from: 'var(--accent-long)', to: 'rgba(6,182,212,0.7)' };
+      case 'pomodoro':
       default:
-        return 'work';
+        return { from: 'var(--accent-work)', to: 'rgba(239,68,68,0.7)' };
     }
   };
 
+  const stops = getStops();
+
   return (
-    <circle
-      cx="50"
-      cy="50"
-      r={radius}
-      stroke="currentColor"
-      strokeWidth="2"
-      fill="none"
-      strokeDasharray={circumference}
-      strokeDashoffset={strokeDashoffset}
-      className={`progress-bar ${getModeClass()}`}
-    />
+    <>
+      <defs>
+        <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor={stops.from} />
+          <stop offset="100%" stopColor={stops.to} />
+        </linearGradient>
+        <filter id={glowId} x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
+          <feMerge>
+            <feMergeNode in="coloredBlur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      <circle
+        cx="50"
+        cy="50"
+        r={radius}
+        fill="none"
+        strokeDasharray={circumference}
+        strokeDashoffset={strokeDashoffset}
+        stroke={`url(#${gradientId})`}
+        strokeWidth="10"
+        strokeLinecap="round"
+        className="progress-bar enhanced"
+        filter={`url(#${glowId})`}
+      />
+    </>
   );
 }
 
@@ -108,6 +130,8 @@ export function PomodoroTimerWithHabits({
     createHabitTask,
     completeTask,
     deleteTask,
+    updateTaskPomodoroCount,
+    markHabitCompletedToday,
   } = useHabitPomodoroIntegration(user);
 
   // Traditional tasks (keeping for backward compatibility)
@@ -124,6 +148,28 @@ export function PomodoroTimerWithHabits({
 
   // Timer sessions history
   const [sessions, setSessions] = useState<PomodoroSession[]>([]);
+
+  // Theo dõi lần tăng completedPomodoros để cập nhật task hiện tại
+  const prevCompletedRef = useRef<number>(0);
+  useEffect(() => {
+    if (pomodoroState.completedPomodoros > prevCompletedRef.current) {
+      const currentId = pomodoroState.currentTaskId;
+      if (currentId) {
+        const task = habitTasks.find(t => t.id === currentId);
+        (async () => {
+          try {
+            await updateTaskPomodoroCount(currentId, 1);
+            if (task?.habitId) {
+              await markHabitCompletedToday(task.habitId);
+            }
+          } catch {
+            // bỏ qua lỗi nhẹ, không chặn UI
+          }
+        })();
+      }
+    }
+    prevCompletedRef.current = pomodoroState.completedPomodoros;
+  }, [pomodoroState.completedPomodoros, pomodoroState.currentTaskId, habitTasks, updateTaskPomodoroCount, markHabitCompletedToday]);
 
   // Load sessions from localStorage on mount
   useEffect(() => {
@@ -291,6 +337,32 @@ export function PomodoroTimerWithHabits({
     }
   };
 
+  const getModeBoxClasses = () => {
+    switch (pomodoroState.mode) {
+      case 'pomodoro':
+        return 'border-red-500/30 bg-red-500/5';
+      case 'shortBreak':
+        return 'border-green-500/30 bg-green-500/5';
+      case 'longBreak':
+        return 'border-sky-500/30 bg-sky-500/5';
+      default:
+        return 'border-gray-300/40 bg-gray-100 dark:bg-gray-800/60';
+    }
+  };
+
+  const getModeIconBg = () => {
+    switch (pomodoroState.mode) {
+      case 'pomodoro':
+        return 'bg-red-500/15 text-red-500';
+      case 'shortBreak':
+        return 'bg-green-500/15 text-green-600';
+      case 'longBreak':
+        return 'bg-sky-500/15 text-sky-600';
+      default:
+        return 'bg-gray-500/10 text-gray-500';
+    }
+  };
+
   return (
     <div className="pomodoro-page">
       <div className="pomodoro-container">
@@ -312,25 +384,39 @@ export function PomodoroTimerWithHabits({
             </div>
 
             {/* Mode Tabs */}
-            <div className="timer-tabs">
-              <button
-                onClick={switchToPomodoro}
-                className={`timer-tab ${pomodoroState.mode === 'pomodoro' ? 'active work' : ''}`}
-              >
-                Pomodoro
-              </button>
-              <button
-                onClick={switchToShortBreak}
-                className={`timer-tab ${pomodoroState.mode === 'shortBreak' ? 'active short' : ''}`}
-              >
-                Nghỉ ngắn
-              </button>
-              <button
-                onClick={switchToLongBreak}
-                className={`timer-tab ${pomodoroState.mode === 'longBreak' ? 'active long' : ''}`}
-              >
-                Nghỉ dài
-              </button>
+            <div className="pomodoro-tabs mb-6 flex justify-center items-center bg-transparent">
+              <div className="inline-flex mx-auto w-fit bg-gray-100 dark:bg-gray-800/60 rounded-xl p-1 gap-1 border border-gray-200/20 dark:border-gray-700/40">
+                <button
+                  onClick={switchToPomodoro}
+                  className={`timer-tab w-28 py-2.5 text-center rounded-lg font-medium transition-all ${
+                    pomodoroState.mode === 'pomodoro'
+                      ? 'active work bg-red-500 text-white shadow-md'
+                      : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
+                  }`}
+                >
+                  Pomodoro
+                </button>
+                <button
+                  onClick={switchToShortBreak}
+                  className={`timer-tab w-28 py-2.5 text-center rounded-lg font-medium transition-all ${
+                    pomodoroState.mode === 'shortBreak'
+                      ? 'active short bg-green-500 text-white shadow-md'
+                      : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
+                  }`}
+                >
+                  Nghỉ ngắn
+                </button>
+                <button
+                  onClick={switchToLongBreak}
+                  className={`timer-tab w-28 py-2.5 text-center rounded-lg font-medium transition-all ${
+                    pomodoroState.mode === 'longBreak'
+                      ? 'active long bg-blue-500 text-white shadow-md'
+                      : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
+                  }`}
+                >
+                  Nghỉ dài
+                </button>
+              </div>
             </div>
 
             {/* Timer Display */}
@@ -341,22 +427,22 @@ export function PomodoroTimerWithHabits({
                   className="w-80 h-80 transform -rotate-90"
                   viewBox="0 0 100 100"
                 >
+                  {/* Track */}
                   <circle
                     cx="50"
                     cy="50"
                     r="45"
-                    stroke="currentColor"
-                    strokeWidth="2"
                     fill="none"
-                    className="progress-track text-gray-200 dark:text-gray-700"
+                    className="progress-track"
                   />
+                  {/* Progress */}
                   <ProgressRing progress={progress} mode={pomodoroState.mode} />
                 </svg>
 
                 {/* Timer Text */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <div
-                    className={`text-6xl md:text-7xl font-mono font-bold leading-tight ${getModeColor()}`}
+                    className={`text-6xl md:text-7xl font-mono font-bold leading-tight ${getModeColor()} drop-shadow-[0_1px_1px_rgba(0,0,0,0.25)]`}
                   >
                     {formattedTime}
                   </div>
@@ -368,12 +454,25 @@ export function PomodoroTimerWithHabits({
               </div>
             </div>
 
-            {/* Current Task Display */}
+            {/* Current Task Display - polished chip */}
             {pomodoroState.currentTaskText && (
-              <div className="mt-4 text-center">
-                <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-lg px-4 py-2 max-w-2xl w-full mx-auto break-words">
-                  <div className="font-medium text-gray-900 dark:text-gray-100">
-                    {pomodoroState.currentTaskText}
+              <div className="mt-5 px-4">
+                <div
+                  className={`max-w-xl mx-auto flex items-center gap-3 rounded-xl px-4 py-3 border shadow-sm backdrop-blur-sm ${getModeBoxClasses()}`}
+                >
+                  <div
+                    className={`h-9 w-9 flex items-center justify-center rounded-lg ${getModeIconBg()}`}
+                    aria-hidden
+                  >
+                    <Target className="w-4.5 h-4.5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100 break-words">
+                      {pomodoroState.currentTaskText}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      Đang tập trung
+                    </div>
                   </div>
                 </div>
               </div>

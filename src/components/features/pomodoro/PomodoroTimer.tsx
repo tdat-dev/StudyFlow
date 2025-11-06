@@ -275,7 +275,7 @@ export function PomodoroTimer() {
                       ? 'active work bg-red-500 text-white shadow-md'
                       : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
                   }`}
-                  onClick={switchToPomodoro}
+                  onClick={() => switchToPomodoro()}
                   disabled={isActive}
                 >
                   Pomodoro
@@ -286,7 +286,7 @@ export function PomodoroTimer() {
                       ? 'active short bg-green-500 text-white shadow-md'
                       : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
                   }`}
-                  onClick={switchToShortBreak}
+                  onClick={() => switchToShortBreak()}
                   disabled={isActive}
                 >
                   Nghỉ ngắn
@@ -297,7 +297,7 @@ export function PomodoroTimer() {
                       ? 'active long bg-cyan-500 text-white shadow-md'
                       : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
                   }`}
-                  onClick={switchToLongBreak}
+                  onClick={() => switchToLongBreak()}
                   disabled={isActive}
                 >
                   Nghỉ dài

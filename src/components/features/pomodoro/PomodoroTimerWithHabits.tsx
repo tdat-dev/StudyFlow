@@ -461,7 +461,7 @@ export function PomodoroTimerWithHabits({
               <div className="pomodoro-tabs relative mb-8 flex justify-center items-center bg-transparent">
                 <div className="inline-flex mx-auto w-fit bg-gray-100 dark:bg-studyflow-surface rounded-xl p-1 gap-1">
                   <button
-                    onClick={switchToPomodoro}
+                    onClick={() => switchToPomodoro()}
                     className={`timer-tab w-28 py-3 text-center rounded-lg font-medium transition-all ${
                       timerMode === 'pomodoro'
                         ? 'active work bg-red-500 text-white shadow-md'
@@ -471,7 +471,7 @@ export function PomodoroTimerWithHabits({
                     Pomodoro
                   </button>
                   <button
-                    onClick={switchToShortBreak}
+                    onClick={() => switchToShortBreak()}
                     className={`timer-tab w-28 py-3 text-center rounded-lg font-medium transition-all ${
                       timerMode === 'shortBreak'
                         ? 'active short bg-green-500 text-white shadow-md'
@@ -481,7 +481,7 @@ export function PomodoroTimerWithHabits({
                     Nghỉ ngắn
                   </button>
                   <button
-                    onClick={switchToLongBreak}
+                    onClick={() => switchToLongBreak()}
                     className={`timer-tab w-28 py-3 text-center rounded-lg font-medium transition-all ${
                       timerMode === 'longBreak'
                         ? 'active long bg-cyan-500 text-white shadow-md'

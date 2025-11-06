@@ -1,0 +1,62 @@
+name: AI Code Review
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: ai-review-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    name: Run AI review on PR
+    runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.draft == false || github.event_name == 'workflow_dispatch' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run ChatGPT Code Review
+        uses: anc95/ChatGPT-CodeReview@v1.7.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        with:
+          model: gpt-4o-mini
+          language: vi
+          temperature: 0.1
+          max_tokens: 12000
+          # Review scope
+          review_comment_lgtm: false
+          enable_pr_diff_reviewer: true
+          enable_pr_description_reviewer: true
+          path_filters: |
+            src/**
+            styles/**
+            tests/**
+          exclude_files: |
+            **/*.svg
+            **/*.md
+            **/dist/**
+            **/build/**
+          # Custom instructions (ngắn gọn, theo dự án StudyFlow)
+          prompt: |
+            Bạn là reviewer cho dự án StudyFlow (Next.js 14 + React 18 + TS, Tailwind, Firebase). Yêu cầu:
+            - Cấm any, không inline style, tuân theo tokens/UI, dark mode.
+            - Bắt buộc validate input mới bằng Zod.
+            - A11y cho button/icon (aria-label/title), không console.log.
+            - Logic tách khỏi UI; bám structure src/components, hooks, services, types, utils.
+            - Lưu ý file-specific rules cho pomodoro/habits.
+            - Nên gợi ý test (Vitest/RTL) cho logic quan trọng.
+            Hãy đưa ra nhận xét ngắn gọn theo bullet: vấn đề, rủi ro, cách sửa cụ thể (đường dẫn + snippet ngắn nếu cần).
+
+
