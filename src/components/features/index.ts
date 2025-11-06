@@ -3,5 +3,6 @@ export * from './chat';
 export * from './flashcards';
 export * from './habits';
 export * from './home';
+export * from './landing';
 export * from './pomodoro';
 export * from './profile';

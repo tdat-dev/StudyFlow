@@ -104,7 +104,14 @@ export async function getDailyMissions(userId: string): Promise<DailyMissions> {
 export async function completeMission(
   userId: string,
   missionId: string,
-): Promise<{ missions: DailyMissions; xpEarned: number }> {
+): Promise<{
+  missions: DailyMissions;
+  xpEarned: number;
+  success?: boolean;
+  message?: string;
+  completedMissions?: number;
+  totalXP?: number;
+}> {
   try {
     const today = new Date().toISOString().split('T')[0];
     const missionsRef = doc(db, 'daily_missions', `${userId}_${today}`);
@@ -120,7 +127,17 @@ export async function completeMission(
 
     const mission = currentMissions.missions[missionIndex];
     if (mission.completed) {
-      throw new Error('Mission already completed');
+      return {
+        missions: currentMissions,
+        success: false,
+        xpEarned: 0,
+        message: 'Mission already completed',
+        completedMissions: currentMissions.missions.filter(m => m.completed)
+          .length,
+        totalXP: currentMissions.missions
+          .filter(m => m.completed)
+          .reduce((sum, m) => sum + m.xp, 0),
+      };
     }
 
     // Cập nhật mission
@@ -168,7 +185,14 @@ export async function completeMission(
 export async function completeMissionByType(
   userId: string,
   type: Mission['type'],
-): Promise<{ missions: DailyMissions; xpEarned: number } | null> {
+): Promise<{
+  missions: DailyMissions;
+  xpEarned: number;
+  success?: boolean;
+  message?: string;
+  completedMissions?: number;
+  totalXP?: number;
+} | null> {
   try {
     const currentMissions = await getDailyMissions(userId);
     const mission = currentMissions.missions.find(

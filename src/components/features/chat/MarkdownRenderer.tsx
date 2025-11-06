@@ -199,7 +199,7 @@ export function MarkdownRenderer({
           // Images
           img: ({ src, alt }) => (
             <Image
-              src={src || ''}
+              src={typeof src === 'string' ? src : ''}
               alt={alt || ''}
               width={500}
               height={300}

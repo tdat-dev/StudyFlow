@@ -38,15 +38,19 @@ export function useHabitPomodoroIntegration(user: User) {
       const querySnapshot = await getDocs(q);
 
       const habits: HabitOption[] = querySnapshot.docs.map(doc => {
-        const data = doc.data();
+        const data = doc.data() as any;
+        // Fallback màu sắc mặc định nếu thiếu từ Firestore
+        const fallbackColor = 'bg-blue-500';
+        const fallbackBg = 'bg-blue-100 dark:bg-blue-900/50';
+        const fallbackText = 'text-blue-600 dark:text-blue-400';
         return {
           id: doc.id,
-          title: data.title,
-          color: data.color,
-          bgColor: data.bgColor,
-          textColor: data.textColor,
+          title: data.title || 'Habit',
+          color: data.color || fallbackColor,
+          bgColor: data.bgColor || fallbackBg,
+          textColor: data.textColor || fallbackText,
           icon: data.iconName, // We'll need to map this back to actual icon
-        };
+        } as HabitOption;
       });
 
       setHabitOptions(habits);
@@ -116,12 +120,15 @@ export function useHabitPomodoroIntegration(user: User) {
         const snap = await getDoc(habitRef);
         if (snap.exists()) {
           const data = snap.data() as any;
+          const fallbackColor = 'bg-blue-500';
+          const fallbackBg = 'bg-blue-100 dark:bg-blue-900/50';
+          const fallbackText = 'text-blue-600 dark:text-blue-400';
           habit = {
             id: taskData.habitId,
             title: data.title || 'Habit',
-            color: data.color,
-            bgColor: data.bgColor,
-            textColor: data.textColor,
+            color: data.color || fallbackColor,
+            bgColor: data.bgColor || fallbackBg,
+            textColor: data.textColor || fallbackText,
             icon: data.iconName,
           } as HabitOption;
         }
@@ -135,8 +142,8 @@ export function useHabitPomodoroIntegration(user: User) {
         completed: false,
         pomodoroCount: 0,
         habitId: taskData.habitId,
-        habitTitle: habit.title,
-        habitColor: habit.color,
+        habitTitle: habit.title || 'Habit',
+        habitColor: habit.color || 'bg-blue-500',
         estimatedPomodoros: taskData.estimatedPomodoros || 1,
         priority: taskData.priority || 'medium',
         createdAt: Timestamp.now(),
@@ -184,6 +191,56 @@ export function useHabitPomodoroIntegration(user: User) {
       }
     } catch (error) {
       console.error('Failed to update task pomodoro count:', error);
+    }
+  };
+
+  // Force mark a habit as completed for today (used after finishing a Pomodoro)
+  const markHabitCompletedToday = async (habitId: string) => {
+    try {
+      const habitRef = doc(db, 'habits', habitId);
+      const snap = await getDoc(habitRef);
+      if (!snap.exists()) return;
+
+      const data = snap.data() as any;
+
+      // Calculate indices
+      const now = new Date();
+      const dayOfWeek = now.getDay(); // 0 = Sun
+      const adjustedDayOfWeek = (dayOfWeek + 6) % 7; // 0 = Mon
+      const dayOfMonth = now.getDate() - 1; // 0-indexed
+
+      const weeklyProgress: boolean[] = (
+        (data.weeklyProgress as boolean[]) || [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+        ]
+      ).slice();
+      weeklyProgress[adjustedDayOfWeek] = true;
+
+      const monthlyProgress: boolean[] = (
+        (data.monthlyProgress as boolean[]) || Array(30).fill(false)
+      ).slice();
+      if (dayOfMonth >= 0 && dayOfMonth < monthlyProgress.length) {
+        monthlyProgress[dayOfMonth] = true;
+      }
+
+      const currentStreak: number = (data.currentStreak as number) || 0;
+
+      await updateDoc(habitRef, {
+        todayCompleted: true,
+        currentStreak: currentStreak + 1,
+        weeklyProgress,
+        monthlyProgress,
+        lastCompletedAt: Timestamp.now(),
+        lastUpdated: Timestamp.now(),
+      });
+    } catch (error) {
+      console.error('Failed to mark habit as completed today:', error);
     }
   };
 
@@ -331,6 +388,7 @@ export function useHabitPomodoroIntegration(user: User) {
     completeTask,
     deleteTask,
     setCurrentHabitId,
+    markHabitCompletedToday,
 
     // Getters
     getTasksForHabit,

@@ -1,3 +1,12 @@
+.pomodoro-tabs {
+  display: flex;
+  justify-content: center;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  background: transparent;
+  border: none;
+}
 /* Modern Design Tokens for AI Tutor Interface */
 :root {
   /* Layout Variables - ChatGPT Style */
@@ -122,12 +131,28 @@
 
 /* Segmented Control */
 .timer-tabs {
-  display: flex;
-  gap: 4px;
-  background-color: var(--app-surface);
-  border: 1px solid var(--app-border);
-  border-radius: 12px;
-  padding: 4px;
+  display: flex !important;
+  gap: 4px !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 12px !important;
+  padding: 0 !important;
+  justify-content: center !important;
+  width: fit-content !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Stronger specificity for Pomodoro layout to ensure centering */
+.pomodoro-page .timer-card .timer-tabs {
+  display: flex !important;
+  justify-content: center !important;
+  width: fit-content !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
 }
 
 .timer-tab {
@@ -179,6 +204,36 @@
   line-height: 1;
 }
 
+.timer-display-content {
+  line-height: 1.4;
+  word-spacing: 0.1em;
+  letter-spacing: 0.01em;
+}
+
+.timer-mode-label {
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
+}
+
+/* Desktop spacing adjustments for clearer typography */
+@media (min-width: 1024px) {
+  .timer-tabs {
+    gap: 8px; /* tăng khoảng cách giữa các tab ở desktop */
+  }
+
+  .timer-display {
+    /* bớt nén chữ và tăng line-height nhẹ cho chữ số lớn */
+    letter-spacing: 0;
+    line-height: 1.08;
+  }
+
+  .task-text {
+    /* chữ trong danh sách task thoáng hơn ở desktop */
+    letter-spacing: 0.01em;
+    line-height: 1.6;
+  }
+}
+
 /* Progress Ring */
 .progress-ring {
   width: 100%;
@@ -186,12 +241,16 @@
   margin: 0 auto;
 }
 
+/* Track mờ tinh tế */
 .progress-track {
   stroke: var(--timer-track-light);
+  stroke-width: 10px;
+  opacity: 0.35;
 }
 
 .dark .progress-track {
   stroke: var(--timer-track-dark);
+  opacity: 0.45;
 }
 
 .dark .timer-track-light {
@@ -199,11 +258,12 @@
 }
 
 .progress-bar {
-  stroke-width: 12px;
+  stroke-width: 10px;
   fill: none;
-  transition: stroke-dasharray 0.3s ease;
+  transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Fallback màu (khi gradient chưa apply) */
 .progress-bar.work {
   stroke: var(--accent-work);
 }
@@ -213,6 +273,8 @@
 .progress-bar.long {
   stroke: var(--accent-long);
 }
+
+/* Nâng cấp hiển thị */
 
 /* Control Buttons */
 .timer-controls {
@@ -249,8 +311,9 @@
 }
 
 .control-ghost {
-  height: 44px;
-  width: 44px;
+  height: 48px;
+  min-width: 80px;
+  padding: 0 16px;
   background: transparent;
   border: 1px solid var(--app-border);
   border-radius: 12px;

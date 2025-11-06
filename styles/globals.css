@@ -1,15 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
 @import 'highlight.js/styles/github.css';
+@import './components.css';
+@import './theme-tokens.css';
+@import './chat-theme.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Import component styles */
-@import './components.css';
-/* Import modern theme tokens */
-@import './theme-tokens.css';
-/* Import chat theme */
-@import './chat-theme.css';
 
 /* Design Tokens */
 @layer base {
@@ -1270,6 +1266,27 @@ img[src*='/images/logo-'] {
   .pr-safe {
     padding-right: calc(env(safe-area-inset-right, 0px));
   }
+}
+
+/* Pomodoro: force center for legacy .timer-tabs still in cache */
+.timer-tabs {
+  background: transparent !important;
+  border: none !important;
+  display: flex !important;
+  justify-content: center !important;
+  width: fit-content !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding: 0 !important;
+}
+
+/* Pomodoro: force center for current component class */
+.pomodoro-tabs {
+  background: transparent !important;
+  border: none !important;
+  display: flex !important;
+  justify-content: center !important;
+  width: 100% !important; /* allow container to take full width */
 }
 
 /* Custom Scrollbar Styling */

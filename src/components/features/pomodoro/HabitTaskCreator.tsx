@@ -94,12 +94,14 @@ export function HabitTaskCreator({
   return (
     <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-studyflow-surface">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-medium text-gray-900 dark:text-gray-100">
+        <h3 className="font-medium text-[var(--text)]">
           Tạo task từ thói quen
         </h3>
         <button
           onClick={() => setIsOpen(false)}
           className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          title="Đóng form"
+          aria-label="Đóng form tạo task"
         >
           <X className="w-4 h-4" />
         </button>
@@ -108,14 +110,15 @@ export function HabitTaskCreator({
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Habit Selection */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-[var(--muted)] mb-2">
             Chọn thói quen
           </label>
           <select
             value={selectedHabitId}
             onChange={e => setSelectedHabitId(e.target.value)}
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-studyflow-surface text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
+            aria-label="Chọn thói quen"
           >
             <option value="">Chọn thói quen...</option>
             {habitOptions.map(habit => (
@@ -128,7 +131,7 @@ export function HabitTaskCreator({
 
         {/* Task Text */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
             Mô tả task
           </label>
           <input
@@ -136,14 +139,14 @@ export function HabitTaskCreator({
             value={taskText}
             onChange={e => setTaskText(e.target.value)}
             placeholder="Ví dụ: Đọc 20 trang sách..."
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-studyflow-surface text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
           />
         </div>
 
         {/* Estimated Pomodoros */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
             <Clock className="w-4 h-4 inline mr-1" />
             Dự kiến số Pomodoro
           </label>
@@ -153,13 +156,14 @@ export function HabitTaskCreator({
             max="10"
             value={estimatedPomodoros}
             onChange={e => setEstimatedPomodoros(parseInt(e.target.value) || 1)}
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-studyflow-surface text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            aria-label="Dự kiến số Pomodoro"
           />
         </div>
 
         {/* Priority */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
             <Flag className="w-4 h-4 inline mr-1" />
             Độ ưu tiên
           </label>

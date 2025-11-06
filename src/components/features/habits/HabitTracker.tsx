@@ -17,7 +17,6 @@ import {
   Target,
   BookOpen,
   Headphones,
-  Loader2,
   ArrowLeft,
   Trash2,
   AlertTriangle,
@@ -66,6 +65,7 @@ import {
 
 interface HabitTrackerProps {
   user: any;
+  onTabChange?: (tab: string) => void;
 }
 
 interface Habit {
@@ -82,9 +82,9 @@ interface Habit {
   monthlyProgress: boolean[];
 }
 
-export function HabitTracker({ user }: HabitTrackerProps) {
+export function HabitTracker({ user, onTabChange }: HabitTrackerProps) {
+  // onTabChange is available for future navigation features
   const [habits, setHabits] = useState<Habit[]>([]);
-  const [loading, setLoading] = useState(false);
   const [currentView, setCurrentView] = useState<'list' | 'detail'>('list');
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -305,135 +305,6 @@ export function HabitTracker({ user }: HabitTrackerProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user.accessToken]);
 
-  const toggleHabitCompletion = async (habitId: string) => {
-    // Nếu không có người dùng đăng nhập, chỉ cập nhật trạng thái local
-    if (!user.accessToken || !auth.currentUser) {
-      updateLocalHabitState(habitId);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // Tìm thói quen cần cập nhật
-      const habitToToggle = habits.find(h => h.id === habitId);
-      if (!habitToToggle) return;
-
-      // Nếu ID bắt đầu bằng "local-", đây là dữ liệu mẫu, chỉ cập nhật trạng thái local
-      if (habitId.startsWith('local-')) {
-        updateLocalHabitState(habitId);
-        setLoading(false);
-        return;
-      }
-
-      // Cập nhật trong Firestore
-      const habitRef = doc(db, 'habits', habitId);
-
-      // Lấy ngày hiện tại
-      const today = new Date();
-      const dayOfWeek = today.getDay(); // 0 = Chủ Nhật, 1-6 = Thứ 2-Thứ 7
-      const dayOfMonth = today.getDate() - 1; // 0-29 (hoặc 0-30 tùy tháng)
-
-      // Cập nhật trạng thái hoàn thành và streak
-      const newTodayCompleted = !habitToToggle.todayCompleted;
-      const newStreak = newTodayCompleted
-        ? habitToToggle.currentStreak + 1
-        : Math.max(0, habitToToggle.currentStreak - 1);
-
-      // Cập nhật tiến độ hàng tuần và hàng tháng
-      const newWeeklyProgress = [...habitToToggle.weeklyProgress];
-      // Chuyển đổi từ Sunday = 0 sang định dạng mảng của chúng ta (0 = Thứ 2, 6 = Chủ Nhật)
-      const adjustedDayOfWeek = (dayOfWeek + 6) % 7;
-      newWeeklyProgress[adjustedDayOfWeek] = newTodayCompleted;
-
-      const newMonthlyProgress = [...habitToToggle.monthlyProgress];
-      newMonthlyProgress[dayOfMonth] = newTodayCompleted;
-
-      // Cập nhật trong Firestore
-      await updateDoc(habitRef, {
-        todayCompleted: newTodayCompleted,
-        currentStreak: newStreak,
-        weeklyProgress: newWeeklyProgress,
-        monthlyProgress: newMonthlyProgress,
-        lastUpdated: Timestamp.now(),
-      });
-
-      // Cập nhật trạng thái local
-      updateLocalHabitState(habitId);
-    } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error toggling habit:', error);
-      }
-      // Nếu có lỗi, vẫn cập nhật UI để trải nghiệm người dùng tốt hơn
-      updateLocalHabitState(habitId);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Cập nhật trạng thái local của thói quen
-  const updateLocalHabitState = (habitId: string) => {
-    // Tìm thói quen cần cập nhật
-    const habitToToggle = habits.find(h => h.id === habitId);
-    if (!habitToToggle) return;
-
-    // Lấy ngày hiện tại
-    const today = new Date();
-    const dayOfWeek = today.getDay(); // 0 = Chủ Nhật, 1-6 = Thứ 2-Thứ 7
-    const dayOfMonth = today.getDate() - 1; // 0-29 (hoặc 0-30 tùy tháng)
-
-    // Cập nhật trạng thái hoàn thành và streak
-    const newTodayCompleted = !habitToToggle.todayCompleted;
-    const newStreak = newTodayCompleted
-      ? habitToToggle.currentStreak + 1
-      : Math.max(0, habitToToggle.currentStreak - 1);
-
-    // Cập nhật tiến độ hàng tuần và hàng tháng
-    const newWeeklyProgress = [...habitToToggle.weeklyProgress];
-    // Chuyển đổi từ Sunday = 0 sang định dạng mảng của chúng ta (0 = Thứ 2, 6 = Chủ Nhật)
-    const adjustedDayOfWeek = (dayOfWeek + 6) % 7;
-    newWeeklyProgress[adjustedDayOfWeek] = newTodayCompleted;
-
-    const newMonthlyProgress = [...habitToToggle.monthlyProgress];
-    newMonthlyProgress[dayOfMonth] = newTodayCompleted;
-
-    // Cập nhật state
-    const updatedHabits = habits.map(habit =>
-      habit.id === habitId
-        ? {
-            ...habit,
-            todayCompleted: newTodayCompleted,
-            currentStreak: newStreak,
-            weeklyProgress: newWeeklyProgress,
-            monthlyProgress: newMonthlyProgress,
-          }
-        : habit,
-    );
-
-    setHabits(updatedHabits);
-
-    // Cập nhật selected habit nếu đang ở chế độ xem chi tiết
-    if (selectedHabit && selectedHabit.id === habitId) {
-      setSelectedHabit(updatedHabits.find(h => h.id === habitId) || null);
-    }
-
-    // Hiệu ứng phản hồi khi đánh dấu hoàn thành
-    if (newTodayCompleted) {
-      // Tìm phần tử DOM của habit card để thêm hiệu ứng
-      const habitCard = document.getElementById(`habit-card-${habitId}`);
-      if (habitCard) {
-        // Thêm class animation và xóa sau khi animation kết thúc
-        habitCard.classList.add('scale-[1.02]', 'bg-green-50', 'shadow-lg');
-        setTimeout(() => {
-          habitCard.classList.remove(
-            'scale-[1.02]',
-            'bg-green-50',
-            'shadow-lg',
-          );
-        }, 800);
-      }
-    }
-  };
-
   const viewHabitDetail = (habit: Habit) => {
     setSelectedHabit(habit);
     setCurrentView('detail');
@@ -498,7 +369,6 @@ export function HabitTracker({ user }: HabitTrackerProps) {
           <Button
             className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 rounded-xl shadow-lg text-white"
             onClick={() => setCurrentView('list')}
-            disabled={loading}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Quay lại danh sách
@@ -577,24 +447,13 @@ export function HabitTracker({ user }: HabitTrackerProps) {
           <CardContent>
             <div className="flex space-x-0">
               {selectedHabit.weeklyProgress.map((completed, index) => (
-                <div
-                  key={index}
-                  className="flex-1 text-center"
-                  onClick={e => {
-                    e.stopPropagation();
-                    // Update weekly progress for the selected day
-                    const newWeeklyProgress = [...selectedHabit.weeklyProgress];
-                    newWeeklyProgress[index] = !completed;
-                    // Update the habit
-                    toggleHabitCompletion(selectedHabit.id);
-                  }}
-                >
+                <div key={index} className="flex-1 text-center">
                   <div
                     className={`w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-1 ${
                       completed
                         ? selectedHabit.color + ' text-white'
                         : 'bg-gray-200 dark:bg-studyflow-surface text-gray-400 dark:text-gray-300'
-                    } cursor-pointer transition-all duration-200 hover:opacity-80 active:scale-95`}
+                    } transition-all duration-200`}
                   >
                     {completed && <Check className="h-5 w-5" />}
                   </div>
@@ -621,23 +480,21 @@ export function HabitTracker({ user }: HabitTrackerProps) {
 
         {/* Action Button */}
         <Button
-          onClick={() => toggleHabitCompletion(selectedHabit.id)}
-          disabled={loading}
+          onClick={() => onTabChange?.('pomodoro')}
+          disabled={selectedHabit.todayCompleted}
           className={`w-full rounded-xl transition-all duration-300 ${
             selectedHabit.todayCompleted
               ? 'bg-green-600 hover:bg-green-700 text-white scale-100'
               : 'bg-gray-100 dark:bg-studyflow-surface hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300'
           }`}
         >
-          {loading ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          ) : selectedHabit.todayCompleted ? (
+          {selectedHabit.todayCompleted ? (
             <>
               <Check className="h-4 w-4 mr-2" />
               Đã hoàn thành
             </>
           ) : (
-            'Đánh dấu hoàn thành'
+            'Hoàn thành qua Pomodoro'
           )}
         </Button>
       </div>
@@ -658,14 +515,9 @@ export function HabitTracker({ user }: HabitTrackerProps) {
         </div>
         <Button
           onClick={() => setCreateFormOpen(true)}
-          disabled={loading}
           className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white shrink-0"
         >
-          {loading ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <Plus className="h-4 w-4 mr-2" />
-          )}
+          <Plus className="h-4 w-4 mr-2" />
           Thêm thói quen
         </Button>
       </div>
@@ -732,10 +584,12 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                         size="sm"
                         className={`rounded-full w-8 h-8 p-0 ${
                           habit.todayCompleted
-                            ? 'bg-green-500 text-white hover:bg-green-600'
-                            : 'bg-gray-100 dark:bg-studyflow-surface text-gray-500 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                            ? 'bg-green-500 text-white'
+                            : 'bg-gray-100 dark:bg-studyflow-surface text-gray-500 dark:text-gray-300'
                         }`}
-                        onClick={() => toggleHabitCompletion(habit.id)}
+                        onClick={() => onTabChange?.('pomodoro')}
+                        title="Hoàn thành qua Pomodoro"
+                        disabled={habit.todayCompleted}
                       >
                         <Check className="h-4 w-4" />
                       </Button>
@@ -879,24 +733,13 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                           false,
                         ]
                       ).map((completed, index) => (
-                        <div
-                          key={index}
-                          className="flex-1 text-center"
-                          onClick={e => {
-                            e.stopPropagation();
-                            // Update weekly progress for the selected day
-                            const newWeeklyProgress = [...habit.weeklyProgress];
-                            newWeeklyProgress[index] = !completed;
-                            // Update the habit
-                            toggleHabitCompletion(habit.id);
-                          }}
-                        >
+                        <div key={index} className="flex-1 text-center">
                           <div
                             className={`w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-1 ${
                               completed
                                 ? habit.color + ' text-white'
                                 : 'bg-gray-200 dark:bg-gray-600 text-gray-400 dark:text-gray-300'
-                            } cursor-pointer transition-all duration-200 hover:opacity-80 active:scale-95`}
+                            } transition-all duration-200`}
                           >
                             {completed && <Check className="h-5 w-5" />}
                           </div>
@@ -911,25 +754,23 @@ export function HabitTracker({ user }: HabitTrackerProps) {
                   {/* Action Button */}
                   <Button
                     onClick={e => {
-                      e.stopPropagation(); // Prevent card click event
-                      toggleHabitCompletion(habit.id);
+                      e.stopPropagation();
+                      onTabChange?.('pomodoro');
                     }}
-                    disabled={loading}
+                    disabled={habit.todayCompleted}
                     className={`w-full rounded-xl transition-all duration-300 ${
                       habit.todayCompleted
                         ? 'bg-green-600 hover:bg-green-700 text-white scale-100'
                         : 'bg-gray-100 dark:bg-studyflow-surface hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300'
                     }`}
                   >
-                    {loading ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : habit.todayCompleted ? (
+                    {habit.todayCompleted ? (
                       <>
                         <Check className="h-4 w-4 mr-2" />
                         Đã hoàn thành
                       </>
                     ) : (
-                      'Đánh dấu hoàn thành'
+                      'Hoàn thành qua Pomodoro'
                     )}
                   </Button>
                 </CardContent>

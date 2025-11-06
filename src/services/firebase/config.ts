@@ -29,11 +29,25 @@ try {
   );
 
   if (isBrowser && hasEnv) {
-    app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+    // Kiểm tra xem đã có app nào chưa
+    const existingApps = getApps();
+    if (existingApps.length > 0) {
+      app = existingApps[0];
+    } else {
+      app = initializeApp(firebaseConfig);
+    }
+
     authInstance = getAuth(app);
     dbInstance = getFirestore(app);
+
+    console.log('Firebase initialized successfully');
+  } else {
+    console.warn(
+      'Firebase not initialized - missing environment variables or not in browser',
+    );
   }
-} catch {
+} catch (error) {
+  console.error('Firebase initialization error:', error);
   // Bỏ qua khi build server/CI không có env, tránh crash do auth/invalid-api-key
 }
 

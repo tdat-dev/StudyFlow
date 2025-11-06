@@ -172,7 +172,10 @@ export function PomodoroTimer() {
   };
 
   const skipSession = () => {
+    // Kết thúc phiên ngay lập tức và chuyển mode phù hợp
+    setIsActive(false);
     setTimeLeft(0);
+    handleTimerComplete();
   };
 
   const handleTimerComplete = () => {
@@ -200,35 +203,32 @@ export function PomodoroTimer() {
     // Auto-switch to appropriate break or work mode
     if (timerMode === 'pomodoro') {
       if ((pomodoroCount + 1) % 4 === 0) {
-        switchToLongBreak();
+        switchToLongBreak(true);
       } else {
-        switchToShortBreak();
+        switchToShortBreak(true);
       }
     } else {
-      switchToPomodoro();
+      switchToPomodoro(true);
     }
   };
 
   // Mode switching
-  const switchToPomodoro = () => {
-    if (!isActive) {
-      setTimerMode('pomodoro');
-      setTimeLeft(pomodoroTime * 60);
-    }
+  const switchToPomodoro = (force = false) => {
+    if (isActive && !force) return;
+    setTimerMode('pomodoro');
+    setTimeLeft(pomodoroTime * 60);
   };
 
-  const switchToShortBreak = () => {
-    if (!isActive) {
-      setTimerMode('shortBreak');
-      setTimeLeft(shortBreakTime * 60);
-    }
+  const switchToShortBreak = (force = false) => {
+    if (isActive && !force) return;
+    setTimerMode('shortBreak');
+    setTimeLeft(shortBreakTime * 60);
   };
 
-  const switchToLongBreak = () => {
-    if (!isActive) {
-      setTimerMode('longBreak');
-      setTimeLeft(longBreakTime * 60);
-    }
+  const switchToLongBreak = (force = false) => {
+    if (isActive && !force) return;
+    setTimerMode('longBreak');
+    setTimeLeft(longBreakTime * 60);
   };
 
   // Task management
@@ -267,28 +267,42 @@ export function PomodoroTimer() {
           {/* Timer Card */}
           <div className="timer-card">
             {/* Timer Mode Tabs */}
-            <div className="timer-tabs mb-8">
-              <button
-                className={`timer-tab ${timerMode === 'pomodoro' ? 'active work' : ''}`}
-                onClick={switchToPomodoro}
-                disabled={isActive}
-              >
-                Pomodoro
-              </button>
-              <button
-                className={`timer-tab ${timerMode === 'shortBreak' ? 'active short' : ''}`}
-                onClick={switchToShortBreak}
-                disabled={isActive}
-              >
-                Nghỉ Ngắn
-              </button>
-              <button
-                className={`timer-tab ${timerMode === 'longBreak' ? 'active long' : ''}`}
-                onClick={switchToLongBreak}
-                disabled={isActive}
-              >
-                Nghỉ Dài
-              </button>
+            <div className="pomodoro-tabs mb-8 flex justify-center items-center bg-transparent">
+              <div className="inline-flex mx-auto w-fit bg-gray-100 dark:bg-studyflow-surface rounded-xl p-1 gap-1">
+                <button
+                  className={`timer-tab w-28 py-2.5 text-center rounded-lg font-medium transition-all ${
+                    timerMode === 'pomodoro'
+                      ? 'active work bg-red-500 text-white shadow-md'
+                      : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
+                  }`}
+                  onClick={() => switchToPomodoro()}
+                  disabled={isActive}
+                >
+                  Pomodoro
+                </button>
+                <button
+                  className={`timer-tab w-28 py-2.5 text-center rounded-lg font-medium transition-all ${
+                    timerMode === 'shortBreak'
+                      ? 'active short bg-green-500 text-white shadow-md'
+                      : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
+                  }`}
+                  onClick={() => switchToShortBreak()}
+                  disabled={isActive}
+                >
+                  Nghỉ ngắn
+                </button>
+                <button
+                  className={`timer-tab w-28 py-2.5 text-center rounded-lg font-medium transition-all ${
+                    timerMode === 'longBreak'
+                      ? 'active long bg-cyan-500 text-white shadow-md'
+                      : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
+                  }`}
+                  onClick={() => switchToLongBreak()}
+                  disabled={isActive}
+                >
+                  Nghỉ dài
+                </button>
+              </div>
             </div>
 
             {/* Timer Display */}

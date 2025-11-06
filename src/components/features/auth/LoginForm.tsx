@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Mail, Lock, BookOpen } from 'lucide-react';
+import { Mail, Lock } from 'lucide-react';
+import Image from 'next/image';
 import {
   loginWithEmail,
   loginWithGoogle,
@@ -34,10 +35,30 @@ export function LoginForm({
       await loginWithEmail(loginInput, password);
       onSuccess();
     } catch (error: any) {
-      if (error.code === 'auth/invalid-credential') {
+      console.error('Login error:', error);
+
+      if (error.message === 'auth/invalid-credential') {
         setError('Tên đăng nhập/Email hoặc mật khẩu không chính xác');
       } else if (error.message === 'auth/user-not-found') {
         setError('Tên đăng nhập không tồn tại');
+      } else if (error.message === 'auth/invalid-email') {
+        setError('Định dạng email không hợp lệ');
+      } else if (error.message === 'auth/user-disabled') {
+        setError('Tài khoản đã bị vô hiệu hóa');
+      } else if (error.message === 'auth/too-many-requests') {
+        setError('Quá nhiều lần thử đăng nhập. Vui lòng thử lại sau ít phút');
+      } else if (error.code === 'auth/invalid-credential') {
+        setError('Tên đăng nhập/Email hoặc mật khẩu không chính xác');
+      } else if (error.code === 'auth/user-not-found') {
+        setError('Tên đăng nhập không tồn tại');
+      } else if (error.code === 'auth/wrong-password') {
+        setError('Mật khẩu không chính xác');
+      } else if (error.code === 'auth/invalid-email') {
+        setError('Định dạng email không hợp lệ');
+      } else if (error.code === 'auth/user-disabled') {
+        setError('Tài khoản đã bị vô hiệu hóa');
+      } else if (error.code === 'auth/too-many-requests') {
+        setError('Quá nhiều lần thử đăng nhập. Vui lòng thử lại sau ít phút');
       } else {
         setError('Đã xảy ra lỗi khi đăng nhập. Vui lòng thử lại sau.');
       }
@@ -65,21 +86,33 @@ export function LoginForm({
       {/* Mobile Logo & Header */}
       <div className="lg:hidden text-center mb-8">
         <div className="flex items-center justify-center space-x-3 mb-4">
-          <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center">
-            <BookOpen className="h-6 w-6 text-white" />
+          <div className="w-12 h-12 rounded-xl overflow-hidden">
+            <Image
+              src="/images/logo-48.png"
+              alt="StudyFlow Logo"
+              width={48}
+              height={48}
+              className="w-full h-full object-contain"
+            />
           </div>
           <span className="text-2xl font-bold text-white">StudyFlow</span>
         </div>
-        <h2 className="text-2xl font-bold text-white mb-2">
-          Chào mừng trở lại
-        </h2>
-        <p className="text-white/60">
-          Đăng nhập để tiếp tục hành trình học tập
-        </p>
       </div>
 
       {/* Desktop Header */}
       <div className="hidden lg:block text-center mb-8">
+        <div className="flex items-center justify-center space-x-3 mb-4">
+          <div className="w-12 h-12 rounded-xl overflow-hidden">
+            <Image
+              src="/images/logo-48.png"
+              alt="StudyFlow Logo"
+              width={48}
+              height={48}
+              className="w-full h-full object-contain"
+            />
+          </div>
+          <span className="text-2xl font-bold text-white">StudyFlow</span>
+        </div>
         <h2 className="text-3xl font-bold text-white mb-2">Đăng nhập</h2>
         <p className="text-white/60">Nhập thông tin để truy cập tài khoản</p>
       </div>
