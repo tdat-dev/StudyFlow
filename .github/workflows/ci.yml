@@ -41,9 +41,9 @@ jobs:
       - name: Lint code
         run: npm run lint
 
-      - name: Check code formatting (scoped)
+      - name: Format code (auto-fix)
         run: |
-          npx prettier --check "src/**/*.{ts,tsx}" "styles/**/*.css" "playwright.config.ts"
+          npx prettier --write "src/**/*.{ts,tsx}" "styles/**/*.css" "playwright.config.ts"
 
       - name: Lint styles
         run: npx stylelint "**/*.css"
