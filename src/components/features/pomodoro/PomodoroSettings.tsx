@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Clock,
@@ -32,6 +32,13 @@ export function PomodoroSettings({
   onSettingsChange,
 }: PomodoroSettingsProps) {
   const [localSettings, setLocalSettings] = useState(settings);
+
+  // Đồng bộ localSettings khi settings prop thay đổi (khi modal mở lại)
+  useEffect(() => {
+    if (isOpen) {
+      setLocalSettings(settings);
+    }
+  }, [settings, isOpen]);
 
   const handleSave = () => {
     onSettingsChange(localSettings);

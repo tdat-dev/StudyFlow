@@ -51,9 +51,8 @@ interface PomodoroTimerWithHabitsProps {
 export function PomodoroTimerWithHabits({
   user,
 }: PomodoroTimerWithHabitsProps) {
-  // Settings
-  const [showSettings, setShowSettings] = useState(false);
-  const [settings, setSettings] = useState({
+  // Settings với localStorage
+  const defaultSettings = {
     pomodoroTime: 25,
     shortBreakTime: 5,
     longBreakTime: 15,
@@ -61,7 +60,38 @@ export function PomodoroTimerWithHabits({
     autoStartBreaks: false,
     autoStartPomodoros: false,
     notificationsEnabled: true,
+  };
+
+  // Load settings từ localStorage khi component mount
+  const [showSettings, setShowSettings] = useState(false);
+  const [settings, setSettingsState] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('pomodoro-settings');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          return { ...defaultSettings, ...parsed };
+        }
+      } catch (error) {
+        // Nếu có lỗi khi parse, sử dụng default settings
+      }
+    }
+    return defaultSettings;
   });
+
+  // Wrapper function để lưu settings vào localStorage
+  const setSettings = (newSettings: typeof defaultSettings) => {
+    // Tạo object mới để đảm bảo reference thay đổi
+    const updatedSettings = { ...newSettings };
+    setSettingsState(updatedSettings);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('pomodoro-settings', JSON.stringify(updatedSettings));
+      } catch (error) {
+        // Nếu không thể lưu vào localStorage, vẫn cập nhật state
+      }
+    }
+  };
 
   // Habit integration
   const {
@@ -80,7 +110,28 @@ export function PomodoroTimerWithHabits({
 
   // Timer state
   const [timerMode, setTimerMode] = useState<TimerMode>('pomodoro');
-  const [timeLeft, setTimeLeft] = useState(settings.pomodoroTime * 60); // Use settings
+  // Khởi tạo timeLeft trực tiếp từ localStorage để đảm bảo đúng giá trị
+  const [timeLeft, setTimeLeft] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('pomodoro-settings');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          const loadedSettings = { ...defaultSettings, ...parsed };
+          const timeMap = {
+            pomodoro: loadedSettings.pomodoroTime * 60,
+            shortBreak: loadedSettings.shortBreakTime * 60,
+            longBreak: loadedSettings.longBreakTime * 60,
+          };
+          return timeMap['pomodoro'];
+        }
+      } catch (error) {
+        // Nếu có lỗi, sử dụng default
+      }
+    }
+    // Fallback về default settings
+    return defaultSettings.pomodoroTime * 60;
+  });
   const [isActive, setIsActive] = useState(false);
   const [currentSession, setCurrentSession] = useState<PomodoroSession | null>(
     null,
@@ -108,23 +159,6 @@ export function PomodoroTimerWithHabits({
   const [, setSessionsCompleted] = useState(0);
   const [, setTotalFocusTime] = useState(0);
 
-  // Update timer when settings change
-  useEffect(() => {
-    if (!isActive) {
-      switch (timerMode) {
-        case 'pomodoro':
-          setTimeLeft(settings.pomodoroTime * 60);
-          break;
-        case 'shortBreak':
-          setTimeLeft(settings.shortBreakTime * 60);
-          break;
-        case 'longBreak':
-          setTimeLeft(settings.longBreakTime * 60);
-          break;
-      }
-    }
-  }, [settings, timerMode, isActive]);
-
   // Set dynamic accent colors based on timer mode
   const setAccentColors = (mode: TimerMode) => {
     const root = document.documentElement;
@@ -146,25 +180,21 @@ export function PomodoroTimerWithHabits({
     setAccentColors(timerMode);
   }, [timerMode]);
 
-  // Auto-update time when mode or settings change, but do NOT reset when pausing mid-session
+  // Cập nhật thời gian khi settings hoặc mode thay đổi
+  // Chỉ cập nhật khi timer không đang chạy (để không làm gián đoạn session đang diễn ra)
   useEffect(() => {
-    const timeMap = {
-      pomodoro: pomodoroTime * 60,
-      shortBreak: shortBreakTime * 60,
-      longBreak: longBreakTime * 60,
-    };
-    // Chỉ reset đồng hồ khi đang không chạy và không có phiên hiện tại (không phải trạng thái pause)
-    if (!isActive && !currentSession) {
-      setTimeLeft(timeMap[timerMode]);
+    if (!isActive) {
+      const timeMap = {
+        pomodoro: settings.pomodoroTime * 60,
+        shortBreak: settings.shortBreakTime * 60,
+        longBreak: settings.longBreakTime * 60,
+      };
+      const newTime = timeMap[timerMode];
+      setTimeLeft(newTime);
+      // Reset session nếu có để áp dụng settings mới
+      setCurrentSession(null);
     }
-  }, [
-    pomodoroTime,
-    shortBreakTime,
-    longBreakTime,
-    timerMode,
-    isActive,
-    currentSession,
-  ]);
+  }, [settings.pomodoroTime, settings.shortBreakTime, settings.longBreakTime, timerMode, isActive]);
 
   // Timer logic
   useEffect(() => {
@@ -724,7 +754,7 @@ export function PomodoroTimerWithHabits({
                     </div>
 
                     {/* Traditional Tasks List */}
-                    <div className="space-y-2 max-h-96 overflow-y-auto">
+                    <div className="space-y-2">
                       {tasks.map(task => (
                         <div
                           key={task.id}

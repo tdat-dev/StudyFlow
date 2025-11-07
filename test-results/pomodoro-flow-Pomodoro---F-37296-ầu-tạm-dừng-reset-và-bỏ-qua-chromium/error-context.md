@@ -1,0 +1,45 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - generic [ref=e7]:
+            - img "StudyFlow Logo" [ref=e9]
+            - generic [ref=e10]: StudyFlow
+          - heading "Đăng nhập" [level=2] [ref=e11]
+          - paragraph [ref=e12]: Nhập thông tin để truy cập tài khoản
+        - generic [ref=e13]:
+          - generic [ref=e14]:
+            - text: Tên đăng nhập hoặc Email
+            - generic [ref=e15]:
+              - img [ref=e16]
+              - textbox "Tên đăng nhập hoặc Email" [ref=e19]:
+                - /placeholder: Nhập tên đăng nhập hoặc email
+          - generic [ref=e20]:
+            - generic [ref=e21]:
+              - generic [ref=e22]: Mật khẩu
+              - button "Quên mật khẩu?" [ref=e23] [cursor=pointer]
+            - generic [ref=e24]:
+              - img [ref=e25]
+              - generic [ref=e28]:
+                - textbox "Mật khẩu" [ref=e29]:
+                  - /placeholder: Mật khẩu của bạn
+                - button "Hiện mật khẩu" [ref=e30] [cursor=pointer]:
+                  - img [ref=e31]
+          - button "Đăng nhập" [ref=e34] [cursor=pointer]
+        - generic [ref=e38]: HOẶC
+        - button "Đăng nhập với Google" [ref=e40] [cursor=pointer]:
+          - img [ref=e41]
+          - text: Đăng nhập với Google
+        - paragraph [ref=e48]:
+          - text: Chưa có tài khoản?
+          - button "Đăng ký ngay" [ref=e49] [cursor=pointer]
+      - button "← Quay lại trang chủ" [ref=e51] [cursor=pointer]
+    - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e57] [cursor=pointer]:
+    - img [ref=e58]
+  - alert [ref=e61]
+```

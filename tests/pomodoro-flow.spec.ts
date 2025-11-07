@@ -2,12 +2,17 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Pomodoro - Flow cơ bản', () => {
   test('bắt đầu, tạm dừng, reset và bỏ qua', async ({ page }) => {
+    // Clear localStorage để đảm bảo dùng default settings
     await page.goto('/');
+    await page.evaluate(() => {
+      localStorage.removeItem('pomodoro-settings');
+    });
+
     const bottomNav = page.getByRole('navigation', { name: /Bottom navigation/i });
     await expect(bottomNav).toBeVisible();
     await bottomNav.getByRole('button', { name: 'Pomodoro' }).click();
 
-    // Đồng hồ hiển thị
+    // Đồng hồ hiển thị với default time (25:00)
     await expect(page.getByText(/25:00/)).toBeVisible();
 
     // Bắt đầu

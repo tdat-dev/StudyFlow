@@ -83,55 +83,67 @@ export function HabitTaskCreator({
       <button
         onClick={() => setIsOpen(true)}
         disabled={loading || habitOptions.length === 0}
-        className="w-full flex items-center justify-center gap-2 p-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full flex items-center justify-center gap-2.5 p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:border-indigo-500 hover:text-indigo-600 dark:hover:border-indigo-400 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/10 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
       >
-        <Plus className="w-4 h-4" />
-        <span>Thêm task từ thói quen</span>
+        <Plus className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
+        <span className="font-medium">Tạo task từ thói quen</span>
       </button>
     );
   }
 
   return (
-    <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-studyflow-surface">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-medium text-[var(--text)]">
-          Tạo task từ thói quen
-        </h3>
+    <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-6 bg-white dark:bg-studyflow-surface shadow-sm hover:shadow-md transition-shadow duration-200">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+            <Target className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            Tạo task từ thói quen
+          </h3>
+        </div>
         <button
           onClick={() => setIsOpen(false)}
-          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200"
           title="Đóng form"
           aria-label="Đóng form tạo task"
         >
-          <X className="w-4 h-4" />
+          <X className="w-5 h-5" />
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {/* Habit Selection */}
         <div>
-          <label className="block text-sm font-medium text-[var(--muted)] mb-2">
+          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2.5">
             Chọn thói quen
           </label>
-          <select
-            value={selectedHabitId}
-            onChange={e => setSelectedHabitId(e.target.value)}
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            required
-            aria-label="Chọn thói quen"
-          >
-            <option value="">Chọn thói quen...</option>
-            {habitOptions.map(habit => (
-              <option key={habit.id} value={habit.id}>
-                {habit.title}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              value={selectedHabitId}
+              onChange={e => setSelectedHabitId(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:focus:border-indigo-400 transition-all duration-200 appearance-none cursor-pointer hover:border-gray-400 dark:hover:border-gray-500"
+              required
+              aria-label="Chọn thói quen"
+            >
+              <option value="">Chọn thói quen...</option>
+              {habitOptions.map(habit => (
+                <option key={habit.id} value={habit.id}>
+                  {habit.title}
+                </option>
+              ))}
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
         </div>
 
         {/* Task Text */}
         <div>
-          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2.5">
             Mô tả task
           </label>
           <input
@@ -139,15 +151,15 @@ export function HabitTaskCreator({
             value={taskText}
             onChange={e => setTaskText(e.target.value)}
             placeholder="Ví dụ: Đọc 20 trang sách..."
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:focus:border-indigo-400 transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
             required
           />
         </div>
 
         {/* Estimated Pomodoros */}
         <div>
-          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
-            <Clock className="w-4 h-4 inline mr-1" />
+          <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2.5">
+            <Clock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
             Dự kiến số Pomodoro
           </label>
           <input
@@ -156,30 +168,30 @@ export function HabitTaskCreator({
             max="10"
             value={estimatedPomodoros}
             onChange={e => setEstimatedPomodoros(parseInt(e.target.value) || 1)}
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:focus:border-indigo-400 transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
             aria-label="Dự kiến số Pomodoro"
           />
         </div>
 
         {/* Priority */}
         <div>
-          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
-            <Flag className="w-4 h-4 inline mr-1" />
+          <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2.5">
+            <Flag className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
             Độ ưu tiên
           </label>
-          <div className="flex gap-2">
+          <div className="flex gap-2.5">
             {(['low', 'medium', 'high'] as const).map(p => (
               <button
                 key={p}
                 type="button"
                 onClick={() => setPriority(p)}
-                className={`flex-1 p-2 rounded-md text-sm font-medium transition-colors ${
+                className={`flex-1 px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${
                   priority === p
-                    ? getPriorityColor(p)
-                    : 'text-gray-600 bg-gray-100 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                    ? `${getPriorityColor(p)} shadow-md scale-105`
+                    : 'text-gray-600 bg-gray-100 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:scale-[1.02]'
                 }`}
               >
-                <span className="mr-1">{getPriorityIcon(p)}</span>
+                <span className="mr-1.5 text-base">{getPriorityIcon(p)}</span>
                 {p === 'low' ? 'Thấp' : p === 'medium' ? 'Trung bình' : 'Cao'}
               </button>
             ))}
@@ -187,28 +199,28 @@ export function HabitTaskCreator({
         </div>
 
         {/* Submit Button */}
-        <div className="flex gap-2 pt-2">
+        <div className="flex gap-3 pt-3">
           <button
             type="button"
             onClick={() => setIsOpen(false)}
-            className="flex-1 px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+            className="flex-1 px-4 py-3 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 font-medium transition-all duration-200 hover:scale-[1.02]"
           >
             Hủy
           </button>
           <button
             type="submit"
             disabled={!taskText.trim() || !selectedHabitId || isSubmitting}
-            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex-1 px-4 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-lg hover:from-indigo-700 hover:to-violet-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-semibold shadow-md hover:shadow-lg hover:scale-[1.02] disabled:hover:scale-100"
           >
             {isSubmitting ? (
               <div className="flex items-center justify-center gap-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Đang tạo...
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Đang tạo...</span>
               </div>
             ) : (
               <div className="flex items-center justify-center gap-2">
-                <Target className="w-4 h-4" />
-                Tạo task
+                <Target className="w-5 h-5" />
+                <span>Tạo task</span>
               </div>
             )}
           </button>
