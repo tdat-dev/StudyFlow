@@ -90,19 +90,65 @@
 /* Pomodoro Timer Components */
 .pomodoro-page {
   background-color: var(--app-bg);
-  min-height: 100vh;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Loại bỏ scroll ở container cha khi pomodoro được hiển thị - chỉ desktop */
+@media (min-width: 1024px) {
+  main:has(.pomodoro-page),
+  main:has(.pomodoro-page) > div {
+    overflow: hidden !important;
+    height: 100% !important;
+  }
 }
 
 .pomodoro-container {
   max-width: 1280px;
   margin: 0 auto;
   padding: 24px;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .pomodoro-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 24px;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Mobile/tablet: cho phép cuộn đầy đủ, tránh mất nội dung */
+@media (max-width: 1023.98px) {
+  .pomodoro-page {
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;
+  }
+
+  .pomodoro-container {
+    height: auto;
+    padding: 16px;
+    overflow: visible;
+  }
+
+  .pomodoro-grid {
+    height: auto;
+    gap: 16px;
+    overflow: visible;
+  }
+
+  .timer-card,
+  .tasks-card {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
 }
 
 @media (min-width: 768px) {
@@ -111,7 +157,19 @@
   }
 
   .pomodoro-grid {
-    grid-template-columns: 65% 35%;
+    grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+    align-items: start;
+    height: 100%;
+  }
+
+  .tasks-card {
+    height: 100%;
+    max-height: 100%;
+  }
+
+  .timer-card {
+    height: 100%;
+    overflow: hidden;
   }
 }
 
@@ -120,6 +178,9 @@
   border: 1px solid var(--app-border);
   border-radius: 16px;
   padding: 24px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .tasks-card {
@@ -127,6 +188,8 @@
   border: 1px solid var(--app-border);
   border-radius: 16px;
   padding: 20px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
 }
 
 /* Segmented Control */
@@ -282,6 +345,14 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
+  margin-top: 32px;
+}
+
+/* Khi chiều cao màn hình nhỏ (laptop/nhỏ hơn), giảm khoảng cách để tránh bị che */
+@media (max-height: 820px) {
+  .timer-controls {
+    margin-top: 16px;
+  }
 }
 
 .control-primary {

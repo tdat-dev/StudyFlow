@@ -199,6 +199,19 @@
   .link-primary:hover {
     text-decoration-thickness: 2px;
   }
+
+  /* Fluid base font-size across breakpoints */
+  @media (max-width: 640px) {
+    :root {
+      --font-size: 14px;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    :root {
+      --font-size: 16px;
+    }
+  }
 }
 
 @custom-variant dark (&:is(.dark *));
@@ -1287,6 +1300,11 @@ img[src*='/images/logo-'] {
   display: flex !important;
   justify-content: center !important;
   width: 100% !important; /* allow container to take full width */
+}
+
+/* Prevent grid children from overflowing their columns */
+.pomodoro-grid > * {
+  min-width: 0;
 }
 
 /* Custom Scrollbar Styling */

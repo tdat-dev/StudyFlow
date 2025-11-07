@@ -10,7 +10,8 @@ test.describe('Navigation - Bottom Nav', () => {
 
     // Mở Pomodoro
     await bottomNav.getByRole('button', { name: 'Pomodoro' }).click();
-    await expect(page.getByRole('heading', { name: /Pomodoro Timer/i })).toBeVisible();
+    // Kiểm tra timer hiển thị (format MM:SS)
+    await expect(page.getByText(/\d{2}:\d{2}/)).toBeVisible({ timeout: 3000 });
 
     // Mở Thói quen
     await bottomNav.getByRole('button', { name: 'Thói quen' }).click();
